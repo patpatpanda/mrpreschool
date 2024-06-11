@@ -11,7 +11,7 @@ const SurveyForm = () => {
 
   useEffect(() => {
     // Fetch questions
-    axios.get('https://localhost:7270/api/survey/questions')
+    axios.get('https://masterkinder20240523125154.azurewebsites.net//api/survey/questions')
       .then(response => {
         setQuestions(response.data);
       })
@@ -20,7 +20,7 @@ const SurveyForm = () => {
       });
 
     // Fetch forskoleverksamheter
-    axios.get('https://localhost:7270/api/survey/forskoleverksamheter')
+    axios.get('https://masterkinder20240523125154.azurewebsites.net//api/survey/forskoleverksamheter')
       .then(response => {
         setForskoleverksamheter(response.data);
       })
