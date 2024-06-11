@@ -1,5 +1,6 @@
 /* global google */
 import React, { useEffect, useRef, useState } from 'react';
+import PreschoolCard from './PreschoolCard';
 import './App.css';
 
 const GoogleMap = () => {
@@ -9,6 +10,8 @@ const GoogleMap = () => {
   const [infowindow, setInfowindow] = useState(null);
   const [directionsService, setDirectionsService] = useState(null);
   const [directionsRenderer, setDirectionsRenderer] = useState(null);
+  const [showDirections, setShowDirections] = useState(false);
+  const [nearbyPreschools, setNearbyPreschools] = useState([]);
 
   useEffect(() => {
     const initMap = () => {
@@ -32,7 +35,6 @@ const GoogleMap = () => {
       const directionsRenderer = new google.maps.DirectionsRenderer({
         draggable: true,
         map: map,
-        panel: document.getElementById('right-panel'),
       });
       setDirectionsRenderer(directionsRenderer);
     };
@@ -62,14 +64,14 @@ const GoogleMap = () => {
           map: map,
           position: results[0].geometry.location,
         });
-        findNearbyPreschools(results[0].geometry.location, results[0].geometry.location);
+        findNearbyPreschools(results[0].geometry.location);
       } else {
         alert('Geocode was not successful for the following reason: ' + status);
       }
     });
   };
 
-  const findNearbyPreschools = (location, origin) => {
+  const findNearbyPreschools = (location) => {
     const request = {
       location: location,
       radius: '2000',
@@ -79,7 +81,8 @@ const GoogleMap = () => {
     const service = new google.maps.places.PlacesService(map);
     service.nearbySearch(request, (results, status) => {
       if (status === google.maps.places.PlacesServiceStatus.OK) {
-        results.forEach((result) => createMarker(result, origin));
+        setNearbyPreschools(results.slice(0, 5));
+        results.slice(0, 5).forEach((result) => createMarker(result, location));
       } else {
         alert('Places API was not successful for the following reason: ' + status);
       }
@@ -109,22 +112,39 @@ const GoogleMap = () => {
     directionsService.route(request, (result, status) => {
       if (status === 'OK') {
         directionsRenderer.setDirections(result);
+        setShowDirections(true);
+        directionsRenderer.setPanel(document.getElementById('right-panel'));
       } else {
         alert('Directions request failed due to ' + status);
       }
     });
   };
 
+  const closeDirections = () => {
+    setShowDirections(false);
+    directionsRenderer.setPanel(null); // Clear the directions
+    directionsRenderer.setMap(null); // Remove the directions from the map
+  };
+
   return (
-    <div className="container">
-      <div className="input-container">
-        <input id="address" type="text" className="styled-input" placeholder="Ange din Address" defaultValue="Sergels torg 1, 111 57 Stockholm, Sverige" />
-        <button className="styled-button" onClick={geocodeAddress}>Hitta Förskolor</button>
+    <div className="app-container">
+      <div ref={mapRef} className="map-background"></div>
+      <div className="content">
+        <div className="input-container">
+          <input id="address" type="text" className="styled-input" placeholder="Ange din Address" defaultValue="Sergels torg 1, 111 57 Stockholm, Sverige" />
+          <button className="styled-button" onClick={geocodeAddress}>Hitta Förskolor</button>
+        </div>
+        <div className="cards-container">
+          {nearbyPreschools.map((preschool, index) => (
+            <PreschoolCard key={index} preschool={preschool} />
+          ))}
+        </div>
       </div>
-      <div className="map-container">
-        <div id="map" ref={mapRef} className="map"></div>
-        <div id="right-panel" className="right-panel"></div>
-      </div>
+      {showDirections && (
+        <div id="right-panel" className="right-panel">
+          <button className="close-button" onClick={closeDirections}>Stäng</button>
+        </div>
+      )}
     </div>
   );
 };

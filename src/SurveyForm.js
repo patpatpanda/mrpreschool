@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import './App.css';
+import './SurveyForm.css'; // Separat CSS-fil för SurveyForm-styling
 
 const SurveyForm = () => {
   const [questions, setQuestions] = useState([]);
@@ -39,7 +39,11 @@ const SurveyForm = () => {
 
     axios.post('https://localhost:7270/api/survey/response-percentages', requestData)
       .then(response => {
-        setResponsePercentages(response.data);
+        // Format response percentages to integers and add % sign
+        const formattedResponse = Object.fromEntries(
+          Object.entries(response.data).map(([key, value]) => [key, `${Math.round(value)}%`])
+        );
+        setResponsePercentages(formattedResponse);
       })
       .catch(error => {
         console.error('There was an error calculating the response percentages!', error);
@@ -48,7 +52,7 @@ const SurveyForm = () => {
 
   return (
     <div className="survey-container">
-      <h1>Survey Form</h1>
+      
       <form onSubmit={handleSubmit} className="survey-form">
         <div className="form-group">
           <label htmlFor="questionSelect">Välj Fråga:</label>
@@ -81,7 +85,7 @@ const SurveyForm = () => {
 
       {responsePercentages && (
         <div className="response-percentages">
-          <h2>Response Percentages</h2>
+          <h2>Svar</h2>
           <pre>{JSON.stringify(responsePercentages, null, 2)}</pre>
         </div>
       )}
