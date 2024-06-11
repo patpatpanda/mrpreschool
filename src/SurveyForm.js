@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import './App.css';
 
 const SurveyForm = () => {
   const [questions, setQuestions] = useState([]);
@@ -46,10 +47,10 @@ const SurveyForm = () => {
   };
 
   return (
-    <div>
+    <div className="survey-container">
       <h1>Survey Form</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
+      <form onSubmit={handleSubmit} className="survey-form">
+        <div className="form-group">
           <label htmlFor="questionSelect">Välj Fråga:</label>
           <select
             id="questionSelect"
@@ -62,7 +63,7 @@ const SurveyForm = () => {
             ))}
           </select>
         </div>
-        <div>
+        <div className="form-group">
           <label htmlFor="forskoleverksamhetSelect">Välj Förskoleverksamhet:</label>
           <select
             id="forskoleverksamhetSelect"
@@ -75,11 +76,11 @@ const SurveyForm = () => {
             ))}
           </select>
         </div>
-        <button type="submit">Sök</button>
+        <button type="submit" className="submit-button">Sök</button>
       </form>
 
       {responsePercentages && (
-        <div>
+        <div className="response-percentages">
           <h2>Response Percentages</h2>
           <pre>{JSON.stringify(responsePercentages, null, 2)}</pre>
         </div>

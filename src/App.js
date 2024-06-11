@@ -1,6 +1,7 @@
 import React from 'react';
 import GoogleMap from './GoogleMap';
 import SurveyForm from './SurveyForm';
+import './App.css';
 
 const App = () => {
   return (

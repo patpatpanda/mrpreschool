@@ -1,5 +1,6 @@
 /* global google */
 import React, { useEffect, useRef, useState } from 'react';
+import './App.css';
 
 const GoogleMap = () => {
   const mapRef = useRef(null);
@@ -115,14 +116,14 @@ const GoogleMap = () => {
   };
 
   return (
-    <div>
+    <div className="container">
       <div className="input-container">
         <input id="address" type="text" className="styled-input" placeholder="Ange din Address" defaultValue="Sergels torg 1, 111 57 Stockholm, Sverige" />
         <button className="styled-button" onClick={geocodeAddress}>Hitta Förskolor</button>
       </div>
       <div className="map-container">
-        <div id="map" ref={mapRef} style={{ height: '500px', width: '100%' }}></div>
-        <div id="right-panel"></div>
+        <div id="map" ref={mapRef} className="map"></div>
+        <div id="right-panel" className="right-panel"></div>
       </div>
     </div>
   );
