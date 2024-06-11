@@ -9,9 +9,11 @@ const SurveyForm = () => {
   const [selectedForskoleverksamhet, setSelectedForskoleverksamhet] = useState('');
   const [responsePercentages, setResponsePercentages] = useState(null);
 
+  const apiUrl = process.env.REACT_APP_API_URL || 'https://masterkinder20240523125154.azurewebsites.net/api';
+
   useEffect(() => {
     // Fetch questions
-    axios.get('https://masterkinder20240523125154.azurewebsites.net//api/survey/questions')
+    axios.get(`${apiUrl}/survey/questions`)
       .then(response => {
         setQuestions(response.data);
       })
@@ -20,14 +22,14 @@ const SurveyForm = () => {
       });
 
     // Fetch forskoleverksamheter
-    axios.get('https://masterkinder20240523125154.azurewebsites.net//api/survey/forskoleverksamheter')
+    axios.get(`${apiUrl}/survey/forskoleverksamheter`)
       .then(response => {
         setForskoleverksamheter(response.data);
       })
       .catch(error => {
         console.error('There was an error fetching the forskoleverksamheter!', error);
       });
-  }, []);
+  }, [apiUrl]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -37,7 +39,7 @@ const SurveyForm = () => {
       selectedForskoleverksamhet
     };
 
-    axios.post('https://localhost:7270/api/survey/response-percentages', requestData)
+    axios.post(`${apiUrl}/survey/response-percentages`, requestData)
       .then(response => {
         // Format response percentages to integers and add % sign
         const formattedResponse = Object.fromEntries(
@@ -52,7 +54,6 @@ const SurveyForm = () => {
 
   return (
     <div className="survey-container">
-      
       <form onSubmit={handleSubmit} className="survey-form">
         <div className="form-group">
           <label htmlFor="questionSelect">Välj Fråga:</label>
