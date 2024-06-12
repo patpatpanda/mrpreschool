@@ -1,13 +1,14 @@
 .header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #a8efaa 0%, #66BB6A 100%);
   padding: 20px;
   text-align: center;
   color: white;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   border-bottom: 3px solid #61dafb;
-  position: sticky;
+  position: relative;
   top: 0;
   z-index: 1000;
+  animation: slideIn 1s ease-out;
 }
 
 .header h1 {
@@ -16,7 +17,7 @@
   font-weight: bold;
   letter-spacing: 1.5px;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-  animation: fadeIn 2s ease-in-out;
+  animation: fadeIn 1s ease-in-out;
 }
 
 .header h2 {
@@ -34,5 +35,14 @@
   }
   to {
     opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
   }
 }

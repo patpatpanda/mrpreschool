@@ -1,10 +1,13 @@
 .survey-container {
   padding: 30px;
   max-width: 600px;
+  
   margin: 0 auto;
-  background-color: #f9f9f9;
+  background-color: #fafafa;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 50px;
+  
 }
 
 .survey-container h1 {
@@ -62,11 +65,12 @@
 }
 
 .response-percentages {
-  margin-top: 30px;
+  
   background-color: #fff;
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  
 }
 
 .response-percentages h2 {

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import './SurveyForm.css'; // Separat CSS-fil för SurveyForm-styling
+import './SurveyForm.css';  // Lägg till detta
 
 const SurveyForm = () => {
   const [questions, setQuestions] = useState([]);
