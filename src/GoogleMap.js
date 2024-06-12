@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import PreschoolCard from './PreschoolCard';
 import './App.css';
-import kinderImage from './images/kinder.webp';
+import kinderImage from './images/kinder.webp'; // Importera bilden
 
 const GoogleMap = () => {
   const mapRef = useRef(null);
@@ -15,8 +15,6 @@ const GoogleMap = () => {
   const [nearbyPreschools, setNearbyPreschools] = useState([]);
   const [selectedPreschool, setSelectedPreschool] = useState(null);
 
-  
-
   // Lokal hårdkodad information om specifika förskolor
   const localPreschoolData = {
     "Förskola Kastanjebacken": {
@@ -25,7 +23,6 @@ const GoogleMap = () => {
       description: "Förskola Kastanjebacken är en utmärkt skola med fantastisk personal och bra aktiviteter för barnen.",
     }
   };
-  
 
   useEffect(() => {
     const initMap = () => {
@@ -361,7 +358,7 @@ const GoogleMap = () => {
             <p>{selectedPreschool.description}</p>
             <p>Address: {selectedPreschool.vicinity}</p>
             <p>Rating: {selectedPreschool.rating}</p>
-            <p>User Ratings: {selectedPreschool.user_ratings_total}</p>
+            
             <button className="close-button" onClick={() => setSelectedPreschool(null)}>Stäng</button>
           </div>
         )}
