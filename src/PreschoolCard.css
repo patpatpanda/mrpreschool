@@ -81,8 +81,8 @@ body, html, #root, .app-container {
   border-radius: 16px;
   padding: 20px;
   margin: 10px;
-  width: 300px;
-  height: 200px; /* Fixed height */
+  width: 150px;
+  height: 100px; /* Fixed height */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   cursor: pointer;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -91,6 +91,7 @@ body, html, #root, .app-container {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+
 }
 
 .preschool-card:hover {
@@ -112,9 +113,14 @@ body, html, #root, .app-container {
   z-index: 1000;
   border-radius: 16px;
 }
+.preschool-card p {
+ 
+  font-size: 0.5em;
+  color: #333;
+}
 .preschool-card h3 {
-  margin: 0 0 10px 0;
-  font-size: 1.5em;
+ 
+  font-size: 0.6em;
   color: #333;
 }
 .selected-preschool-card img {
