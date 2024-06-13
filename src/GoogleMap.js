@@ -92,7 +92,7 @@ const GoogleMap = () => {
             "elementType": "all",
             "stylers": [
               {
-                "visibility": "off"
+              
               }
             ]
           },
@@ -140,7 +140,7 @@ const GoogleMap = () => {
             "elementType": "all",
             "stylers": [
               {
-                "visibility": "simplified"
+             
               }
             ]
           },
@@ -149,7 +149,7 @@ const GoogleMap = () => {
             "elementType": "labels.icon",
             "stylers": [
               {
-                "visibility": "off"
+               
               }
             ]
           },
@@ -158,7 +158,7 @@ const GoogleMap = () => {
             "elementType": "all",
             "stylers": [
               {
-                "visibility": "off"
+               "visibility": "off"
               }
             ]
           },
@@ -334,7 +334,9 @@ const GoogleMap = () => {
 
   return (
     <div className="app-container">
-      <div ref={mapRef} className="map-background"></div>
+      <div ref={mapRef} className="map-container">
+        <div className="map-background"></div>
+      </div>
       <header className="app-header">
         <h1>Förskolor i Stockholm</h1>
       </header>
@@ -358,7 +360,7 @@ const GoogleMap = () => {
             <p>{selectedPreschool.description}</p>
             <p>Address: {selectedPreschool.vicinity}</p>
             <p>Rating: {selectedPreschool.rating}</p>
-            
+            <p>User Ratings: {selectedPreschool.user_ratings_total}</p>
             <button className="close-button" onClick={() => setSelectedPreschool(null)}>Stäng</button>
           </div>
         )}

@@ -8,6 +8,7 @@ const SurveyForm = () => {
   const [selectedQuestion, setSelectedQuestion] = useState('');
   const [selectedForskoleverksamhet, setSelectedForskoleverksamhet] = useState('');
   const [responsePercentages, setResponsePercentages] = useState(null);
+  const [responseCount, setResponseCount] = useState(null);
 
   const apiUrl = process.env.REACT_APP_API_URL || 'https://masterkinder20240523125154.azurewebsites.net/api';
 
@@ -30,6 +31,24 @@ const SurveyForm = () => {
         console.error('There was an error fetching the forskoleverksamheter!', error);
       });
   }, [apiUrl]);
+
+  useEffect(() => {
+    if (selectedQuestion && selectedForskoleverksamhet) {
+      // Fetch response count for the selected question and forskoleverksamhet
+      axios.get(`${apiUrl}/survey/response-count`, {
+        params: {
+          question: selectedQuestion,
+          forskoleverksamhet: selectedForskoleverksamhet
+        }
+      })
+        .then(response => {
+          setResponseCount(response.data.count);
+        })
+        .catch(error => {
+          console.error('There was an error fetching the response count!', error);
+        });
+    }
+  }, [selectedQuestion, selectedForskoleverksamhet, apiUrl]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -83,6 +102,12 @@ const SurveyForm = () => {
         </div>
         <button type="submit" className="submit-button">Sök</button>
       </form>
+
+      {responseCount !== null && (
+        <div className="response-count">
+          <h2>Antal svar: {responseCount}</h2>
+        </div>
+      )}
 
       {responsePercentages && (
         <div className="response-percentages">
