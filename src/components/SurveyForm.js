@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import './SurveyForm.css';  // Lägg till detta
+import '../styles/SurveyForm.css';
 
 const SurveyForm = () => {
   const [questions, setQuestions] = useState([]);
@@ -13,7 +13,6 @@ const SurveyForm = () => {
   const apiUrl = process.env.REACT_APP_API_URL || 'https://masterkinder20240523125154.azurewebsites.net/api';
 
   useEffect(() => {
-    // Fetch questions
     axios.get(`${apiUrl}/survey/questions`)
       .then(response => {
         setQuestions(response.data);
@@ -22,7 +21,6 @@ const SurveyForm = () => {
         console.error('There was an error fetching the questions!', error);
       });
 
-    // Fetch forskoleverksamheter
     axios.get(`${apiUrl}/survey/forskoleverksamheter`)
       .then(response => {
         setForskoleverksamheter(response.data);
@@ -34,7 +32,6 @@ const SurveyForm = () => {
 
   useEffect(() => {
     if (selectedQuestion && selectedForskoleverksamhet) {
-      // Fetch response count for the selected question and forskoleverksamhet
       axios.get(`${apiUrl}/survey/response-count`, {
         params: {
           question: selectedQuestion,
@@ -50,25 +47,22 @@ const SurveyForm = () => {
     }
   }, [selectedQuestion, selectedForskoleverksamhet, apiUrl]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const requestData = {
-      selectedQuestion,
-      selectedForskoleverksamhet
-    };
-
-    axios.post(`${apiUrl}/survey/response-percentages`, requestData)
-      .then(response => {
-        // Format response percentages to integers and add % sign
-        const formattedResponse = Object.fromEntries(
-          Object.entries(response.data).map(([key, value]) => [key, `${Math.round(value)}%`])
-        );
-        setResponsePercentages(formattedResponse);
-      })
-      .catch(error => {
-        console.error('There was an error calculating the response percentages!', error);
+    try {
+      const response = await axios.post(`${apiUrl}/survey/response-percentages`, {
+        selectedQuestion,
+        selectedForskoleverksamhet
       });
+      const formattedResponse = Object.fromEntries(
+        Object.entries(response.data).map(([key, value]) => [key, `${Math.round(value)}%`])
+      );
+      setResponsePercentages(formattedResponse);
+    } catch (error) {
+      console.error('There was an error calculating the response percentages!', error);
+      alert('Något gick fel vid beräkningen av svaren. Vänligen försök igen senare.');
+    }
   };
 
   return (

@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import './PreschoolCard.css';
+import '../styles/PreschoolCard.css';
 
 const PreschoolCard = ({ preschool, onSelect }) => {
   const handleSelect = () => {

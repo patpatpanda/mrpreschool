@@ -1,8 +1,8 @@
 import React from 'react';
-import Header from './Header';
-import GoogleMap from './GoogleMap';
-import SurveyForm from './SurveyForm';
-import Footer from './Footer';
+import Header from './components/Header';
+import GoogleMap from './components/GoogleMap';
+import SurveyForm from './components/SurveyForm';
+import Footer from './components/Footer';
 
 const App = () => {
   return (
