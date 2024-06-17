@@ -1,5 +1,9 @@
+
+
+/* global google */
 import React, { useEffect, useRef, useState } from 'react';
 import PreschoolCard from './PreschoolCard';
+import SurveyForm from './SurveyForm'; // Importera SurveyForm
 import '../styles/GoogleMap.css';
 import kinderImage from '../images/kinder.webp';
 
@@ -198,6 +202,7 @@ const GoogleMap = () => {
             <p>Address: {selectedPreschool.vicinity}</p>
             <p>Rating: {selectedPreschool.rating}</p>
             <p>User Ratings: {selectedPreschool.user_ratings_total}</p>
+            <SurveyForm /> {/* Lägg till SurveyForm här */}
             <button className="close-button" onClick={() => setSelectedPreschool(null)}>Stäng</button>
           </div>
         )}

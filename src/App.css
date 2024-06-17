@@ -1,16 +1,16 @@
-html, body {
-  height: 100%;
-  margin: 0;
-  overflow: hidden; /* Prevent scrolling */
-}
-
+/* app-container */
 .app-container {
-  position: fixed;
+  /* position: fixed; */ /* Kommentar ut för att testa om detta påverkar */
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  overflow: auto; /* Lägg till detta för att tillåta rullning */
 }
 
+/* survey-container */
+
+
+/* Resterande CSS för Survey-Container här... */
