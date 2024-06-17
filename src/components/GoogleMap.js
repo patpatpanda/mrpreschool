@@ -1,4 +1,3 @@
-/* global google */
 import React, { useEffect, useRef, useState } from 'react';
 import PreschoolCard from './PreschoolCard';
 import '../styles/GoogleMap.css';
@@ -14,6 +13,7 @@ const GoogleMap = () => {
   const [showDirections, setShowDirections] = useState(false);
   const [nearbyPreschools, setNearbyPreschools] = useState([]);
   const [selectedPreschool, setSelectedPreschool] = useState(null);
+  const [showPreschools, setShowPreschools] = useState(true); // State to manage visibility of the cards container
 
   const localPreschoolData = {
     "Förskola Kastanjebacken": {
@@ -76,6 +76,9 @@ const GoogleMap = () => {
           position: results[0].geometry.location,
         });
         findNearbyPreschools(results[0].geometry.location);
+        // Move content to the left
+        document.querySelector('.content').classList.remove('center');
+        document.querySelector('.content').classList.add('left');
       } else {
         alert('Geocode was not successful for the following reason: ' + status);
       }
@@ -169,19 +172,22 @@ const GoogleMap = () => {
       <header className="app-header">
         <h1>Förskolor i Stockholm</h1>
       </header>
-      <div className="content">
-      <div className="input-container">
-  <input id="address" type="text" className="styled-input" placeholder="Ange din Address" defaultValue="Sergels torg 1, 111 57 Stockholm, Sverige" />
-  <button className="styled-button" onClick={geocodeAddress}>Hitta Förskolor</button>
-  <button className="styled-button" onClick={handleReset}>Återställ Sidan</button>
-</div>
-
-
-        <div className="cards-container">
-          {nearbyPreschools.map((preschool) => (
-            <PreschoolCard key={preschool.place_id} preschool={preschool} onSelect={handleSelectPreschool} />
-          ))}
+      <div className="content center">
+        <div className="input-container">
+          <input id="address" type="text" className="styled-input" placeholder="Ange din Address" defaultValue="Sergels torg 1, 111 57 Stockholm, Sverige" />
+          <button className="styled-button" onClick={geocodeAddress}>Hitta Förskolor</button>
+          <button className="styled-button" onClick={handleReset}>Återställ Sidan</button>
         </div>
+        
+        {showPreschools && (
+          <div className="cards-container">
+            <button className="close-button" onClick={() => setShowPreschools(false)}>Stäng</button>
+            {nearbyPreschools.map((preschool) => (
+              <PreschoolCard key={preschool.place_id} preschool={preschool} onSelect={handleSelectPreschool} />
+            ))}
+          </div>
+        )}
+        
         {selectedPreschool && (
           <div className="selected-preschool-card">
             <h2>{selectedPreschool.name}</h2>

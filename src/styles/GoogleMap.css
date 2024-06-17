@@ -1,66 +1,60 @@
-.app-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.right-panel {
-  position: absolute;
-  margin-top: 200px;
-  top: 10px;
-  right: 10px;
-  height: 400px;
-  background-color: rgba(255, 255, 255, 0.8); /* Halvtransparent vit bakgrund */
-  z-index: 1;
-}
-.right-panel .close-button {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-}
-
-@media (max-width: 768px) {
-  .right-panel {
-    margin-top: 500px;
-    height: 400px;
-    background-color: rgba(255, 255, 255, 0.8); /* Halvtransparent vit bakgrund */
-    z-index: 5;
-  }
-}
-
 .map-container {
   width: 100%;
-  height: 500px;
-}
-
-.map-background {
-  width: 100%;
   height: 100%;
-}
-
-.app-header {
-  text-align: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
 }
 
 .content {
-  padding: 20px;
-}
-
-.input-container {
-  display: flex;
-  flex-direction: column; /* Placera sökfältet överst och knapparna under */
-  align-items: center;
-  margin-bottom: 20px;
-  background-color: #f8f9fa;
+  margin-bottom: 300px;
+  position: relative;
+  z-index: 1;
+  background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 90%;
+  width: 500px;
+  text-align: center;
+  display: flex;
+  flex-direction: column; /* Place input field on top and buttons below */
+  align-items: center;
+  transition: left 0.3s ease, transform 0.3s ease;
+}
+
+.content.center {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.content.left {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: auto;
+  justify-content: flex-start;
+  align-items: flex-start;
+  pointer-events: none; /* Ignore pointer events */
+}
+
+.content.left .input-container,
+.content.left .close-cards-button,
+.content.left .cards-container,
+.content.left .selected-preschool-card {
+  pointer-events: all; /* Restore pointer events */
+}
+
+.content.cards-hidden .cards-container {
+  display: none;
 }
 
 .styled-input {
   padding: 10px 15px;
-  width: 100%; /* Full width */
-  max-width: 300px; /* Max width for larger screens */
-  margin-bottom: 10px; /* Space between input and buttons */
+  width: 100%;
+  max-width: 300px;
+  margin-bottom: 10px;
   border: 2px solid #ced4da;
   border-radius: 20px;
   font-size: 16px;
@@ -82,7 +76,7 @@
   font-size: 16px;
   transition: background-color 0.3s, transform 0.3s;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  margin: 5px; /* Space between buttons */
+  margin: 5px;
 }
 
 .styled-button:hover {
@@ -95,71 +89,96 @@
   transform: translateY(0);
 }
 
-
 .cards-container {
   display: flex;
   flex-wrap: wrap;
+  position: relative;
+}
+
+.selected-preschool-card-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  pointer-events: all; /* Ensure interactions are allowed */
 }
 
 .selected-preschool-card {
+  z-index: 2;
+  margin-top: 20px;
   padding: 20px;
   border: 1px solid #ccc;
-  margin-top: 20px;
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.9); /* More opaque white background */
 }
 
-
-
 .close-button {
-  padding: 10px;
+  padding: 10px 20px;
   background-color: #dc3545;
   color: #fff;
   border: none;
+  border-radius: 20px;
   cursor: pointer;
-}
-@media (max-width: 768px) {
-  
-  .input-container {
-    padding: 10px;
-  }
-
-  .styled-input {
-    width: 400px;
-    margin-right: 0;
-    margin-bottom: 10px;
-  }
-
-  .styled-button {
-    height: 100px;
-    width: 100px;
-  }
-
-  .content {
-    flex-direction: column;
-  }
-  
-
-  .cards-container {
-    order: 2;
-  }
-
-  .right-panel {
-    order: 1;
-  }
+  font-size: 16px;
+  transition: background-color 0.3s, transform 0.3s;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin: 5px;
+  z-index: 3; /* Ensure the close button is above the card */
+  pointer-events: all; /* Ensure pointer events are allowed */
 }
 
+.close-button:hover {
+  background-color: #c82333;
+  transform: translateY(-2px);
+}
+
+.close-button:active {
+  background-color: #bd2130;
+  transform: translateY(0);
+}
+
+.close-cards-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: transparent;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #dc3545;
+  transition: transform 0.3s;
+}
+
+.close-cards-button:hover {
+  transform: scale(1.2);
+}
 
 /* Media queries for responsive design */
 @media (max-width: 768px) {
   .content {
-    flex-direction: column;
+    max-width: 100%;
+    padding: 10px;
+    margin-bottom: 0;
+  }
+
+  .styled-input {
+    max-width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .styled-button {
+    width: 100%;
+    margin: 10px 0;
+  }
+
+  .input-container {
+    width: 100%;
+    padding: 10px;
   }
 
   .cards-container {
-    max-width: 100%;
-    margin-left: 0;
-  }
-
-  .map-container {
-    height: 300px; /* Fixed height for smaller screens */
+    flex-direction: column;
+    align-items: center;
   }
 }
