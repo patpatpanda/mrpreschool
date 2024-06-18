@@ -12,7 +12,7 @@ const PreschoolCard = ({ preschool, onSelect }) => {
       <h3>{preschool.name}</h3>
       <p>{preschool.vicinity}</p>
       {preschool.rating && <p>Rating: {preschool.rating}</p>}
-      {/* {preschool.user_ratings_total && <p>User Ratings: {preschool.user_ratings_total}</p>} */}
+      {preschool.user_ratings_total && <p>User Ratings: {preschool.user_ratings_total}</p>}
     </div>
   );
 };

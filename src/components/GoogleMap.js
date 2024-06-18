@@ -1,7 +1,7 @@
-/* global google */
+/*global google*/
 import React, { useEffect, useRef, useState } from 'react';
 import PreschoolCard from './PreschoolCard';
-import SurveyForm from './SurveyForm'; // Import the SurveyForm component
+import SurveyForm from './SurveyForm';
 import '../styles/GoogleMap.css';
 
 const GoogleMap = () => {
@@ -14,7 +14,7 @@ const GoogleMap = () => {
   const [nearbyPreschools, setNearbyPreschools] = useState([]);
   const [selectedPreschool, setSelectedPreschool] = useState(null);
   const [showPreschools, setShowPreschools] = useState(false);
-  const [showContent, setShowContent] = useState(true); // New state for toggling content visibility
+  const [showContent, setShowContent] = useState(true);
 
   useEffect(() => {
     const initMap = () => {
@@ -69,7 +69,6 @@ const GoogleMap = () => {
           position: results[0].geometry.location,
         });
         findNearbyPreschools(results[0].geometry.location);
-        // Move content to the left
         document.querySelector('.content').classList.remove('center');
         document.querySelector('.content').classList.add('left');
       } else {
@@ -162,7 +161,7 @@ const GoogleMap = () => {
             <input id="address" type="text" className="styled-input" placeholder="Ange din Address" defaultValue="Sergels torg 1, 111 57 Stockholm, Sverige" />
             <button className="styled-button" onClick={geocodeAddress}>Hitta Förskolor</button>
             <button className="styled-button" onClick={handleReset}>Återställ Sidan</button>
-            <SurveyForm /> {/* Keep SurveyForm in the input container */}
+            <SurveyForm />
           </div>
         </div>
       )}
@@ -170,11 +169,13 @@ const GoogleMap = () => {
       <div className={`cards-container ${showPreschools ? 'show' : ''}`}>
         <button className="close-button" onClick={() => setShowPreschools(false)}>Stäng</button>
         {showPreschools && (
-          <p>Visar de 5 närmsta förskolorna.</p>
+          <>
+            <p>Visar de 5 närmsta förskolorna.</p>
+            {nearbyPreschools.map((preschool) => (
+              <PreschoolCard key={preschool.place_id} preschool={preschool} onSelect={handleSelectPreschool} />
+            ))}
+          </>
         )}
-        {nearbyPreschools.map((preschool) => (
-          <PreschoolCard key={preschool.place_id} preschool={preschool} onSelect={handleSelectPreschool} />
-        ))}
       </div>
 
       {selectedPreschool && (
@@ -183,7 +184,6 @@ const GoogleMap = () => {
           {selectedPreschool.imageUrl && (
             <img src={selectedPreschool.imageUrl} alt={selectedPreschool.name} />
           )}
-          <p>{selectedPreschool.description}</p>
           <p>Address: {selectedPreschool.vicinity}</p>
           <p>Rating: {selectedPreschool.rating}</p>
           <p>User Ratings: {selectedPreschool.user_ratings_total}</p>

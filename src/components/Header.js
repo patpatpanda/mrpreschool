@@ -4,8 +4,7 @@ import '../styles/Header.css';
 const Header = () => {
   return (
     <header className="header">
-      <h1>Förskolekollen</h1>
-      <h2>din guide för att hitta rätt förskola</h2>
+      <img src={require('../images/forstar.png')} alt="Förskolekollen" className="header-image" />
     </header>
   );
 };

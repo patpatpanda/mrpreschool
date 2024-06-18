@@ -1,48 +1,25 @@
 .header {
-  background: linear-gradient(135deg, #a8efaa 0%, #66BB6A 100%);
+  
   
   text-align: center;
   color: white;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  border-bottom: 3px solid #61dafb;
+  border-bottom: 3px solid #b5dce7;
   position: relative;
   top: 0;
-  z-index: 1000;
+  z-index: 1;
   animation: slideIn 1s ease-out;
 }
 
-.header h1 {
-  margin: 0;
-  font-size: 2.5em;
-  font-weight: bold;
-  letter-spacing: 1.5px;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-  animation: fadeIn 1s ease-in-out;
+.header-image {
+  width: 50%; /* Adjust percentage as needed */
+  max-width: 300px; /* Max width to ensure it's not too large */
+  height: auto;
 }
 
-.header h2 {
-  margin: 10px 0 0;
-  font-size: 1.2em;
-  font-weight: 300;
-  letter-spacing: 1px;
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
-  animation: fadeIn 2s ease-in-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateY(-100%);
-  }
-  to {
-    transform: translateY(0);
+@media (max-width: 768px) {
+  .header-image {
+    width: 80%; /* Adjust percentage for smaller screens */
+    max-width: 200px; /* Max width for smaller screens */
   }
 }
