@@ -9,6 +9,7 @@ const SurveyForm = () => {
   const [selectedForskoleverksamhet, setSelectedForskoleverksamhet] = useState('');
   const [responsePercentages, setResponsePercentages] = useState(null);
   const [responseCount, setResponseCount] = useState(null);
+  const [showResponses, setShowResponses] = useState(false); // Set to false initially
 
   const apiUrl = process.env.REACT_APP_API_URL || 'https://masterkinder20240523125154.azurewebsites.net/api';
 
@@ -59,6 +60,7 @@ const SurveyForm = () => {
         Object.entries(response.data).map(([key, value]) => [key, `${Math.round(value)}%`])
       );
       setResponsePercentages(formattedResponse);
+      setShowResponses(true); // Show responses when fetched
     } catch (error) {
       console.error('There was an error calculating the response percentages!', error);
       alert('Något gick fel vid beräkningen av svaren. Vänligen försök igen senare.');
@@ -66,49 +68,54 @@ const SurveyForm = () => {
   };
 
   return (
-    <div className="survey-container">
-      <form onSubmit={handleSubmit} className="survey-form">
-        <div className="form-group">
-          <label htmlFor="questionSelect">Välj Fråga:</label>
-          <select
-            id="questionSelect"
-            value={selectedQuestion}
-            onChange={e => setSelectedQuestion(e.target.value)}
-          >
-            <option value="">-- Select a question --</option>
-            {questions.map((question, index) => (
-              <option key={index} value={question}>{question}</option>
-            ))}
-          </select>
-        </div>
-        <div className="form-group">
-          <label htmlFor="forskoleverksamhetSelect">Välj Förskoleverksamhet:</label>
-          <select
-            id="forskoleverksamhetSelect"
-            value={selectedForskoleverksamhet}
-            onChange={e => setSelectedForskoleverksamhet(e.target.value)}
-          >
-            <option value="">-- Select Förskoleverksamhet --</option>
-            {forskoleverksamheter.map((item, index) => (
-              <option key={index} value={item}>{item}</option>
-            ))}
-          </select>
-        </div>
-        <button type="submit" className="submit-button">Sök</button>
-      </form>
-
-      {responseCount !== null && (
-        <div className="response-count">
-          <h2>Antal svar: {responseCount}</h2>
+    <div className="survey-wrapper">
+      {showResponses && (
+        <div className="responses-container">
+          <button className="close-button" onClick={() => setShowResponses(false)}>Stäng</button>
+          {responseCount !== null && (
+            <div className="response-count">
+              <h2>Antal svar: {responseCount}</h2>
+            </div>
+          )}
+          {responsePercentages && (
+            <div className="response-percentages">
+              <h2>Svar</h2>
+              <pre>{JSON.stringify(responsePercentages, null, 2)}</pre>
+            </div>
+          )}
         </div>
       )}
-
-      {responsePercentages && (
-        <div className="response-percentages">
-          <h2>Svar</h2>
-          <pre>{JSON.stringify(responsePercentages, null, 2)}</pre>
-        </div>
-      )}
+      <div className="survey-container">
+        <form onSubmit={handleSubmit} className="survey-form">
+          <div className="form-group">
+            <label htmlFor="questionSelect">Välj Fråga:</label>
+            <select
+              id="questionSelect"
+              value={selectedQuestion}
+              onChange={e => setSelectedQuestion(e.target.value)}
+            >
+              <option value="">-- Select a question --</option>
+              {questions.map((question, index) => (
+                <option key={index} value={question}>{question}</option>
+              ))}
+            </select>
+          </div>
+          <div className="form-group">
+            <label htmlFor="forskoleverksamhetSelect">Välj Förskoleverksamhet:</label>
+            <select
+              id="forskoleverksamhetSelect"
+              value={selectedForskoleverksamhet}
+              onChange={e => setSelectedForskoleverksamhet(e.target.value)}
+            >
+              <option value="">-- Select Förskoleverksamhet --</option>
+              {forskoleverksamheter.map((item, index) => (
+                <option key={index} value={item}>{item}</option>
+              ))}
+            </select>
+          </div>
+          <button type="submit" className="submit-button">Sök</button>
+        </form>
+      </div>
     </div>
   );
 };

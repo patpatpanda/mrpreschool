@@ -12,58 +12,57 @@
 
 
 
-
-
 .preschool-card {
-  background: linear-gradient(135deg, #9dff9a 0%, #fad0c4 100%);
-  border: 1px solid #ccc;
-  border-radius: 16px;
+  background: #ffffff; /* Solid white background */
+  border: 1px solid #e0e0e0; /* Light grey border */
+  border-radius: 8px;
   padding: 20px;
   margin: 10px;
-  width: 150px;
-  height: 100px; /* Fixed height */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  width: 200px; /* Updated width */
+  height: auto; /* Allow height to adjust */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow */
   cursor: pointer;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  text-align: left; /* Left align text */
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  justify-content: space-between; /* Space between elements */
+  align-items: flex-start; /* Align items to the start */
 }
 
 .preschool-card:hover {
-  background-color: #f0f0f0;
+  background: rgba(255, 255, 255, 0.25); /* Slightly more opaque on hover */
   transform: translateY(-5px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
 .selected-preschool-card {
-  position: fixed;
-  top: 10%;
-  left: 50%;
+  position: relative;
+ 
+  left: 40%;
   transform: translateX(-50%);
-  width: 80%;
   max-width: 800px;
-  background-color: white;
+  background: rgba(255, 255, 255, 0.8); /* More opaque white background */
   padding: 20px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   border-radius: 16px;
+  backdrop-filter: blur(10px); /* Background blur */
+  z-index: 4;
 }
 
 .preschool-card p {
-  font-size: 0.5em;
+  font-size: 0.7em;
   color: #333;
 }
 
 .preschool-card h3 {
-  font-size: 0.6em;
+  font-size: 0.7em;
   color: #333;
 }
 
 .selected-preschool-card img {
-  width: 100%;
-  height: auto;
+  width: 500px;
+  height: 300px;
   border-radius: 8px;
 }
 
@@ -71,16 +70,7 @@
   margin-top: 0;
 }
 
-
-
 /* Media queries for responsive design */
-@media (max-width: 1208px) {
-  .cards-container {
-    flex-direction: column;
-    align-items: center;
-  }
 
-  .preschool-card {
-    width: 300px;
-  }
-}
+
+

@@ -7,8 +7,28 @@
   z-index: 0;
 }
 
+.filter-container {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.filter-label {
+  margin-bottom: 5px;
+  font-size: 16px;
+}
+
+.filter-select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  width: 300px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
 .content {
-  margin-bottom: 300px;
   position: relative;
   z-index: 1;
   background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
@@ -22,17 +42,19 @@
   flex-direction: column; /* Place input field on top and buttons below */
   align-items: center;
   transition: left 0.3s ease, transform 0.3s ease;
+
 }
 
 .content.center {
-  left: 50%;
+  margin-top: 20px;
+  left: 10%;
   transform: translateX(-50%);
 }
 
 .content.left {
   position: absolute;
   left: 0;
-  top: 0;
+  margin-top: 600px;
   height: auto;
   justify-content: flex-start;
   align-items: flex-start;
@@ -44,10 +66,6 @@
 .content.left .cards-container,
 .content.left .selected-preschool-card {
   pointer-events: all; /* Restore pointer events */
-}
-
-.content.cards-hidden .cards-container {
-  display: none;
 }
 
 .styled-input {
@@ -90,32 +108,30 @@
 }
 
 .cards-container {
-  display: flex;
+  display: none; /* Hide by default */
   flex-wrap: wrap;
   position: relative;
+  background: rgba(71, 26, 195, 0); /* Semi-transparent white */
+  border: 1px solid rgb(255, 255, 255);
+  border-radius: 16px;
+  padding: 10px;
+  margin: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px); /* Background blur */
+  justify-content: flex-start; /* Align items to the left */
+  
 }
 
-.selected-preschool-card-container {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 1000;
-  pointer-events: all; /* Ensure interactions are allowed */
+.cards-container.show {
+  display: flex; /* Show when the class 'show' is added */
+  flex-wrap: wrap; /* Ensure items wrap to next line */
+  top:0
 }
 
-.selected-preschool-card {
-  z-index: 2;
-  margin-top: 20px;
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  background-color: rgba(255, 255, 255, 0.9); /* More opaque white background */
-}
 
 .close-button {
   padding: 10px 20px;
-  background-color: #dc3545;
+  background-color: #004085;
   color: #fff;
   border: none;
   border-radius: 20px;
@@ -134,7 +150,7 @@
 }
 
 .close-button:active {
-  background-color: #bd2130;
+  background-color: #004085;
   transform: translateY(0);
 }
 
@@ -155,13 +171,20 @@
 }
 
 /* Media queries for responsive design */
-@media (max-width: 768px) {
+@media (max-width: 1000px) {
   .content {
     max-width: 100%;
     padding: 10px;
     margin-bottom: 0;
   }
-
+  .cards-container {
+  display: none; /* Hide by default */
+  
+}
+.cards-container.show {
+  display: none; /* Show when the class 'show' is added */
+  
+}
   .styled-input {
     max-width: 100%;
     margin-bottom: 10px;
@@ -177,8 +200,53 @@
     padding: 10px;
   }
 
-  .cards-container {
-    flex-direction: column;
-    align-items: center;
+ 
+  
+  .content.center {
+    margin: 20px auto;
+    left: 50%;
+    transform: translateX(-50%);
   }
+  
+  .content.left {
+    position: relative;
+    top: 0;
+    left: 0;
+    margin-top: 0;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none; /* Ignore pointer events */
+  }
+
+  .content.left .input-container,
+  .content.left .close-cards-button,
+  .content.left .cards-container,
+  .content.left .selected-preschool-card {
+    pointer-events: all; /* Restore pointer events */
+  }
+}
+.toggle-button {
+  padding: 10px 20px;
+  background-color: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s, transform 0.3s;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin: 10px;
+  z-index: 2; /* Ensure the toggle button is above the map */
+  position: relative; /* Ensure proper positioning */
+}
+
+.toggle-button:hover {
+  background-color: #218838;
+  transform: translateY(-2px);
+}
+
+.toggle-button:active {
+  background-color: #1e7e34;
+  transform: translateY(0);
 }

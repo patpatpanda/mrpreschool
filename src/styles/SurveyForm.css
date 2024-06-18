@@ -1,52 +1,61 @@
+.survey-wrapper {
+  display: flex;
+  flex-direction: row; /* Change to row */
+  justify-content: center;
+  align-items: flex-start; /* Align items at the start */
+  padding: 10px;
+  gap: 10px;
+  flex-wrap: wrap; /* Allow wrapping to new line if needed */
+}
+
 .survey-container {
-  padding: 15px; /* Minskat från 30px */
-  max-width: 400px; /* Minskat från 600px */
-  margin: 0 auto;
+  padding: 15px;
+  max-width: 400px;
   background-color: #f9f9f9;
-  height: 300px;
-  border-radius: 10px; /* Minskat från 15px */
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1); /* Minskat från 0 10px 20px */
-  margin-top: 25px; /* Minskat från 50px */
+  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+  margin-top: 2px;
   animation: fadeIn 1s ease-in-out;
 }
 
 .survey-container h1 {
   text-align: center;
-  margin-bottom: 10px; /* Minskat från 20px */
+  margin-bottom: 10px;
   color: #4A90E2;
-  font-size: 1.5em; /* Minskat från 2em */
+  font-size: 1.2em;
 }
 
 .survey-form {
   display: flex;
   flex-direction: column;
-  gap: 10px; /* Minskat från 20px */
-  height: 200px;
+  gap: 10px;
+  height: auto;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
   background-color: #fff;
-  padding: 10px; /* Minskat från 15px */
-  border-radius: 5px; /* Minskat från 10px */
+  padding: 10px;
+  border-radius: 5px;
   border: 1px solid #ddd;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Minskat från 0 5px 10px */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .form-group label {
-  margin-bottom: 5px; /* Minskat från 10px */
+  margin-bottom: 5px;
   font-weight: bold;
   color: #333;
-  font-size: 0.9em; /* Minskat från 1.1em */
+  font-size: 0.9em;
 }
 
 .form-group select {
-  padding: 5px; /* Minskat från 10px */
+  padding: 5px;
   border: 1px solid #ccc;
   border-radius: 5px;
   background-color: #fff;
-  font-size: 0.9em; /* Minskat från 16px */
+  font-size: 0.9em;
   color: #333;
   transition: border-color 0.3s ease;
 }
@@ -57,47 +66,83 @@
 }
 
 .submit-button {
-  padding: 10px 15px; /* Minskat från 15px 20px */
-  font-size: 1em; /* Minskat från 18px */
+  padding: 10px 15px;
+  font-size: 1em;
   background-color: #4A90E2;
   color: white;
   border: none;
-  border-radius: 5px; /* Minskat från 10px */
+  border-radius: 5px;
   cursor: pointer;
   align-self: center;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Minskat från 0 5px 10px */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
 .submit-button:hover {
   background-color: #357ABD;
-  transform: translateY(-2px); /* Minskat från -3px */
+  transform: translateY(-2px);
+}
+
+.responses-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 400px;
+  background-color: #f9f9f9;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 1s ease-in-out;
+  margin-top: 15px;
+}
+
+.close-button {
+  padding: 5px 10px;
+  background-color: #dc3545;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9em;
+  align-self: flex-end;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.close-button:hover {
+  background-color: #c82333;
+  transform: translateY(-2px);
+}
+
+.close-button:active {
+  background-color: #bd2130;
+  transform: translateY(0);
 }
 
 .response-count, .response-percentages {
   background-color: #fff;
-  padding: 15px; /* Minskat från 20px */
-  border-radius: 5px; /* Minskat från 10px */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Minskat från 0 5px 10px */
-  margin-top: 15px; /* Minskat från 20px */
+  padding: 15px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  margin-top: 10px;
   animation: fadeIn 1s ease-in-out;
 }
 
 .response-count h2, .response-percentages h2 {
   margin-top: 0;
-  font-size: 1.5em; /* Minskat från 1.8em */
+  font-size: 1.2em;
 }
 
 .response-percentages pre {
   background-color: #f1f1f1;
-  padding: 10px; /* Minskat från 15px */
-  border-radius: 5px; /* Minskat från 10px */
+  padding: 10px;
+  border-radius: 5px;
   color: #333;
   overflow: auto;
-  max-height: 200px; /* Minskat från 300px */
-  font-size: 1em; /* Minskat från 1.5em */
-  line-height: 1.4em; /* Minskat från 1.6em */
-  font-family: Arial, sans-serif; /* Förtydligat font-family */
+  max-height: 200px;
+  font-size: 0.9em;
+  line-height: 1.4em;
+  font-family: Arial, sans-serif;
 }
 
 @keyframes fadeIn {
@@ -108,5 +153,29 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* Media query for smaller screens */
+@media (max-width: 768px) {
+  .survey-container {
+    left: 70%;
+    padding: 10px;
+    margin-top: 10px;
+  }
+
+  .responses-container {
+    width: 90%;
+    padding: 10px;
+    margin-top: 10px;
+  }
+
+  .survey-container h1 {
+    font-size: 1.1em;
+  }
+
+  .submit-button {
+    padding: 8px 12px;
+    font-size: 0.9em;
   }
 }

@@ -1,11 +1,8 @@
-
-
 /* global google */
 import React, { useEffect, useRef, useState } from 'react';
 import PreschoolCard from './PreschoolCard';
-import SurveyForm from './SurveyForm'; // Importera SurveyForm
+import SurveyForm from './SurveyForm'; // Import the SurveyForm component
 import '../styles/GoogleMap.css';
-import kinderImage from '../images/kinder.webp';
 
 const GoogleMap = () => {
   const mapRef = useRef(null);
@@ -14,18 +11,10 @@ const GoogleMap = () => {
   const [infowindow, setInfowindow] = useState(null);
   const [directionsService, setDirectionsService] = useState(null);
   const [directionsRenderer, setDirectionsRenderer] = useState(null);
-  const [showDirections, setShowDirections] = useState(false);
   const [nearbyPreschools, setNearbyPreschools] = useState([]);
   const [selectedPreschool, setSelectedPreschool] = useState(null);
-  const [showPreschools, setShowPreschools] = useState(true); // State to manage visibility of the cards container
-
-  const localPreschoolData = {
-    "Förskola Kastanjebacken": {
-      name: "Förskola Kastanjebacken",
-      imageUrl: kinderImage,
-      description: "Förskola Kastanjebacken är en utmärkt skola med fantastisk personal och bra aktiviteter för barnen.",
-    }
-  };
+  const [showPreschools, setShowPreschools] = useState(false);
+  const [showContent, setShowContent] = useState(true); // New state for toggling content visibility
 
   useEffect(() => {
     const initMap = () => {
@@ -99,15 +88,9 @@ const GoogleMap = () => {
     const service = new google.maps.places.PlacesService(map);
     service.nearbySearch(request, (results, status) => {
       if (status === google.maps.places.PlacesServiceStatus.OK) {
-        const updatedResults = results.map(result => {
-          const localData = localPreschoolData[result.name];
-          return {
-            ...result,
-            ...localData
-          };
-        });
-        setNearbyPreschools(updatedResults.slice(0, 5));
-        updatedResults.slice(0, 5).forEach((result) => createMarker(result, location));
+        setNearbyPreschools(results.slice(0, 5));
+        setShowPreschools(true);
+        results.slice(0, 5).forEach((result) => createMarker(result, location));
       } else {
         alert('Places API was not successful for the following reason: ' + status);
       }
@@ -127,7 +110,14 @@ const GoogleMap = () => {
       map.setCenter(placeLoc);
       map.setZoom(15);
 
-      setShowDirections(true);
+      setSelectedPreschool({
+        name: place.name,
+        vicinity: place.vicinity,
+        rating: place.rating,
+        user_ratings_total: place.user_ratings_total,
+        place_id: place.place_id
+      });
+
       calculateAndDisplayRoute(origin, placeLoc);
     });
   };
@@ -142,17 +132,10 @@ const GoogleMap = () => {
       if (status === 'OK') {
         directionsRenderer.setDirections(result);
         directionsRenderer.setMap(map);
-        directionsRenderer.setPanel(document.getElementById('right-panel'));
       } else {
         alert('Directions request failed due to ' + status);
       }
     });
-  };
-
-  const closeDirections = () => {
-    setShowDirections(false);
-    directionsRenderer.setPanel(null);
-    directionsRenderer.setMap(null);
   };
 
   const handleReset = () => {
@@ -160,12 +143,7 @@ const GoogleMap = () => {
   };
 
   const handleSelectPreschool = (preschool) => {
-    const localData = localPreschoolData[preschool.name];
-    if (localData) {
-      setSelectedPreschool({ ...preschool, ...localData });
-    } else {
-      setSelectedPreschool(preschool);
-    }
+    setSelectedPreschool(preschool);
   };
 
   return (
@@ -173,43 +151,43 @@ const GoogleMap = () => {
       <div ref={mapRef} className="map-container">
         <div className="map-background"></div>
       </div>
-      <header className="app-header">
-        <h1>Förskolor i Stockholm</h1>
-      </header>
-      <div className="content center">
-        <div className="input-container">
-          <input id="address" type="text" className="styled-input" placeholder="Ange din Address" defaultValue="Sergels torg 1, 111 57 Stockholm, Sverige" />
-          <button className="styled-button" onClick={geocodeAddress}>Hitta Förskolor</button>
-          <button className="styled-button" onClick={handleReset}>Återställ Sidan</button>
+
+      <button onClick={() => setShowContent(!showContent)} className="toggle-button">
+        {showContent ? 'Dölj' : 'Visa'} Innehåll
+      </button>
+
+      {showContent && (
+        <div className="content center">
+          <div className="input-container">
+            <input id="address" type="text" className="styled-input" placeholder="Ange din Address" defaultValue="Sergels torg 1, 111 57 Stockholm, Sverige" />
+            <button className="styled-button" onClick={geocodeAddress}>Hitta Förskolor</button>
+            <button className="styled-button" onClick={handleReset}>Återställ Sidan</button>
+            <SurveyForm /> {/* Keep SurveyForm in the input container */}
+          </div>
         </div>
-        
+      )}
+
+      <div className={`cards-container ${showPreschools ? 'show' : ''}`}>
+        <button className="close-button" onClick={() => setShowPreschools(false)}>Stäng</button>
         {showPreschools && (
-          <div className="cards-container">
-            <button className="close-button" onClick={() => setShowPreschools(false)}>Stäng</button>
-            {nearbyPreschools.map((preschool) => (
-              <PreschoolCard key={preschool.place_id} preschool={preschool} onSelect={handleSelectPreschool} />
-            ))}
-          </div>
+          <p>Visar de 5 närmsta förskolorna.</p>
         )}
-        
-        {selectedPreschool && (
-          <div className="selected-preschool-card">
-            <h2>{selectedPreschool.name}</h2>
-            {selectedPreschool.imageUrl && (
-              <img src={selectedPreschool.imageUrl} alt={selectedPreschool.name} />
-            )}
-            <p>{selectedPreschool.description}</p>
-            <p>Address: {selectedPreschool.vicinity}</p>
-            <p>Rating: {selectedPreschool.rating}</p>
-            <p>User Ratings: {selectedPreschool.user_ratings_total}</p>
-            <SurveyForm /> {/* Lägg till SurveyForm här */}
-            <button className="close-button" onClick={() => setSelectedPreschool(null)}>Stäng</button>
-          </div>
-        )}
+        {nearbyPreschools.map((preschool) => (
+          <PreschoolCard key={preschool.place_id} preschool={preschool} onSelect={handleSelectPreschool} />
+        ))}
       </div>
-      {showDirections && (
-        <div id="right-panel" className="right-panel">
-          <button className="close-button" onClick={closeDirections}>Stäng</button>
+
+      {selectedPreschool && (
+        <div className="selected-preschool-card">
+          <h2>{selectedPreschool.name}</h2>
+          {selectedPreschool.imageUrl && (
+            <img src={selectedPreschool.imageUrl} alt={selectedPreschool.name} />
+          )}
+          <p>{selectedPreschool.description}</p>
+          <p>Address: {selectedPreschool.vicinity}</p>
+          <p>Rating: {selectedPreschool.rating}</p>
+          <p>User Ratings: {selectedPreschool.user_ratings_total}</p>
+          <button className="close-button" onClick={() => setSelectedPreschool(null)}>Stäng</button>
         </div>
       )}
     </div>
