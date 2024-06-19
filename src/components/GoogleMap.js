@@ -1,7 +1,6 @@
 /*global google*/
 import React, { useEffect, useRef, useState } from 'react';
 import PreschoolCard from './PreschoolCard';
-import SurveyForm from './SurveyForm';
 import '../styles/GoogleMap.css';
 
 const GoogleMap = () => {
@@ -11,10 +10,12 @@ const GoogleMap = () => {
   const [infowindow, setInfowindow] = useState(null);
   const [directionsService, setDirectionsService] = useState(null);
   const [directionsRenderer, setDirectionsRenderer] = useState(null);
-  const [nearbyPreschools, setNearbyPreschools] = useState([]);
-  const [selectedPreschool, setSelectedPreschool] = useState(null);
-  const [showPreschools, setShowPreschools] = useState(false);
-  const [showContent, setShowContent] = useState(true);
+  const [nearbyPlaces, setNearbyPlaces] = useState([]);
+  const [selectedPlace, setSelectedPlace] = useState(null);
+  const [showPlaces, setShowPlaces] = useState(false);
+  const [originalPlaces, setOriginalPlaces] = useState([]);
+  const [markers, setMarkers] = useState([]);
+  const [showFilters, setShowFilters] = useState(true); // Set to true to show filters initially
 
   useEffect(() => {
     const initMap = () => {
@@ -60,7 +61,12 @@ const GoogleMap = () => {
   }, []);
 
   const geocodeAddress = () => {
-    const address = document.getElementById('address').value;
+    const address = document.getElementById('address').value.trim();
+    if (!address) {
+      alert('Please enter a valid address.');
+      return;
+    }
+
     geocoder.geocode({ address: address }, (results, status) => {
       if (status === 'OK') {
         map.setCenter(results[0].geometry.location);
@@ -68,28 +74,30 @@ const GoogleMap = () => {
           map: map,
           position: results[0].geometry.location,
         });
-        findNearbyPreschools(results[0].geometry.location);
-        document.querySelector('.content').classList.remove('center');
-        document.querySelector('.content').classList.add('left');
+        findNearbyPlaces(results[0].geometry.location);
+        setShowFilters(true);
       } else {
         alert('Geocode was not successful for the following reason: ' + status);
       }
     });
   };
 
-  const findNearbyPreschools = (location) => {
+  const findNearbyPlaces = (location) => {
     const request = {
       location: location,
-      radius: '2000',
-      keyword: 'förskola',
+      radius: '1000',  // 1 km radius
+      keyword: '(förskola OR dagmamma OR föräldrakooperativ)',
     };
 
     const service = new google.maps.places.PlacesService(map);
     service.nearbySearch(request, (results, status) => {
-      if (status === google.maps.places.PlacesServiceStatus.OK) {
-        setNearbyPreschools(results.slice(0, 5));
-        setShowPreschools(true);
-        results.slice(0, 5).forEach((result) => createMarker(result, location));
+      if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+        const validResults = results.filter(place => place.name);
+        setNearbyPlaces(validResults);
+        setOriginalPlaces(validResults);
+        setShowPlaces(true);
+        clearMarkers();
+        validResults.forEach((result) => createMarker(result, location));
       } else {
         alert('Places API was not successful for the following reason: ' + status);
       }
@@ -109,7 +117,7 @@ const GoogleMap = () => {
       map.setCenter(placeLoc);
       map.setZoom(15);
 
-      setSelectedPreschool({
+      setSelectedPlace({
         name: place.name,
         vicinity: place.vicinity,
         rating: place.rating,
@@ -119,6 +127,13 @@ const GoogleMap = () => {
 
       calculateAndDisplayRoute(origin, placeLoc);
     });
+
+    setMarkers((prevMarkers) => [...prevMarkers, marker]);
+  };
+
+  const clearMarkers = () => {
+    markers.forEach(marker => marker.setMap(null));
+    setMarkers([]);
   };
 
   const calculateAndDisplayRoute = (origin, destination) => {
@@ -137,57 +152,99 @@ const GoogleMap = () => {
     });
   };
 
-  const handleReset = () => {
-    window.location.reload();
+  const handleSelectPlace = (place) => {
+    setSelectedPlace(place);
   };
 
-  const handleSelectPreschool = (preschool) => {
-    setSelectedPreschool(preschool);
+  const filterTopRatedPlaces = () => {
+    if (originalPlaces.length > 0) {
+      const topRatedPlaces = [...originalPlaces].sort((a, b) => b.rating - a.rating).slice(0, 5);
+      setNearbyPlaces(topRatedPlaces);
+      clearMarkers();
+      topRatedPlaces.forEach((place) => createMarker(place, map.getCenter()));
+    } else {
+      alert('No places found to filter.');
+    }
+  };
+
+  const filterNearestPlaces = () => {
+    if (originalPlaces.length > 0) {
+      const nearestPlaces = [...originalPlaces].slice(0, 5);
+      setNearbyPlaces(nearestPlaces);
+      clearMarkers();
+      nearestPlaces.forEach((place) => createMarker(place, map.getCenter()));
+    } else {
+      alert('No places found to filter.');
+    }
+  };
+
+  const handleGetCurrentLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((position) => {
+        const { latitude, longitude } = position.coords;
+        const latlng = new google.maps.LatLng(latitude, longitude);
+
+        geocoder.geocode({ location: latlng }, (results, status) => {
+          if (status === 'OK' && results[0]) {
+            document.getElementById('address').value = results[0].formatted_address;
+            map.setCenter(latlng);
+            new google.maps.Marker({
+              map: map,
+              position: latlng,
+            });
+            findNearbyPlaces(latlng);
+          } else {
+            alert('Geocode was not successful for the following reason: ' + status);
+          }
+        });
+      }, () => {
+        alert('Geolocation failed.');
+      });
+    } else {
+      alert('Geolocation is not supported by this browser.');
+    }
   };
 
   return (
     <div className="app-container">
-      <div ref={mapRef} className="map-container">
-        <div className="map-background"></div>
+      <div ref={mapRef} className="map-container"></div>
+      
+      <div className="search-container">
+        <input id="address" type="text" className="styled-input" placeholder="" defaultValue="Götgatan 45" />
+        <button className="styled-button" onClick={geocodeAddress}>Hitta Förskolor</button>
+        <div className="location-button-container">
+        
       </div>
-
-      <button onClick={() => setShowContent(!showContent)} className="toggle-button">
-        {showContent ? 'Dölj' : 'Visa'} Innehåll
-      </button>
-
-      {showContent && (
-        <div className="content center">
-          <div className="input-container">
-            <input id="address" type="text" className="styled-input" placeholder="Ange din Address" defaultValue="Sergels torg 1, 111 57 Stockholm, Sverige" />
-            <button className="styled-button" onClick={geocodeAddress}>Hitta Förskolor</button>
-            <button className="styled-button" onClick={handleReset}>Återställ Sidan</button>
-            <SurveyForm />
-          </div>
+        
+      </div>
+      {showFilters && (
+        <div className="filter-container">
+          <button className="styled-button filter-button" onClick={filterTopRatedPlaces}>Högst-betyg</button>
+          <button className="styled-button filter-button" onClick={filterNearestPlaces}>Närmast</button>
+          <button className="styled-button filter-button" onClick={handleGetCurrentLocation}>Min-Plats</button>
         </div>
       )}
-
-      <div className={`cards-container ${showPreschools ? 'show' : ''}`}>
-        <button className="close-button" onClick={() => setShowPreschools(false)}>Stäng</button>
-        {showPreschools && (
+      <div className={`cards-container ${showPlaces ? 'show' : ''}`}>
+        <button className="close-button" onClick={() => setShowPlaces(false)}>Stäng</button>
+        {showPlaces && (
           <>
-            <p>Visar de 5 närmsta förskolorna.</p>
-            {nearbyPreschools.map((preschool) => (
-              <PreschoolCard key={preschool.place_id} preschool={preschool} onSelect={handleSelectPreschool} />
+            <p>Visar de {nearbyPlaces.length} närmsta förskolorna.</p>
+            {nearbyPlaces.map((place) => (
+              <PreschoolCard key={place.place_id} preschool={place} onSelect={handleSelectPlace} />
             ))}
           </>
         )}
       </div>
-
-      {selectedPreschool && (
-        <div className="selected-preschool-card">
-          <h2>{selectedPreschool.name}</h2>
-          {selectedPreschool.imageUrl && (
-            <img src={selectedPreschool.imageUrl} alt={selectedPreschool.name} />
+      {selectedPlace && (
+        <div className="selected-place-card">
+          <h2>{selectedPlace.name}</h2>
+          {selectedPlace.imageUrl && (
+            <img src={selectedPlace.imageUrl} alt={selectedPlace.name} />
           )}
-          <p>Address: {selectedPreschool.vicinity}</p>
-          <p>Rating: {selectedPreschool.rating}</p>
-          <p>User Ratings: {selectedPreschool.user_ratings_total}</p>
-          <button className="close-button" onClick={() => setSelectedPreschool(null)}>Stäng</button>
+          <p>Address: {selectedPlace.vicinity}</p>
+          <p>Rating: {selectedPlace.rating}</p>
+          <p>User Ratings: {selectedPlace.user_ratings_total}</p>
+          <button className="close-button" onClick={() => setSelectedPlace(null)}>Stäng</button>
         </div>
       )}
     </div>

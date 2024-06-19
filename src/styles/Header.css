@@ -1,6 +1,6 @@
 .header {
-  
-  
+  height: 200px;
+background-color: rgb(230, 230, 230);
   text-align: center;
   color: white;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -13,13 +13,27 @@
 
 .header-image {
   width: 50%; /* Adjust percentage as needed */
-  max-width: 300px; /* Max width to ensure it's not too large */
-  height: auto;
+  max-width: 600px; /* Max width to ensure it's not too large */
+  height: 200px;
 }
 
 @media (max-width: 768px) {
+  .header {
+  
+    height: 80px;
+    text-align: center;
+    color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-bottom: 3px solid #b5dce7;
+    position: relative;
+    top: 0;
+    z-index: 1;
+    animation: slideIn 1s ease-out;
+  }
+  
   .header-image {
-    width: 80%; /* Adjust percentage for smaller screens */
-    max-width: 200px; /* Max width for smaller screens */
+    width: 50%; /* Adjust percentage as needed */
+    max-width: 600px; /* Max width to ensure it's not too large */
+    height: auto;
   }
 }
