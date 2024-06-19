@@ -1,76 +1,51 @@
-/* App.css */
-
-.styled-input {
-  padding: 10px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  margin-right: 10px;
-  flex: 1;
-  max-width: 300px;
-}
-
-
-
 .preschool-card {
-  background: #ffffff; /* Solid white background */
-  border: 1px solid #e0e0e0; /* Light grey border */
-  border-radius: 8px;
+  width: 300px; /* Fast bredd */
+  height: 400px; /* Fast höjd */
+  border-radius: 15px;
   padding: 20px;
-  margin: 10px;
-  width: 200px; /* Updated width */
-  height: auto; /* Allow height to adjust */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow */
+  margin: 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  text-align: left; /* Left align text */
+  background-color: #f8f9fa; /* Ljusare bakgrund för en fräschare look */
+  border: 1px solid #2dbdc2;
+  color: #333; /* Mjukare textfärg */
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
   display: flex;
-  flex-direction: column;
-  justify-content: space-between; /* Space between elements */
-  align-items: flex-start; /* Align items to the start */
+  flex-direction: column; /* Gör att innehållet i korten är vertikalt arrangerat */
+  justify-content: space-between; /* Ger utrymme mellan elementen */
 }
 
 .preschool-card:hover {
-  background: rgba(255, 255, 255, 0.25); /* Slightly more opaque on hover */
   transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  background-color: #e2f1f3; /* Ljus cyan bakgrund vid hover */
+  border-color: #1ba2a8;
 }
 
-.selected-preschool-card {
-  position: relative;
- 
-  left: 60%;
-  transform: translateX(-50%);
-  max-width: 300px;
-  background: rgba(255, 255, 255, 0.8); /* More opaque white background */
-  padding: 20px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  border-radius: 16px;
-  backdrop-filter: blur(10px); /* Background blur */
-  z-index: 4;
+.preschool-card h2 {
+  margin: 0 0 10px;
+  font-size: 1.8em;
+  color: #2dbdc2; /* Matchar kantfärgen */
 }
 
 .preschool-card p {
-  font-size: 0.7em;
-  color: #333;
+  margin: 10px 0;
+  font-size: 1em;
+  line-height: 1.5;
+  color: #555; /* Mjukare textfärg för bättre läsbarhet */
 }
 
-.preschool-card h3 {
-  font-size: 0.7em;
-  color: #333;
+/* Extra styling för bilder eller ikoner */
+.preschool-card img {
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  margin-bottom: 15px;
 }
 
-.selected-preschool-card img {
-  width: 500px;
-  height: 300px;
-  border-radius: 8px;
+.preschool-card .icon {
+  font-size: 2em;
+  color: #2dbdc2;
+  margin-right: 10px;
 }
-
-.selected-preschool-card h2 {
-  margin-top: 0;
-}
-
-/* Media queries for responsive design */
-
-
-

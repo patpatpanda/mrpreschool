@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import PreschoolCard from './PreschoolCard';
 import '../styles/GoogleMap.css';
+import '../styles/PreschoolCard.css';
 
 const GoogleMap = () => {
   const mapRef = useRef(null);

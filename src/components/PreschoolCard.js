@@ -1,30 +1,43 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import '../styles/PreschoolCard.css';
+import { FaMapMarkerAlt, FaStar, FaUsers } from 'react-icons/fa';
 
 const PreschoolCard = ({ preschool, onSelect }) => {
-  const handleSelect = () => {
-    onSelect(preschool);
-  };
+  if (!preschool) {
+    return null;
+  }
+
+  const { name, vicinity, rating, user_ratings_total } = preschool;
 
   return (
-    <div className="preschool-card" onClick={handleSelect}>
-      <h3>{preschool.name}</h3>
-      <p>{preschool.vicinity}</p>
-      {preschool.rating && <p>Rating: {preschool.rating}</p>}
-      {preschool.user_ratings_total && <p>User Ratings: {preschool.user_ratings_total}</p>}
+    <div className="preschool-card" onClick={() => onSelect(preschool)}>
+      <h2>{name || 'Namn saknas'}</h2>
+      <div className="preschool-info">
+        <div className="info-item">
+          <FaMapMarkerAlt className="icon" />
+          <p>{vicinity || 'Adress saknas'}</p>
+        </div>
+        <div className="info-item">
+          <FaStar className="icon" />
+          <p>{rating || 'Betyg saknas'}</p>
+        </div>
+        <div className="info-item">
+          <FaUsers className="icon" />
+          <p>{user_ratings_total || 'Inga betyg'}</p>
+        </div>
+      </div>
     </div>
   );
 };
 
 PreschoolCard.propTypes = {
   preschool: PropTypes.shape({
-    name: PropTypes.string.isRequired,
-    place_id: PropTypes.string.isRequired,
-    vicinity: PropTypes.string.isRequired,
+    name: PropTypes.string,
+    vicinity: PropTypes.string,
     rating: PropTypes.number,
     user_ratings_total: PropTypes.number,
-  }).isRequired,
+  }),
   onSelect: PropTypes.func.isRequired,
 };
 
