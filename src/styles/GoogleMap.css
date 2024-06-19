@@ -111,14 +111,14 @@
 }
 
 .cards-container {
-  display: none;
+  display: flex; /* Ensure cards-container is visible initially */
   flex-direction: column;
   align-items: center;
   position: absolute;
   bottom: 0;
   margin-top: 100px; /* Adds space above the cards */
   width: 100%;
-  max-height: 20%;
+  max-height: 35%;
   overflow-y: auto;
   background-color: white;
   border-radius: 10px 10px 0 0;
@@ -132,13 +132,16 @@
   max-height: 90%;
 }
 
-
 .cards-container.show {
   display: flex;
 }
 
+.cards-container.hidden {
+  display: none;
+}
+
 .close-button {
-  left:20%;
+  left: 20%;
   padding: 5px 10px;
   background-color: #dc3545;
   color: white;
@@ -148,6 +151,25 @@
   margin-bottom: 10px;
   position: fixed;
   z-index: 4;
+}
+
+.show-button {
+  display: none; /* Hide initially */
+  padding: 15px 25px;
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 10px;
+  position: fixed;
+  bottom: 20px;
+  z-index: 4;
+  margin-bottom: 40px;
+}
+
+.cards-container.hidden + .show-button {
+  display: block; /* Show when cards-container is hidden */
 }
 
 .selected-preschool-card {
@@ -173,9 +195,10 @@
     width: 200px;
   }
 }
-@media (max-width: 12000px) {
+
+@media (min-width: 1200px) {
   .cards-container {
-    display: none;
+    display: flex; /* Ensure cards-container is visible initially */
     flex-direction: column;
     align-items: center;
     position: absolute;
@@ -191,5 +214,4 @@
     z-index: 2;
     transition: max-height 0.3s ease;
   }
-  
 }
