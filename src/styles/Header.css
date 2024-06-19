@@ -20,7 +20,7 @@ background-color: rgb(230, 230, 230);
 @media (max-width: 768px) {
   .header {
   
-    height: 80px;
+    height: 90px;
     text-align: center;
     color: white;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -32,7 +32,7 @@ background-color: rgb(230, 230, 230);
   }
   
   .header-image {
-    width: 50%; /* Adjust percentage as needed */
+    width: 60%; /* Adjust percentage as needed */
     max-width: 600px; /* Max width to ensure it's not too large */
     height: auto;
   }

@@ -17,6 +17,7 @@ const GoogleMap = () => {
   const [originalPlaces, setOriginalPlaces] = useState([]);
   const [markers, setMarkers] = useState([]);
   const [showFilters, setShowFilters] = useState(true); // Set to true to show filters initially
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
     const initMap = () => {
@@ -99,6 +100,7 @@ const GoogleMap = () => {
         setShowPlaces(true);
         clearMarkers();
         validResults.forEach((result) => createMarker(result, location));
+        fitMapToMarkers(validResults);
       } else {
         alert('Places API was not successful for the following reason: ' + status);
       }
@@ -132,6 +134,14 @@ const GoogleMap = () => {
     setMarkers((prevMarkers) => [...prevMarkers, marker]);
   };
 
+  const fitMapToMarkers = (places) => {
+    const bounds = new google.maps.LatLngBounds();
+    places.forEach((place) => {
+      bounds.extend(place.geometry.location);
+    });
+    map.fitBounds(bounds);
+  };
+
   const clearMarkers = () => {
     markers.forEach(marker => marker.setMap(null));
     setMarkers([]);
@@ -163,6 +173,7 @@ const GoogleMap = () => {
       setNearbyPlaces(topRatedPlaces);
       clearMarkers();
       topRatedPlaces.forEach((place) => createMarker(place, map.getCenter()));
+      fitMapToMarkers(topRatedPlaces);
     } else {
       alert('No places found to filter.');
     }
@@ -174,6 +185,7 @@ const GoogleMap = () => {
       setNearbyPlaces(nearestPlaces);
       clearMarkers();
       nearestPlaces.forEach((place) => createMarker(place, map.getCenter()));
+      fitMapToMarkers(nearestPlaces);
     } else {
       alert('No places found to filter.');
     }
@@ -206,6 +218,10 @@ const GoogleMap = () => {
     }
   };
 
+  const toggleExpand = () => {
+    setExpanded(!expanded);
+  };
+
   return (
     <div className="app-container">
       <div ref={mapRef} className="map-container"></div>
@@ -225,11 +241,14 @@ const GoogleMap = () => {
           <button className="styled-button filter-button" onClick={handleGetCurrentLocation}>Min-Plats</button>
         </div>
       )}
-      <div className={`cards-container ${showPlaces ? 'show' : ''}`}>
+      <div className={`cards-container ${showPlaces ? 'show' : ''} ${expanded ? 'expanded' : ''}`}>
         <button className="close-button" onClick={() => setShowPlaces(false)}>Stäng</button>
+        <button className="expand-button" onClick={toggleExpand}>
+          {expanded ? 'Minska' : 'Utöka'}
+        </button>
         {showPlaces && (
           <>
-            <p>Visar de {nearbyPlaces.length} närmsta förskolorna.</p>
+           
             {nearbyPlaces.map((place) => (
               <PreschoolCard key={place.place_id} preschool={place} onSelect={handleSelectPlace} />
             ))}
@@ -245,7 +264,7 @@ const GoogleMap = () => {
           <p>Address: {selectedPlace.vicinity}</p>
           <p>Rating: {selectedPlace.rating}</p>
           <p>User Ratings: {selectedPlace.user_ratings_total}</p>
-          <button className="close-button" onClick={() => setSelectedPlace(null)}>Stäng</button>
+          
         </div>
       )}
     </div>
