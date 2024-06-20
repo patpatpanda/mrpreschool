@@ -115,7 +115,7 @@ const GoogleMap = () => {
   const findNearbyPlaces = (location) => {
     const request = {
       location: location,
-      radius: '1000', // 1 km radius
+      radius: '2000', // 2 km radius
       keyword: '(förskola OR dagmamma OR Förskolan)',
     };
 
@@ -326,7 +326,7 @@ const GoogleMap = () => {
         <button className="close-button" onClick={toggleHide}>
           {isHidden ? 'Visa' : 'Dölj'}
         </button>
-        <button className="expand-button" onClick={toggleExpand}>
+        <button className="styled-button-2" onClick={toggleExpand}>
           {expanded ? 'Minska' : 'Utöka'}
         </button>
         {showPlaces && !isHidden && (
