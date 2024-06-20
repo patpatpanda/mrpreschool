@@ -109,7 +109,15 @@
   color: white;
   border-color: #1581ac;
 }
-
+.drag-handle {
+  cursor: move;
+  background: #eee;
+  padding: 10px;
+  text-align: center;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  z-index: 1001; /* Ensure it is above other elements */
+}
 .cards-container {
   display: flex; /* Ensure cards-container is visible initially */
   flex-direction: column;
@@ -124,7 +132,7 @@
   border-radius: 10px 10px 0 0;
   box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.3);
   padding: 10px;
-  z-index: 2;
+  z-index: 1000;
   transition: max-height 0.3s ease;
 }
 

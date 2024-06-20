@@ -20,6 +20,11 @@ const MapContainer = ({
   setOriginalPlaces,
   nearbyPlaces,
   setNearbyPlaces,
+  createMarker,
+  findNearbyPlaces,
+  fitMapToMarkers,
+  clearMarkers,
+  calculateAndDisplayRoute,
 }) => {
 
   useEffect(() => {
@@ -65,117 +70,6 @@ const MapContainer = ({
     }
   }, [mapRef, setMap, setGeocoder, setInfowindow, setDirectionsService, setDirectionsRenderer]);
 
-  const createMarker = (place, origin) => {
-    const placeLoc = place.geometry.location;
-    const marker = new google.maps.Marker({
-      map: map,
-      position: placeLoc,
-    });
-
-    marker.addListener('click', () => {
-      infowindow.setContent(place.name);
-      infowindow.open(map, marker);
-      map.setCenter(placeLoc);
-      map.setZoom(15);
-
-      setSelectedPlace({
-        name: place.name,
-        vicinity: place.vicinity,
-        rating: place.rating,
-        user_ratings_total: place.user_ratings_total,
-        place_id: place.place_id,
-      });
-
-      if (markers.length === 1) {
-        const originLocation = markers[0].getPosition();
-        const distance = google.maps.geometry.spherical.computeDistanceBetween(
-          originLocation,
-          placeLoc
-        );
-        setDistanceBetweenPlaces(distance);
-      }
-
-      calculateAndDisplayRoute(origin, placeLoc);
-    });
-
-    setMarkers((prevMarkers) => [...prevMarkers, marker]);
-  };
-
-  const findNearbyPlaces = (location) => {
-    const request = {
-      location: location,
-      radius: '1000', // 1 km radius
-      keyword: '(förskola OR dagmamma OR Förskolan)',
-    };
-
-    const service = new google.maps.places.PlacesService(map);
-    service.nearbySearch(request, (results, status) => {
-      if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-        // Filtrera bort oönskade resultat baserat på namnet
-        const validResults = results.filter(
-          (place) =>
-            place.name.toLowerCase().includes('förskola') ||
-            place.name.toLowerCase().includes('dagmamma') ||
-            place.name.toLowerCase().includes('förskolan') ||
-            place.name.toLowerCase().includes('montessoriförskolan tellus') ||
-            place.name.toLowerCase().includes('daghemmet blå huset') ||
-            place.name.toLowerCase().includes('kastanjegården') ||
-            place.name.toLowerCase().includes('storken montessoriförskola') ||
-            place.name.toLowerCase().includes('daghemmet haga')
-        );
-
-        // Calculate distances
-        const resultsWithDistances = validResults.map((place) => {
-          const distance = google.maps.geometry.spherical.computeDistanceBetween(
-            location,
-            place.geometry.location
-          );
-          return { ...place, distance };
-        });
-
-        setNearbyPlaces(resultsWithDistances);
-        setOriginalPlaces(resultsWithDistances);
-        setShowPlaces(true);
-        clearMarkers();
-        resultsWithDistances.forEach((result) => createMarker(result, location));
-        fitMapToMarkers(resultsWithDistances);
-        resultsWithDistances.forEach((place) => fetchSurveyResponses(place.name)); // Fetch survey responses
-      } else {
-        alert('Places API was not successful for the following reason: ' + status);
-      }
-    });
-  };
-
-  const fitMapToMarkers = (places) => {
-    const bounds = new google.maps.LatLngBounds();
-    places.forEach((place) => {
-      bounds.extend(place.geometry.location);
-    });
-    map.fitBounds(bounds);
-  };
-
-  const clearMarkers = () => {
-    markers.forEach((marker) => marker.setMap(null));
-    setMarkers([]);
-    setDistanceBetweenPlaces(null);
-  };
-
-  const calculateAndDisplayRoute = (origin, destination) => {
-    const request = {
-      origin: origin,
-      destination: destination,
-      travelMode: 'WALKING',
-    };
-    directionsService.route(request, (result, status) => {
-      if (status === 'OK') {
-        directionsRenderer.setDirections(result);
-        directionsRenderer.setMap(map);
-      } else {
-        alert('Directions request failed due to ' + status);
-      }
-    });
-  };
-
   return <div ref={mapRef} className="map-container"></div>;
 };
 
@@ -197,6 +91,11 @@ MapContainer.propTypes = {
   setOriginalPlaces: PropTypes.func.isRequired,
   nearbyPlaces: PropTypes.array.isRequired,
   setNearbyPlaces: PropTypes.func.isRequired,
+  createMarker: PropTypes.func.isRequired,
+  findNearbyPlaces: PropTypes.func.isRequired,
+  fitMapToMarkers: PropTypes.func.isRequired,
+  clearMarkers: PropTypes.func.isRequired,
+  calculateAndDisplayRoute: PropTypes.func.isRequired,
 };
 
 export default MapContainer;
