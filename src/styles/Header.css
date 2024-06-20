@@ -1,6 +1,6 @@
 .header {
   height: 200px;
-background-color: rgb(230, 230, 230);
+  background-color: #17bcc2;
   text-align: center;
   color: white;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -20,7 +20,7 @@ background-color: rgb(230, 230, 230);
 @media (max-width: 768px) {
   .header {
   
-    height: 90px;
+    height: 100px;
     text-align: center;
     color: white;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
