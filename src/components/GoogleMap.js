@@ -4,6 +4,7 @@ import PreschoolCard from './PreschoolCard';
 import '../styles/GoogleMap.css';
 import '../styles/PreschoolCard.css';
 import axios from 'axios';
+import Draggable from 'react-draggable';
 
 const GoogleMap = () => {
   const mapRef = useRef(null);
@@ -18,10 +19,10 @@ const GoogleMap = () => {
   const [originalPlaces, setOriginalPlaces] = useState([]);
   const [markers, setMarkers] = useState([]);
   const [showFilters, setShowFilters] = useState(true);
-  const [expanded, setExpanded] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
   const [surveyResponses, setSurveyResponses] = useState({});
   const [distanceBetweenPlaces, setDistanceBetweenPlaces] = useState(null);
+  const [containerHeight, setContainerHeight] = useState(10); // Initial height in percentage
 
   const apiUrl = process.env.REACT_APP_API_URL || 'https://masterkinder20240523125154.azurewebsites.net/api';
 
@@ -68,22 +69,21 @@ const GoogleMap = () => {
     }
   }, []);
 
- const fetchSurveyResponses = async (placeName) => {
-  try {
-    const response = await axios.post(`${apiUrl}/survey/response-percentages`, {
-      selectedQuestion: 'Jag är som helhet nöjd med mitt barns förskola',
-      selectedForskoleverksamhet: placeName,
-    });
-    const { responsePercentages, totalResponses } = response.data;
-    setSurveyResponses((prev) => ({ 
-      ...prev, 
-      [placeName]: { responsePercentages, totalResponses }
-    }));
-  } catch (error) {
-    console.error('There was an error fetching the survey responses!', error);
-  }
-};
-
+  const fetchSurveyResponses = async (placeName) => {
+    try {
+      const response = await axios.post(`${apiUrl}/survey/response-percentages`, {
+        selectedQuestion: 'Jag är som helhet nöjd med mitt barns förskola',
+        selectedForskoleverksamhet: placeName,
+      });
+      const { responsePercentages, totalResponses } = response.data;
+      setSurveyResponses((prev) => ({ 
+        ...prev, 
+        [placeName]: { responsePercentages, totalResponses }
+      }));
+    } catch (error) {
+      console.error('There was an error fetching the survey responses!', error);
+    }
+  };
 
   const geocodeAddress = () => {
     const address = document.getElementById('address').value.trim();
@@ -290,12 +290,20 @@ const GoogleMap = () => {
     }
   };
 
-  const toggleExpand = () => {
-    setExpanded(!expanded);
-  };
-
   const toggleHide = () => {
     setIsHidden(!isHidden);
+  };
+
+  const handleDrag = (e, data) => {
+    // Calculate new container height based on the drag position
+    const newHeight = Math.max(10, Math.min(90, containerHeight + (data.deltaY / window.innerHeight) * 100));
+    setContainerHeight(newHeight);
+  };
+
+  const handleStop = (e, data) => {
+    // Ensure the container height is within the allowed bounds
+    const newHeight = Math.max(10, Math.min(90, containerHeight + (data.deltaY / window.innerHeight) * 100));
+    setContainerHeight(newHeight);
   };
 
   return (
@@ -305,7 +313,6 @@ const GoogleMap = () => {
       <div className="search-container">
         <input id="address" type="text" className="styled-input" placeholder="Ange Address" defaultValue="Götgatan 45" />
         <button className="styled-button" onClick={geocodeAddress}>Hitta Förskolor</button>
-        <div className="location-button-container"></div>
       </div>
 
       {showFilters && (
@@ -322,26 +329,30 @@ const GoogleMap = () => {
         </div>
       )}
 
-      <div className={`cards-container ${showPlaces && !isHidden ? 'show' : 'hidden'} ${expanded ? 'expanded' : ''}`}>
-        <button className="close-button" onClick={toggleHide}>
-          {isHidden ? 'Visa' : 'Dölj'}
-        </button>
-        <button className="styled-button-2" onClick={toggleExpand}>
-          {expanded ? 'Minska' : 'Utöka'}
-        </button>
-        {showPlaces && !isHidden && (
-          <>
-            {nearbyPlaces.map((place) => (
-              <PreschoolCard
-                key={place.place_id}
-                preschool={place}
-                onSelect={handleSelectPlace}
-                surveyResponses={surveyResponses[place.name] || {}}
-              />
-            ))}
-          </>
-        )}
-      </div>
+      <Draggable axis="y" onDrag={handleDrag} onStop={handleStop}>
+        <div className={`cards-container ${showPlaces && !isHidden ? 'show' : 'hidden'}`} style={{ height: `${containerHeight}%` }}>
+          <button className="close-button" onClick={toggleHide}>
+            {isHidden ? 'Visa' : 'Dölj'}
+          </button>
+
+          <div className="drag-handle">
+            Drag
+          </div>
+
+          {showPlaces && !isHidden && (
+            <>
+              {nearbyPlaces.map((place) => (
+                <PreschoolCard
+                  key={place.place_id}
+                  preschool={place}
+                  onSelect={handleSelectPlace}
+                  surveyResponses={surveyResponses[place.name] || {}}
+                />
+              ))}
+            </>
+          )}
+        </div>
+      </Draggable>
 
       {isHidden && (
         <button className="show-button" onClick={toggleHide}>

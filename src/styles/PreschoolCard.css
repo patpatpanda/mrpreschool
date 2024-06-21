@@ -1,42 +1,41 @@
 .preschool-card {
-  width: 300px; /* Fast bredd */
-  height: 440px; /* Fast höjd */
+  width: 300px;
+  height: 440px;
   border-radius: 15px;
   padding: 20px;
   margin: 15px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s, box-shadow 0.3s;
   cursor: pointer;
-  background-color: #f8f9fa; /* Ljusare bakgrund för en fräschare look */
+  background-color: #f8f9fa;
   border: 1px solid #2dbdc2;
-  color: #333; /* Mjukare textfärg */
+  color: #333;
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
   display: flex;
-  flex-direction: column; /* Gör att innehållet i korten är vertikalt arrangerat */
-  justify-content: space-between; /* Ger utrymme mellan elementen */
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .preschool-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-  background-color: #e2f1f3; /* Ljus cyan bakgrund vid hover */
+  background-color: #e2f1f3;
   border-color: #1ba2a8;
 }
 
 .preschool-card h2 {
   margin: 0 0 10px;
   font-size: 1.8em;
-  color: #2dbdc2; /* Matchar kantfärgen */
+  color: #2dbdc2;
 }
 
 .preschool-card p {
   margin: 10px 0;
   font-size: 1em;
   line-height: 1.5;
-  color: #555; /* Mjukare textfärg för bättre läsbarhet */
+  color: #555;
 }
 
-/* Extra styling för bilder eller ikoner */
 .preschool-card img {
   width: 100%;
   height: auto;
