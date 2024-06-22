@@ -4,17 +4,8 @@ import '../styles/PreschoolCard.css';
 import { FaMapMarkerAlt } from 'react-icons/fa';
 
 const PreschoolCard = ({ preschool, onSelect, surveyResponses }) => {
-  if (!preschool) {
-    return null;
-  }
-
   const { name, vicinity } = preschool;
-  const { responsePercentages, totalResponses } = surveyResponses || {};
-
-  // Filtrera bort svar med 0%
-  const filteredResponses = responsePercentages
-    ? Object.entries(responsePercentages).filter(([response, percentage]) => percentage > 0)
-    : [];
+  const { totalResponses, helhetsomdome, svarsfrekvens, antalBarn } = surveyResponses || {};
 
   return (
     <div className="preschool-card" onClick={() => onSelect(preschool)}>
@@ -26,20 +17,15 @@ const PreschoolCard = ({ preschool, onSelect, surveyResponses }) => {
         </div>
       </div>
       <div className="survey-results">
-        <h3>Är du nöjd med din förskola?</h3>
-        {totalResponses !== undefined && (
-          <p>Totalt antal svar: {totalResponses}</p>
-        )}
-        {filteredResponses.length > 0 ? (
-          <ul>
-            {filteredResponses.map(([response, percentage]) => (
-              <li key={response}>
-                {response}: {percentage.toFixed(2)}%
-              </li>
-            ))}
-          </ul>
+        {surveyResponses ? (
+          <>
+            <p><strong>Helhetsomdöme:</strong> {helhetsomdome?.toFixed(2) || 'N/A'}%</p>
+            <p><strong>Totalt antal svar:</strong> {totalResponses || 'N/A'}</p>
+            <p><strong>Svarsfrekvens:</strong> {svarsfrekvens?.toFixed(2) || 'N/A'}%</p>
+            <p><strong>Antal barn på förskolan:</strong> {antalBarn || 'N/A'}</p>
+          </>
         ) : (
-          <p>Inga undersökningssvar tillgängliga</p>
+          <p>Ingen data tillgänglig</p>
         )}
       </div>
     </div>
@@ -50,9 +36,14 @@ PreschoolCard.propTypes = {
   preschool: PropTypes.shape({
     name: PropTypes.string,
     vicinity: PropTypes.string,
-  }),
+  }).isRequired,
   onSelect: PropTypes.func.isRequired,
-  surveyResponses: PropTypes.object,
+  surveyResponses: PropTypes.shape({
+    totalResponses: PropTypes.number,
+    helhetsomdome: PropTypes.number,
+    svarsfrekvens: PropTypes.number,
+    antalBarn: PropTypes.number,
+  }),
 };
 
 export default PreschoolCard;

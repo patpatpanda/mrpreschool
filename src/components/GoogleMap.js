@@ -4,10 +4,10 @@ import PreschoolCard from './PreschoolCard';
 import '../styles/GoogleMap.css';
 import '../styles/PreschoolCard.css';
 import axios from 'axios';
-import Draggable from 'react-draggable';
 
 const GoogleMap = () => {
   const mapRef = useRef(null);
+  const cardsContainerRef = useRef(null);
   const [map, setMap] = useState(null);
   const [geocoder, setGeocoder] = useState(null);
   const [infowindow, setInfowindow] = useState(null);
@@ -19,10 +19,14 @@ const GoogleMap = () => {
   const [originalPlaces, setOriginalPlaces] = useState([]);
   const [markers, setMarkers] = useState([]);
   const [showFilters, setShowFilters] = useState(true);
+  const [expanded, setExpanded] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
   const [surveyResponses, setSurveyResponses] = useState({});
   const [distanceBetweenPlaces, setDistanceBetweenPlaces] = useState(null);
-  const [containerHeight, setContainerHeight] = useState(10); // Initial height in percentage
+
+  const [isDragging, setIsDragging] = useState(false);
+  const [startY, setStartY] = useState(0);
+  const [scrollTop, setScrollTop] = useState(0);
 
   const apiUrl = process.env.REACT_APP_API_URL || 'https://masterkinder20240523125154.azurewebsites.net/api';
 
@@ -71,15 +75,19 @@ const GoogleMap = () => {
 
   const fetchSurveyResponses = async (placeName) => {
     try {
-      const response = await axios.post(`${apiUrl}/survey/response-percentages`, {
-        selectedQuestion: 'Jag är som helhet nöjd med mitt barns förskola',
-        selectedForskoleverksamhet: placeName,
-      });
-      const { responsePercentages, totalResponses } = response.data;
-      setSurveyResponses((prev) => ({ 
-        ...prev, 
-        [placeName]: { responsePercentages, totalResponses }
-      }));
+      const response = await axios.get(`${apiUrl}/schools/details/google/${placeName}`);
+      if (response.data) {
+        const { helhetsomdome, totalResponses, svarsfrekvens, antalBarn } = response.data;
+
+        console.log(`Data for ${placeName}:`, response.data);
+
+        setSurveyResponses((prev) => ({
+          ...prev,
+          [placeName]: { helhetsomdome, totalResponses, svarsfrekvens, antalBarn }
+        }));
+      } else {
+        console.log(`No data found for ${placeName}`);
+      }
     } catch (error) {
       console.error('There was an error fetching the survey responses!', error);
     }
@@ -150,7 +158,7 @@ const GoogleMap = () => {
         clearMarkers();
         resultsWithDistances.forEach((result) => createMarker(result, location));
         fitMapToMarkers(resultsWithDistances);
-        resultsWithDistances.forEach((place) => fetchSurveyResponses(place.name)); // Fetch survey responses
+        resultsWithDistances.forEach((place) => fetchSurveyResponses(place.name)); // Fetch survey responses using place name
       } else {
         alert('Places API was not successful for the following reason: ' + status);
       }
@@ -232,8 +240,8 @@ const GoogleMap = () => {
       const topRatedPlaces = [...originalPlaces].sort((a, b) => {
         const aResponses = surveyResponses[a.name] || {};
         const bResponses = surveyResponses[b.name] || {};
-        const aRating = aResponses['Instämmer helt'] || 0;
-        const bRating = bResponses['Instämmer helt'] || 0;
+        const aRating = aResponses.helhetsomdome || 0;
+        const bRating = bResponses.helhetsomdome || 0;
         return bRating - aRating;
       }).slice(0, 5);
       setNearbyPlaces(topRatedPlaces);
@@ -290,21 +298,39 @@ const GoogleMap = () => {
     }
   };
 
+  const toggleExpand = () => {
+    setExpanded(!expanded);
+  };
+
   const toggleHide = () => {
     setIsHidden(!isHidden);
   };
 
-  const handleDrag = (e, data) => {
-    // Calculate new container height based on the drag position
-    const newHeight = Math.max(10, Math.min(90, containerHeight + (data.deltaY / window.innerHeight) * 100));
-    setContainerHeight(newHeight);
+  const handleMouseDown = (e) => {
+    setIsDragging(true);
+    setStartY(e.clientY);
+    setScrollTop(cardsContainerRef.current.scrollTop);
   };
 
-  const handleStop = (e, data) => {
-    // Ensure the container height is within the allowed bounds
-    const newHeight = Math.max(10, Math.min(90, containerHeight + (data.deltaY / window.innerHeight) * 100));
-    setContainerHeight(newHeight);
+  const handleMouseMove = (e) => {
+    if (!isDragging) return;
+    const dy = e.clientY - startY;
+    cardsContainerRef.current.scrollTop = scrollTop - dy;
   };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging]);
 
   return (
     <div className="app-container">
@@ -313,6 +339,7 @@ const GoogleMap = () => {
       <div className="search-container">
         <input id="address" type="text" className="styled-input" placeholder="Ange Address" defaultValue="Götgatan 45" />
         <button className="styled-button" onClick={geocodeAddress}>Hitta Förskolor</button>
+        <div className="location-button-container"></div>
       </div>
 
       {showFilters && (
@@ -329,30 +356,31 @@ const GoogleMap = () => {
         </div>
       )}
 
-      <Draggable axis="y" onDrag={handleDrag} onStop={handleStop}>
-        <div className={`cards-container ${showPlaces && !isHidden ? 'show' : 'hidden'}`} style={{ height: `${containerHeight}%` }}>
-          <button className="close-button" onClick={toggleHide}>
-            {isHidden ? 'Visa' : 'Dölj'}
-          </button>
-
-          <div className="drag-handle">
-            Drag
-          </div>
-
-          {showPlaces && !isHidden && (
-            <>
-              {nearbyPlaces.map((place) => (
-                <PreschoolCard
-                  key={place.place_id}
-                  preschool={place}
-                  onSelect={handleSelectPlace}
-                  surveyResponses={surveyResponses[place.name] || {}}
-                />
-              ))}
-            </>
-          )}
-        </div>
-      </Draggable>
+      <div
+        ref={cardsContainerRef}
+        className={`cards-container ${showPlaces && !isHidden ? 'show' : 'hidden'} ${expanded ? 'expanded' : ''}`}
+        onMouseDown={handleMouseDown}
+        style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+      >
+        <button className="close-button" onClick={toggleHide}>
+          {isHidden ? 'Visa' : 'Dölj'}
+        </button>
+        <button className="styled-button-2" onClick={toggleExpand}>
+          {expanded ? 'Minska' : 'Utöka'}
+        </button>
+        {showPlaces && !isHidden && (
+          <>
+            {nearbyPlaces.map((place) => (
+              <PreschoolCard
+                key={place.place_id}
+                preschool={place}
+                onSelect={handleSelectPlace}
+                surveyResponses={surveyResponses[place.name] || null}
+              />
+            ))}
+          </>
+        )}
+      </div>
 
       {isHidden && (
         <button className="show-button" onClick={toggleHide}>
@@ -367,6 +395,14 @@ const GoogleMap = () => {
           <p>Address: {selectedPlace.vicinity}</p>
           <p>Rating: {selectedPlace.rating}</p>
           <p>User Ratings: {selectedPlace.user_ratings_total}</p>
+          {surveyResponses[selectedPlace.name] && (
+            <div>
+              <p><strong>Helhetsomdöme:</strong> {surveyResponses[selectedPlace.name].helhetsomdome}%</p>
+              <p><strong>Totalt antal svar:</strong> {surveyResponses[selectedPlace.name].totalResponses}</p>
+              <p><strong>Svarsfrekvens:</strong> {surveyResponses[selectedPlace.name].svarsfrekvens}%</p>
+              <p><strong>Antal barn på förskolan:</strong> {surveyResponses[selectedPlace.name].antalBarn}</p>
+            </div>
+          )}
         </div>
       )}
 

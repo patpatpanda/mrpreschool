@@ -1,12 +1,12 @@
 .preschool-card {
   width: 300px;
-  height: 440px;
+  height: 300px;
   border-radius: 15px;
   padding: 20px;
   margin: 15px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s, box-shadow 0.3s;
-  cursor: pointer;
+  
   background-color: #f8f9fa;
   border: 1px solid #2dbdc2;
   color: #333;
