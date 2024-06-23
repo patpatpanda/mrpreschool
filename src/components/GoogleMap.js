@@ -1,4 +1,5 @@
 /*global google*/
+
 import React, { useEffect, useRef, useState } from 'react';
 import PreschoolCard from './PreschoolCard';
 import DetailedCard from './DetailedCard';
@@ -71,20 +72,21 @@ const GoogleMap = () => {
 
   const fetchSchoolDetailsByGoogleName = async (placeAddress) => {
     try {
-        const addressParts = placeAddress.split(',');
-        const addressWithoutCity = addressParts[0].trim();
-        const encodedAddress = encodeURIComponent(addressWithoutCity);
-        
-        const url = `${apiUrl}/schools/details/google/${encodedAddress}`;
-        console.log(`Fetching details for ${encodedAddress} from ${url}`);
-        const response = await axios.get(url);
-        console.log(`Fetched details for ${encodedAddress}:`, response.data);
-        return response.data;
+      const encodedAddress = encodeURIComponent(placeAddress);
+      const url = `${apiUrl}/schools/details/google/${encodedAddress}`;
+      const response = await axios.get(url);
+  
+      // Add a console log to check the response
+      console.log('API response:', response.data);
+  
+      return response.data;
     } catch (error) {
-        console.error('There was an error fetching the school details!', error);
-        return null;
+      console.error('Error fetching school details:', error);
+      return null;
     }
   };
+  
+  
 
   const geocodeAddress = () => {
     const address = document.getElementById('address').value.trim();
@@ -119,7 +121,7 @@ const GoogleMap = () => {
       radius: '2000',
       keyword: '(förskola OR dagmamma OR Förskolan)',
     };
-  
+
     const service = new google.maps.places.PlacesService(map);
     service.nearbySearch(request, (results, status) => {
       if (status === google.maps.places.PlacesServiceStatus.OK && results) {
@@ -134,7 +136,7 @@ const GoogleMap = () => {
             place.name.toLowerCase().includes('storken montessoriförskola') ||
             place.name.toLowerCase().includes('daghemmet haga')
         );
-  
+
         const resultsWithDistances = validResults.map((place) => {
           const distance = google.maps.geometry.spherical.computeDistanceBetween(
             location,
@@ -142,7 +144,7 @@ const GoogleMap = () => {
           );
           return { ...place, distance };
         });
-  
+
         setNearbyPlaces(resultsWithDistances);
         setOriginalPlaces(resultsWithDistances);
         setShowPlaces(true);
@@ -335,6 +337,7 @@ const GoogleMap = () => {
                 key={place.place_id}
                 preschool={place}
                 onSelect={handleSelectPlace}
+                surveyResponses={surveyResponses[place.name] || {}}
               />
             ))}
           </>

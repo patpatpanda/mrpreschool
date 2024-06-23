@@ -27,6 +27,23 @@ const DetailedCard = ({ schoolData, onClose }) => {
       <p>Mål och vision: {schoolData.goalsAndVisionDescription}</p>
       <p>Inriktning och profil: {schoolData.orientationAndProfile}</p>
       <p>Tillgänglighet: {schoolData.accessibility}</p>
+
+      <h3>Responsdata</h3>
+      {schoolData.responses && schoolData.responses.length > 0 ? (
+        <ul>
+          {schoolData.responses.map(response => (
+            <li key={response.responseId}>
+              <p><strong>Kategori:</strong> {response.category}</p>
+              <p><strong>Fråga:</strong> {response.question}</p>
+              <p><strong>Procent:</strong> {response.percentage}%</p>
+              <p><strong>År:</strong> {response.year}</p>
+              {response.gender && <p><strong>Kön:</strong> {response.gender}</p>}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>Ingen responsdata tillgänglig</p>
+      )}
     </div>
   );
 };

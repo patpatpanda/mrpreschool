@@ -127,10 +127,9 @@ body {
   border-radius: 10px 10px 0 0;
   box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.3);
   padding: 10px;
- z-index: 1000;
+  z-index: 1000;
   transition: max-height 0.3s ease;
   padding-bottom: 100px;
-  
 }
 
 .cards-container.expanded {
@@ -205,6 +204,62 @@ body {
   z-index: 2;
 }
 
+@media (max-width: 600px) {
+  .search-container {
+    flex-direction: column;
+    width: 90%;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .styled-input {
+    width: 100%;
+    border-radius: 5px 5px 0 0;
+    margin-right: 0;
+    margin-bottom: 5px;
+  }
+
+  .styled-button {
+    width: 100%;
+    border-radius: 0 0 5px 5px;
+  }
+
+  .filter-container {
+    flex-direction: column;
+    top: 120px;
+    gap: 5px;
+  }
+
+  .filter-button {
+    width: 100%;
+    padding: 10px;
+  }
+
+  .cards-container {
+    max-height: 50%;
+    padding-bottom: 50px;
+  }
+
+  .cards-container.expanded {
+    max-height: 90%;
+    padding-bottom: 50px;
+  }
+
+  .close-button {
+    margin-top: 20px;
+    margin-bottom: 10px;
+  }
+
+  .styled-button-2 {
+    margin-top: 20px;
+  }
+
+  .selected-preschool-card {
+    width: 90%;
+  }
+}
+
 @media (min-width: 1400px) {
   .styled-button-2 {
     margin-left: 600px;
@@ -217,7 +272,7 @@ body {
     z-index: 20000;
     position: fixed;
   }
-  
+
   .close-button {
     margin-left: 600px;
     margin-top: 100px;
@@ -231,6 +286,7 @@ body {
     position: fixed;
     z-index: 4;
   }
+
   .cards-container {
     display: flex; /* Ensure cards-container is visible initially */
     flex-direction: column;
@@ -244,15 +300,12 @@ body {
     border-radius: 10px 10px 0 0;
     box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.3);
     padding: 10px;
-   
     transition: max-height 0.3s ease;
     padding-bottom: 200px;
-    
   }
-  
+
   .cards-container.expanded {
     max-height: 75%;
     padding-bottom: 200px; /* Add padding-bottom to ensure last card is visible */
   }
-  
 }
