@@ -1,49 +1,45 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import '../styles/PreschoolCard.css';
-import { FaMapMarkerAlt } from 'react-icons/fa';
+import { fetchSchoolDetailsByGoogleName } from './api'; // Import the function
 
 const PreschoolCard = ({ preschool, onSelect, surveyResponses }) => {
-  const { name, vicinity } = preschool;
-  const { totalResponses, helhetsomdome, svarsfrekvens, antalBarn } = surveyResponses || {};
+  const [schoolData, setSchoolData] = useState(null);
+
+  useEffect(() => {
+    const fetchSchoolData = async () => {
+      const data = await fetchSchoolDetailsByGoogleName(preschool.vicinity);
+      setSchoolData(data);
+    };
+
+    fetchSchoolData();
+  }, [preschool.vicinity]);
+
+  console.log('Preschool data:', preschool);
+  console.log('School data:', schoolData);
 
   return (
     <div className="preschool-card" onClick={() => onSelect(preschool)}>
-      <h2>{name || 'Namn saknas'}</h2>
-      <div className="preschool-info">
-        <div className="info-item">
-          <FaMapMarkerAlt className="icon" />
-          <p>{vicinity || 'Adress saknas'}</p>
-        </div>
-      </div>
-      <div className="survey-results">
-        {surveyResponses ? (
-          <>
-            <p><strong>Helhetsomdöme:</strong> {helhetsomdome?.toFixed(2) || 'N/A'}%</p>
-            <p><strong>Totalt antal svar:</strong> {totalResponses || 'N/A'}</p>
-            <p><strong>Svarsfrekvens:</strong> {svarsfrekvens?.toFixed(2) || 'N/A'}%</p>
-            <p><strong>Antal barn på förskolan:</strong> {antalBarn || 'N/A'}</p>
-          </>
-        ) : (
-          <p>Ingen data tillgänglig</p>
-        )}
-      </div>
+      <h2>{preschool.name}</h2>
+      <p>Address: {preschool.vicinity}</p>
+      {schoolData ? (
+        <>
+          <p>Helhetsomdöme: {schoolData.helhetsomdome}%</p>
+          <p>Antal svar: {schoolData.totalResponses}</p>
+          <p>Svarsfrekvens: {schoolData.svarsfrekvens}%</p>
+          <p>Antal barn på förskolan: {schoolData.antalBarn}</p>
+        </>
+      ) : (
+        <p>Ingen data tillgänglig</p>
+      )}
     </div>
   );
 };
 
 PreschoolCard.propTypes = {
-  preschool: PropTypes.shape({
-    name: PropTypes.string,
-    vicinity: PropTypes.string,
-  }).isRequired,
+  preschool: PropTypes.object.isRequired,
   onSelect: PropTypes.func.isRequired,
-  surveyResponses: PropTypes.shape({
-    totalResponses: PropTypes.number,
-    helhetsomdome: PropTypes.number,
-    svarsfrekvens: PropTypes.number,
-    antalBarn: PropTypes.number,
-  }),
+  surveyResponses: PropTypes.object
 };
 
 export default PreschoolCard;

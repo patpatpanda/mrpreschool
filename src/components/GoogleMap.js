@@ -1,4 +1,5 @@
-/* global google */
+/*global google*/
+
 import React, { useEffect, useRef, useState } from 'react';
 import PreschoolCard from './PreschoolCard';
 import '../styles/GoogleMap.css';
@@ -7,7 +8,6 @@ import axios from 'axios';
 
 const GoogleMap = () => {
   const mapRef = useRef(null);
-  const cardsContainerRef = useRef(null);
   const [map, setMap] = useState(null);
   const [geocoder, setGeocoder] = useState(null);
   const [infowindow, setInfowindow] = useState(null);
@@ -21,12 +21,8 @@ const GoogleMap = () => {
   const [showFilters, setShowFilters] = useState(true);
   const [expanded, setExpanded] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
-  const [surveyResponses, setSurveyResponses] = useState({});
+  const [surveyResponses] = useState({});
   const [distanceBetweenPlaces, setDistanceBetweenPlaces] = useState(null);
-
-  const [isDragging, setIsDragging] = useState(false);
-  const [startY, setStartY] = useState(0);
-  const [scrollTop, setScrollTop] = useState(0);
 
   const apiUrl = process.env.REACT_APP_API_URL || 'https://masterkinder20240523125154.azurewebsites.net/api';
 
@@ -73,25 +69,21 @@ const GoogleMap = () => {
     }
   }, []);
 
-  const fetchSurveyResponses = async (placeName) => {
+  const fetchSchoolDetailsByGoogleName = async (placeAddress) => {
     try {
-      const response = await axios.get(`${apiUrl}/schools/details/google/${placeName}`);
-      if (response.data) {
-        const { helhetsomdome, totalResponses, svarsfrekvens, antalBarn } = response.data;
-
-        console.log(`Data for ${placeName}:`, response.data);
-
-        setSurveyResponses((prev) => ({
-          ...prev,
-          [placeName]: { helhetsomdome, totalResponses, svarsfrekvens, antalBarn }
-        }));
-      } else {
-        console.log(`No data found for ${placeName}`);
-      }
+        const addressParts = placeAddress.split(',');
+        const addressWithoutCity = addressParts[0].trim();
+        const encodedAddress = encodeURIComponent(addressWithoutCity);
+        const url = `${apiUrl}/schools/details/google/${encodedAddress}`;
+        console.log(`Fetching details for ${encodedAddress} from ${url}`);
+        const response = await axios.get(url);
+        console.log(`Fetched details for ${encodedAddress}:`, response.data);
+        return response.data;
     } catch (error) {
-      console.error('There was an error fetching the survey responses!', error);
+        console.error('There was an error fetching the school details!', error);
+        return null;
     }
-  };
+};
 
   const geocodeAddress = () => {
     const address = document.getElementById('address').value.trim();
@@ -126,11 +118,10 @@ const GoogleMap = () => {
       radius: '2000', // 2 km radius
       keyword: '(förskola OR dagmamma OR Förskolan)',
     };
-
+  
     const service = new google.maps.places.PlacesService(map);
     service.nearbySearch(request, (results, status) => {
       if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-        // Filtrera bort oönskade resultat baserat på namnet
         const validResults = results.filter(
           (place) =>
             place.name.toLowerCase().includes('förskola') ||
@@ -142,8 +133,7 @@ const GoogleMap = () => {
             place.name.toLowerCase().includes('storken montessoriförskola') ||
             place.name.toLowerCase().includes('daghemmet haga')
         );
-
-        // Calculate distances
+  
         const resultsWithDistances = validResults.map((place) => {
           const distance = google.maps.geometry.spherical.computeDistanceBetween(
             location,
@@ -151,14 +141,14 @@ const GoogleMap = () => {
           );
           return { ...place, distance };
         });
-
+  
         setNearbyPlaces(resultsWithDistances);
         setOriginalPlaces(resultsWithDistances);
         setShowPlaces(true);
         clearMarkers();
         resultsWithDistances.forEach((result) => createMarker(result, location));
         fitMapToMarkers(resultsWithDistances);
-        resultsWithDistances.forEach((place) => fetchSurveyResponses(place.name)); // Fetch survey responses using place name
+        resultsWithDistances.forEach((place) => fetchSchoolDetailsByGoogleName(place.vicinity));
       } else {
         alert('Places API was not successful for the following reason: ' + status);
       }
@@ -240,8 +230,8 @@ const GoogleMap = () => {
       const topRatedPlaces = [...originalPlaces].sort((a, b) => {
         const aResponses = surveyResponses[a.name] || {};
         const bResponses = surveyResponses[b.name] || {};
-        const aRating = aResponses.helhetsomdome || 0;
-        const bRating = bResponses.helhetsomdome || 0;
+        const aRating = aResponses['Instämmer helt'] || 0;
+        const bRating = bResponses['Instämmer helt'] || 0;
         return bRating - aRating;
       }).slice(0, 5);
       setNearbyPlaces(topRatedPlaces);
@@ -306,32 +296,6 @@ const GoogleMap = () => {
     setIsHidden(!isHidden);
   };
 
-  const handleMouseDown = (e) => {
-    setIsDragging(true);
-    setStartY(e.clientY);
-    setScrollTop(cardsContainerRef.current.scrollTop);
-  };
-
-  const handleMouseMove = (e) => {
-    if (!isDragging) return;
-    const dy = e.clientY - startY;
-    cardsContainerRef.current.scrollTop = scrollTop - dy;
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  useEffect(() => {
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [isDragging]);
-
   return (
     <div className="app-container">
       <div ref={mapRef} className="map-container"></div>
@@ -356,12 +320,7 @@ const GoogleMap = () => {
         </div>
       )}
 
-      <div
-        ref={cardsContainerRef}
-        className={`cards-container ${showPlaces && !isHidden ? 'show' : 'hidden'} ${expanded ? 'expanded' : ''}`}
-        onMouseDown={handleMouseDown}
-        style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
-      >
+      <div className={`cards-container ${showPlaces && !isHidden ? 'show' : 'hidden'} ${expanded ? 'expanded' : ''}`}>
         <button className="close-button" onClick={toggleHide}>
           {isHidden ? 'Visa' : 'Dölj'}
         </button>
@@ -375,7 +334,7 @@ const GoogleMap = () => {
                 key={place.place_id}
                 preschool={place}
                 onSelect={handleSelectPlace}
-                surveyResponses={surveyResponses[place.name] || null}
+                surveyResponses={surveyResponses[place.name] || {}}
               />
             ))}
           </>
@@ -395,14 +354,6 @@ const GoogleMap = () => {
           <p>Address: {selectedPlace.vicinity}</p>
           <p>Rating: {selectedPlace.rating}</p>
           <p>User Ratings: {selectedPlace.user_ratings_total}</p>
-          {surveyResponses[selectedPlace.name] && (
-            <div>
-              <p><strong>Helhetsomdöme:</strong> {surveyResponses[selectedPlace.name].helhetsomdome}%</p>
-              <p><strong>Totalt antal svar:</strong> {surveyResponses[selectedPlace.name].totalResponses}</p>
-              <p><strong>Svarsfrekvens:</strong> {surveyResponses[selectedPlace.name].svarsfrekvens}%</p>
-              <p><strong>Antal barn på förskolan:</strong> {surveyResponses[selectedPlace.name].antalBarn}</p>
-            </div>
-          )}
         </div>
       )}
 
