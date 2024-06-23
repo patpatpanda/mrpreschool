@@ -1,7 +1,7 @@
 /*global google*/
-
 import React, { useEffect, useRef, useState } from 'react';
 import PreschoolCard from './PreschoolCard';
+import DetailedCard from './DetailedCard';
 import '../styles/GoogleMap.css';
 import '../styles/PreschoolCard.css';
 import axios from 'axios';
@@ -74,6 +74,7 @@ const GoogleMap = () => {
         const addressParts = placeAddress.split(',');
         const addressWithoutCity = addressParts[0].trim();
         const encodedAddress = encodeURIComponent(addressWithoutCity);
+        
         const url = `${apiUrl}/schools/details/google/${encodedAddress}`;
         console.log(`Fetching details for ${encodedAddress} from ${url}`);
         const response = await axios.get(url);
@@ -83,7 +84,7 @@ const GoogleMap = () => {
         console.error('There was an error fetching the school details!', error);
         return null;
     }
-};
+  };
 
   const geocodeAddress = () => {
     const address = document.getElementById('address').value.trim();
@@ -104,8 +105,8 @@ const GoogleMap = () => {
         });
         findNearbyPlaces(results[0].geometry.location);
         setShowFilters(true);
-        setShowPlaces(true); // Ensure cards-container is shown after search
-        setIsHidden(false); // Ensure cards-container is visible
+        setShowPlaces(true);
+        setIsHidden(false);
       } else {
         alert('Geocode was not successful for the following reason: ' + status);
       }
@@ -115,7 +116,7 @@ const GoogleMap = () => {
   const findNearbyPlaces = (location) => {
     const request = {
       location: location,
-      radius: '2000', // 2 km radius
+      radius: '2000',
       keyword: '(förskola OR dagmamma OR Förskolan)',
     };
   
@@ -334,7 +335,6 @@ const GoogleMap = () => {
                 key={place.place_id}
                 preschool={place}
                 onSelect={handleSelectPlace}
-                surveyResponses={surveyResponses[place.name] || {}}
               />
             ))}
           </>
@@ -348,13 +348,7 @@ const GoogleMap = () => {
       )}
 
       {selectedPlace && (
-        <div className="selected-place-card">
-          <h2>{selectedPlace.name}</h2>
-          {selectedPlace.imageUrl && <img src={selectedPlace.imageUrl} alt={selectedPlace.name} />}
-          <p>Address: {selectedPlace.vicinity}</p>
-          <p>Rating: {selectedPlace.rating}</p>
-          <p>User Ratings: {selectedPlace.user_ratings_total}</p>
-        </div>
+        <DetailedCard schoolData={selectedPlace} onClose={() => setSelectedPlace(null)} />
       )}
 
       {distanceBetweenPlaces !== null && (

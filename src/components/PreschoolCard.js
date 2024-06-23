@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import '../styles/PreschoolCard.css';
-import { fetchSchoolDetailsByGoogleName } from './api'; // Import the function
+import { fetchSchoolDetailsByGoogleName } from './api';
 
-const PreschoolCard = ({ preschool, onSelect, surveyResponses }) => {
+const PreschoolCard = ({ preschool, onSelect }) => {
   const [schoolData, setSchoolData] = useState(null);
 
   useEffect(() => {
@@ -15,15 +15,12 @@ const PreschoolCard = ({ preschool, onSelect, surveyResponses }) => {
     fetchSchoolData();
   }, [preschool.vicinity]);
 
-  console.log('Preschool data:', preschool);
-  console.log('School data:', schoolData);
-
   return (
-    <div className="preschool-card" onClick={() => onSelect(preschool)}>
+    <div className="preschool-card" onClick={() => onSelect(schoolData)}>
       <h2>{preschool.name}</h2>
-      <p>Address: {preschool.vicinity}</p>
       {schoolData ? (
         <>
+          <p>Adress: {schoolData.address}</p>
           <p>Helhetsomdöme: {schoolData.helhetsomdome}%</p>
           <p>Antal svar: {schoolData.totalResponses}</p>
           <p>Svarsfrekvens: {schoolData.svarsfrekvens}%</p>
@@ -38,8 +35,7 @@ const PreschoolCard = ({ preschool, onSelect, surveyResponses }) => {
 
 PreschoolCard.propTypes = {
   preschool: PropTypes.object.isRequired,
-  onSelect: PropTypes.func.isRequired,
-  surveyResponses: PropTypes.object
+  onSelect: PropTypes.func.isRequired
 };
 
 export default PreschoolCard;
