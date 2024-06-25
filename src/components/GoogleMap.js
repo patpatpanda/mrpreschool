@@ -1,366 +1,156 @@
-/*global google*/
 
-import React, { useEffect, useRef, useState } from 'react';
-import PreschoolCard from './PreschoolCard';
-import DetailedCard from './DetailedCard';
-import '../styles/GoogleMap.css';
-import '../styles/PreschoolCard.css';
-import axios from 'axios';
+// /*global google*/
+// import React, { useEffect, useRef, useState } from 'react';
+// import PreschoolCard from './PreschoolCard';
+// import DetailedCard from './DetailedCard';
+// import '../styles/GoogleMap.css';
+// import { fetchSchoolDetailsByGoogleName, fetchSchoolDetailsByAddress } from './api';
 
-const GoogleMap = () => {
-  const mapRef = useRef(null);
-  const [map, setMap] = useState(null);
-  const [geocoder, setGeocoder] = useState(null);
-  const [infowindow, setInfowindow] = useState(null);
-  const [directionsService, setDirectionsService] = useState(null);
-  const [directionsRenderer, setDirectionsRenderer] = useState(null);
-  const [nearbyPlaces, setNearbyPlaces] = useState([]);
-  const [selectedPlace, setSelectedPlace] = useState(null);
-  const [showPlaces, setShowPlaces] = useState(false);
-  const [originalPlaces, setOriginalPlaces] = useState([]);
-  const [markers, setMarkers] = useState([]);
-  const [showFilters, setShowFilters] = useState(true);
-  const [expanded, setExpanded] = useState(false);
-  const [isHidden, setIsHidden] = useState(false);
-  const [surveyResponses] = useState({});
-  const [distanceBetweenPlaces, setDistanceBetweenPlaces] = useState(null);
+// const GoogleMap = () => {
+//   const mapRef = useRef(null);
+//   const [map, setMap] = useState(null);
+//   const [geocoder, setGeocoder] = useState(null);
+//   const [infowindow, setInfowindow] = useState(null);
+//   const [nearbyPlaces, setNearbyPlaces] = useState([]);
+//   const [selectedPlace, setSelectedPlace] = useState(null);
+//   const [showPlaces, setShowPlaces] = useState(false);
+//   const [markers, setMarkers] = useState([]);
 
-  const apiUrl = process.env.REACT_APP_API_URL || 'https://masterkinder20240523125154.azurewebsites.net/api';
+//   useEffect(() => {
+//     const initMap = () => {
+//       const stockholm = new google.maps.LatLng(59.3293, 18.0686);
 
-  useEffect(() => {
-    const initMap = () => {
-      const stockholm = new google.maps.LatLng(59.3293, 18.0686);
+//       const map = new google.maps.Map(mapRef.current, {
+//         center: stockholm,
+//         zoom: 12,
+//         disableDefaultUI: true,
+//       });
+//       setMap(map);
 
-      const map = new google.maps.Map(mapRef.current, {
-        center: stockholm,
-        zoom: 12,
-        disableDefaultUI: true,
-      });
-      setMap(map);
+//       const geocoder = new google.maps.Geocoder();
+//       setGeocoder(geocoder);
 
-      const geocoder = new google.maps.Geocoder();
-      setGeocoder(geocoder);
+//       const infowindow = new google.maps.InfoWindow();
+//       setInfowindow(infowindow);
+//     };
 
-      const infowindow = new google.maps.InfoWindow();
-      setInfowindow(infowindow);
+//     const loadScript = (url) => {
+//       const script = document.createElement('script');
+//       script.src = url;
+//       script.async = true;
+//       script.defer = true;
+//       script.onload = () => initMap();
+//       document.head.appendChild(script);
+//     };
 
-      const directionsService = new google.maps.DirectionsService();
-      setDirectionsService(directionsService);
+//     if (!window.google) {
+//       loadScript('https://maps.googleapis.com/maps/api/js?key=AIzaSyCbJmqNnZHTZ99pPQ2uHfkDXwpMxOpfYLw&libraries=places&callback=initMap');
+//     } else {
+//       initMap();
+//     }
+//   }, []);
 
-      const directionsRenderer = new google.maps.DirectionsRenderer({
-        draggable: true,
-        map: map,
-      });
-      setDirectionsRenderer(directionsRenderer);
-    };
+//   const geocodeAddress = () => {
+//     const address = document.getElementById('address').value.trim();
+//     if (!address) {
+//       alert('Please enter a valid address.');
+//       return;
+//     }
 
-    const loadScript = (url) => {
-      const script = document.createElement('script');
-      script.src = url;
-      script.async = true;
-      script.defer = true;
-      script.onload = () => initMap();
-      document.head.appendChild(script);
-    };
+//     geocoder.geocode({ address: address }, (results, status) => {
+//       if (status === 'OK') {
+//         console.log('Geocoded address:', results[0].formatted_address); // Log the geocoded address
+//         map.setCenter(results[0].geometry.location);
+//         new google.maps.Marker({
+//           map: map,
+//           position: results[0].geometry.location,
+//           icon: {
+//             url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+//           },
+//         });
+//         // Fetch and display the exact school at this address
+//         fetchSchoolDetailsByAddress(results[0].formatted_address);
+//         // Find and display nearby places
+//         findNearbyPlaces(results[0].geometry.location);
+//         setShowPlaces(true);
+//       } else {
+//         alert('Search was not successful for the following reason: ' + status);
+//       }
+//     });
+//   };
 
-    if (!window.google) {
-      loadScript('https://maps.googleapis.com/maps/api/js?key=AIzaSyCbJmqNnZHTZ99pPQ2uHfkDXwpMxOpfYLw&libraries=places&callback=initMap');
-    } else {
-      initMap();
-    }
-  }, []);
+//   const findNearbyPlaces = (location) => {
+//     const request = {
+//       location: location,
+//       radius: '2000',
+//       keyword: '(förskola OR dagmamma OR Förskolan)',
+//     };
 
-  const fetchSchoolDetailsByGoogleName = async (placeAddress) => {
-    try {
-      const encodedAddress = encodeURIComponent(placeAddress);
-      const url = `${apiUrl}/schools/details/google/${encodedAddress}`;
-      const response = await axios.get(url);
-  
-      // Add a console log to check the response
-      console.log('API response:', response.data);
-  
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching school details:', error);
-      return null;
-    }
-  };
-  
-  
+//     const service = new google.maps.places.PlacesService(map);
+//     service.nearbySearch(request, async (results, status) => {
+//       if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+//         const validResults = results.filter(place =>
+//           place.name.toLowerCase().includes('förskola') ||
+//           place.name.toLowerCase().includes('dagmamma') ||
+//           place.name.toLowerCase().includes('förskolan')
+//         );
 
-  const geocodeAddress = () => {
-    const address = document.getElementById('address').value.trim();
-    if (!address) {
-      alert('Please enter a valid address.');
-      return;
-    }
+//         setNearbyPlaces(validResults);
+//         clearMarkers();
+//         validResults.forEach(result => createMarker(result));
+//       } else {
+//         alert('Places API was not successful for the following reason: ' + status);
+//       }
+//     });
+//   };
 
-    geocoder.geocode({ address: address }, (results, status) => {
-      if (status === 'OK') {
-        map.setCenter(results[0].geometry.location);
-        new google.maps.Marker({
-          map: map,
-          position: results[0].geometry.location,
-          icon: {
-            url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-          },
-        });
-        findNearbyPlaces(results[0].geometry.location);
-        setShowFilters(true);
-        setShowPlaces(true);
-        setIsHidden(false);
-      } else {
-        alert('Geocode was not successful for the following reason: ' + status);
-      }
-    });
-  };
+//   const createMarker = (place) => {
+//     const marker = new google.maps.Marker({
+//       map: map,
+//       position: place.geometry.location,
+//     });
 
-  const findNearbyPlaces = (location) => {
-    const request = {
-      location: location,
-      radius: '2000',
-      keyword: '(förskola OR dagmamma OR Förskolan)',
-    };
+//     marker.addListener('click', async () => {
+//       infowindow.setContent(place.name);
+//       infowindow.open(map, marker);
+//       console.log('Fetching details for place:', place.name); // Log the place name
+//       const pdfData = await fetchSchoolDetailsByGoogleName(place.name);
+//       console.log('Fetched pdfData:', pdfData); // Log the fetched pdfData
+//       setSelectedPlace({ ...place, pdfData });
+//     });
 
-    const service = new google.maps.places.PlacesService(map);
-    service.nearbySearch(request, (results, status) => {
-      if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-        const validResults = results.filter(
-          (place) =>
-            place.name.toLowerCase().includes('förskola') ||
-            place.name.toLowerCase().includes('dagmamma') ||
-            place.name.toLowerCase().includes('förskolan') ||
-            place.name.toLowerCase().includes('montessoriförskolan tellus') ||
-            place.name.toLowerCase().includes('daghemmet blå huset') ||
-            place.name.toLowerCase().includes('kastanjegården') ||
-            place.name.toLowerCase().includes('storken montessoriförskola') ||
-            place.name.toLowerCase().includes('daghemmet haga')
-        );
+//     setMarkers((prevMarkers) => [...prevMarkers, marker]);
+//   };
 
-        const resultsWithDistances = validResults.map((place) => {
-          const distance = google.maps.geometry.spherical.computeDistanceBetween(
-            location,
-            place.geometry.location
-          );
-          return { ...place, distance };
-        });
+//   const clearMarkers = () => {
+//     markers.forEach(marker => marker.setMap(null));
+//     setMarkers([]);
+//   };
 
-        setNearbyPlaces(resultsWithDistances);
-        setOriginalPlaces(resultsWithDistances);
-        setShowPlaces(true);
-        clearMarkers();
-        resultsWithDistances.forEach((result) => createMarker(result, location));
-        fitMapToMarkers(resultsWithDistances);
-        resultsWithDistances.forEach((place) => fetchSchoolDetailsByGoogleName(place.vicinity));
-      } else {
-        alert('Places API was not successful for the following reason: ' + status);
-      }
-    });
-  };
+//   return (
+//     <div className="app-container">
+//       <div ref={mapRef} className="map-container"></div>
 
-  const createMarker = (place, origin) => {
-    const placeLoc = place.geometry.location;
-    const marker = new google.maps.Marker({
-      map: map,
-      position: placeLoc,
-    });
+//       <div className="search-container">
+//         <input id="address" type="text" className="styled-input" placeholder="Ange Address eller Förskolans Namn" />
+//         <button className="styled-button" onClick={geocodeAddress}>Hitta Förskolor</button>
+//       </div>
 
-    marker.addListener('click', () => {
-      infowindow.setContent(place.name);
-      infowindow.open(map, marker);
-      map.setCenter(placeLoc);
-      map.setZoom(15);
+//       <div className="cards-container">
+//         {showPlaces && nearbyPlaces.map((place) => (
+//           <PreschoolCard
+//             key={place.place_id}
+//             preschool={place}
+//             onSelect={(data) => setSelectedPlace(data)}
+//           />
+//         ))}
+//       </div>
 
-      setSelectedPlace({
-        name: place.name,
-        vicinity: place.vicinity,
-        rating: place.rating,
-        user_ratings_total: place.user_ratings_total,
-        place_id: place.place_id,
-      });
+//       {selectedPlace && (
+//         <DetailedCard schoolData={selectedPlace} onClose={() => setSelectedPlace(null)} />
+//       )}
+//     </div>
+//   );
+// };
 
-      if (markers.length === 1) {
-        const originLocation = markers[0].getPosition();
-        const distance = google.maps.geometry.spherical.computeDistanceBetween(
-          originLocation,
-          placeLoc
-        );
-        setDistanceBetweenPlaces(distance);
-      }
-
-      calculateAndDisplayRoute(origin, placeLoc);
-    });
-
-    setMarkers((prevMarkers) => [...prevMarkers, marker]);
-  };
-
-  const fitMapToMarkers = (places) => {
-    const bounds = new google.maps.LatLngBounds();
-    places.forEach((place) => {
-      bounds.extend(place.geometry.location);
-    });
-    map.fitBounds(bounds);
-  };
-
-  const clearMarkers = () => {
-    markers.forEach((marker) => marker.setMap(null));
-    setMarkers([]);
-    setDistanceBetweenPlaces(null);
-  };
-
-  const calculateAndDisplayRoute = (origin, destination) => {
-    const request = {
-      origin: origin,
-      destination: destination,
-      travelMode: 'WALKING',
-    };
-    directionsService.route(request, (result, status) => {
-      if (status === 'OK') {
-        directionsRenderer.setDirections(result);
-        directionsRenderer.setMap(map);
-      } else {
-        alert('Directions request failed due to ' + status);
-      }
-    });
-  };
-
-  const handleSelectPlace = (place) => {
-    setSelectedPlace(place);
-  };
-
-  const filterTopRatedPlaces = () => {
-    if (originalPlaces.length > 0) {
-      const topRatedPlaces = [...originalPlaces].sort((a, b) => {
-        const aResponses = surveyResponses[a.name] || {};
-        const bResponses = surveyResponses[b.name] || {};
-        const aRating = aResponses['Instämmer helt'] || 0;
-        const bRating = bResponses['Instämmer helt'] || 0;
-        return bRating - aRating;
-      }).slice(0, 5);
-      setNearbyPlaces(topRatedPlaces);
-      clearMarkers();
-      topRatedPlaces.forEach((place) => createMarker(place, map.getCenter()));
-      fitMapToMarkers(topRatedPlaces);
-    } else {
-      alert('No places found to filter.');
-    }
-  };
-
-  const filterNearestPlaces = () => {
-    if (originalPlaces.length > 0) {
-      const nearestPlaces = [...originalPlaces].sort((a, b) => a.distance - b.distance).slice(0, 5);
-      setNearbyPlaces(nearestPlaces);
-      clearMarkers();
-      nearestPlaces.forEach((place) => createMarker(place, map.getCenter()));
-      fitMapToMarkers(nearestPlaces);
-    } else {
-      alert('No places found to filter.');
-    }
-  };
-
-  const handleGetCurrentLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          const latlng = new google.maps.LatLng(latitude, longitude);
-
-          geocoder.geocode({ location: latlng }, (results, status) => {
-            if (status === 'OK' && results[0]) {
-              document.getElementById('address').value = results[0].formatted_address;
-              map.setCenter(latlng);
-              new google.maps.Marker({
-                map: map,
-                position: latlng,
-                icon: {
-                  url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-                },
-              });
-              findNearbyPlaces(latlng);
-            } else {
-              alert('Geocode was not successful for the following reason: ' + status);
-            }
-          });
-        },
-        () => {
-          alert('Geolocation failed.');
-        }
-      );
-    } else {
-      alert('Geolocation is not supported by this browser.');
-    }
-  };
-
-  const toggleExpand = () => {
-    setExpanded(!expanded);
-  };
-
-  const toggleHide = () => {
-    setIsHidden(!isHidden);
-  };
-
-  return (
-    <div className="app-container">
-      <div ref={mapRef} className="map-container"></div>
-
-      <div className="search-container">
-        <input id="address" type="text" className="styled-input" placeholder="Ange Address" defaultValue="Götgatan 45" />
-        <button className="styled-button" onClick={geocodeAddress}>Hitta Förskolor</button>
-        <div className="location-button-container"></div>
-      </div>
-
-      {showFilters && (
-        <div className="filter-container">
-          <button className="styled-button filter-button" onClick={filterTopRatedPlaces}>
-            Högst-betyg
-          </button>
-          <button className="styled-button filter-button" onClick={filterNearestPlaces}>
-            Närmast
-          </button>
-          <button className="styled-button filter-button" onClick={handleGetCurrentLocation}>
-            Min-Plats
-          </button>
-        </div>
-      )}
-
-      <div className={`cards-container ${showPlaces && !isHidden ? 'show' : 'hidden'} ${expanded ? 'expanded' : ''}`}>
-        <button className="close-button" onClick={toggleHide}>
-          {isHidden ? 'Visa' : 'Dölj'}
-        </button>
-        <button className="styled-button-2" onClick={toggleExpand}>
-          {expanded ? 'Minska' : 'Utöka'}
-        </button>
-        {showPlaces && !isHidden && (
-          <>
-            {nearbyPlaces.map((place) => (
-              <PreschoolCard
-                key={place.place_id}
-                preschool={place}
-                onSelect={handleSelectPlace}
-                surveyResponses={surveyResponses[place.name] || {}}
-              />
-            ))}
-          </>
-        )}
-      </div>
-
-      {isHidden && (
-        <button className="show-button" onClick={toggleHide}>
-          Visa
-        </button>
-      )}
-
-      {selectedPlace && (
-        <DetailedCard schoolData={selectedPlace} onClose={() => setSelectedPlace(null)} />
-      )}
-
-      {distanceBetweenPlaces !== null && (
-        <div className="distance-info">
-          <p>Avstånd mellan valda platser: {(distanceBetweenPlaces / 1000).toFixed(2)} km</p>
-        </div>
-      )}
-    </div>
-  );
-};
-
-export default GoogleMap;
+// export default GoogleMap;

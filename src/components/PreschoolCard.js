@@ -1,41 +1,32 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import '../styles/PreschoolCard.css';
-import { fetchSchoolDetailsByGoogleName } from './api';
 
-const PreschoolCard = ({ preschool, onSelect }) => {
-  const [schoolData, setSchoolData] = useState(null);
-
-  useEffect(() => {
-    const fetchSchoolData = async () => {
-      const data = await fetchSchoolDetailsByGoogleName(preschool.vicinity);
-      setSchoolData(data);
-    };
-
-    fetchSchoolData();
-  }, [preschool.vicinity]);
-
-  return (
-    <div className="preschool-card" onClick={() => onSelect(schoolData)}>
-      <h2>{preschool.name}</h2>
-      {schoolData ? (
-        <>
-          <p>Adress: {schoolData.address}</p>
-          <p>Helhetsomdöme: {schoolData.helhetsomdome}%</p>
-          <p>Antal svar: {schoolData.totalResponses}</p>
-          <p>Svarsfrekvens: {schoolData.svarsfrekvens}%</p>
-          <p>Antal barn på förskolan: {schoolData.antalBarn}</p>
-        </>
-      ) : (
-        <p>Ingen data tillgänglig</p>
-      )}
-    </div>
-  );
-};
+const PreschoolCard = ({ preschool, onSelect }) => (
+  <div onClick={() => onSelect(preschool)} className="card">
+    <h3>{preschool.name}</h3>
+    <p>{preschool.vicinity}</p>
+    {preschool.address && <p>Address: {preschool.address}</p>}
+    {preschool.description && <p>Description: {preschool.description}</p>}
+    {preschool.pdfData && preschool.pdfData.$values && preschool.pdfData.$values.length > 0 && (
+      <div>
+        <h4>PDF Data:</h4>
+        <p>{preschool.pdfData.$values[0].namn}</p>
+        <p>Helhetsomdome: {preschool.pdfData.$values[0].helhetsomdome}</p>
+        <p>Svarsfrekvens: {preschool.pdfData.$values[0].svarsfrekvens}</p>
+      </div>
+    )}
+  </div>
+);
 
 PreschoolCard.propTypes = {
-  preschool: PropTypes.object.isRequired,
-  onSelect: PropTypes.func.isRequired
+  preschool: PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    vicinity: PropTypes.string.isRequired,
+    address: PropTypes.string,
+    description: PropTypes.string,
+    pdfData: PropTypes.object,
+  }).isRequired,
+  onSelect: PropTypes.func.isRequired,
 };
 
 export default PreschoolCard;

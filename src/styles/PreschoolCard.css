@@ -1,50 +1,22 @@
 .preschool-card {
-  width: 300px;
-  height: 400px;
-  border-radius: 15px;
+  width: 200px;
   padding: 20px;
-  margin: 15px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s, box-shadow 0.3s;
-  
-  background-color: #f8f9fa;
-  border: 1px solid #2dbdc2;
-  color: #333;
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background-color: #fff;
+  cursor: pointer;
+  transition: transform 0.2s;
 }
 
 .preschool-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-  background-color: #e2f1f3;
-  border-color: #1ba2a8;
+  transform: scale(1.05);
 }
 
 .preschool-card h2 {
-  margin: 0 0 10px;
-  font-size: 1.8em;
-  color: #2dbdc2;
+  font-size: 18px;
+  margin-bottom: 10px;
 }
 
 .preschool-card p {
-  margin: 10px 0;
-  font-size: 1em;
-  line-height: 1.5;
-  color: #555;
-}
-
-.preschool-card img {
-  width: 100%;
-  height: auto;
-  border-radius: 10px;
-  margin-bottom: 15px;
-}
-
-.preschool-card .icon {
-  font-size: 2em;
-  color: #2dbdc2;
-  margin-right: 10px;
+  margin: 5px 0;
 }

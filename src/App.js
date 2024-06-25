@@ -1,20 +1,18 @@
-import './App.css';
 import React from 'react';
-import Header from './components/Header';
-import GoogleMap from './components/GoogleMap';
+import MapComponent from './components/MapComponent';
+import './App.css';
 
-
-
-
-const App = () => {
+function App() {
   return (
-    <div className="app">
-      <Header />
-      <GoogleMap />
-      
-     
+    <div className="App">
+      <header className="App-header">
+        <h1>Forskolan Locator</h1>
+      </header>
+      <main>
+        <MapComponent />
+      </main>
     </div>
   );
-};
+}
 
 export default App;
