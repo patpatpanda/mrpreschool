@@ -13,7 +13,7 @@ const DetailedCard = ({ schoolData, onClose }) => {
         {schoolData.pdfData && schoolData.pdfData.$values && schoolData.pdfData.$values.length > 0 && (
           <div>
           
-            <p>{schoolData.pdfData.$values[0].namn}</p>
+            
             <p>Helhetsomdome: {schoolData.pdfData.$values[0].helhetsomdome}</p>
             <p>Svarsfrekvens: {schoolData.pdfData.$values[0].svarsfrekvens}</p>
           </div>
@@ -29,9 +29,7 @@ const DetailedCard = ({ schoolData, onClose }) => {
             <p>Andel Legitimerade Förskollärare: {schoolData.schoolDetails.$values[0].andelLegitimeradeForskollarare}</p>
             <p>Webbplats: <a href={schoolData.schoolDetails.$values[0].webbplats} target="_blank" rel="noopener noreferrer">{schoolData.schoolDetails.$values[0].webbplats}</a></p>
             <p>Inriktning och Profil: {schoolData.schoolDetails.$values[0].inriktningOchProfil}</p>
-            <p>Inne- och Utemiljö: {schoolData.schoolDetails.$values[0].inneOchUtemiljo}</p>
-            <p>Kost och Måltider: {schoolData.schoolDetails.$values[0].kostOchMaltider}</p>
-            <p>Mål och Vision: {schoolData.schoolDetails.$values[0].malOchVision}</p>
+           
             <p>Mer om Oss: {schoolData.schoolDetails.$values[0].merOmOss}</p>
           </div>
         )}

@@ -14,6 +14,8 @@ const MapComponent = () => {
   const [selectedPlace, setSelectedPlace] = useState(null);
   const [showPlaces, setShowPlaces] = useState(false);
   const [markers, setMarkers] = useState([]);
+  const [directionsService, setDirectionsService] = useState(null);
+  const [directionsRenderer, setDirectionsRenderer] = useState(null);
 
   useEffect(() => {
     const initMap = () => {
@@ -31,6 +33,13 @@ const MapComponent = () => {
 
       const infowindow = new google.maps.InfoWindow();
       setInfowindow(infowindow);
+
+      const directionsService = new google.maps.DirectionsService();
+      setDirectionsService(directionsService);
+
+      const directionsRenderer = new google.maps.DirectionsRenderer();
+      directionsRenderer.setMap(map);
+      setDirectionsRenderer(directionsRenderer);
     };
 
     const loadScript = (url) => {
@@ -59,7 +68,7 @@ const MapComponent = () => {
     geocoder.geocode({ address: address }, async (results, status) => {
       if (status === 'OK') {
         map.setCenter(results[0].geometry.location);
-        new google.maps.Marker({
+        const originMarker = new google.maps.Marker({
           map: map,
           position: results[0].geometry.location,
           icon: {
@@ -69,6 +78,8 @@ const MapComponent = () => {
 
         findNearbyPlaces(results[0].geometry.location);
         setShowPlaces(true);
+
+        setMarkers((prevMarkers) => [...prevMarkers, originMarker]);
       } else {
         alert('Search was not successful for the following reason: ' + status);
       }
@@ -129,6 +140,8 @@ const MapComponent = () => {
       const schoolDetails = await fetchSchoolDetailsByAddress(relevantAddress);
 
       setSelectedPlace({ ...place, pdfData, schoolDetails });
+
+      calculateRoute(document.getElementById('address').value.trim(), place.geometry.location);
     });
 
     setMarkers((prevMarkers) => [...prevMarkers, marker]);
@@ -137,6 +150,22 @@ const MapComponent = () => {
   const clearMarkers = () => {
     markers.forEach(marker => marker.setMap(null));
     setMarkers([]);
+  };
+
+  const calculateRoute = (origin, destination) => {
+    const request = {
+      origin: origin,
+      destination: destination,
+      travelMode: google.maps.TravelMode.DRIVING,
+    };
+
+    directionsService.route(request, (result, status) => {
+      if (status === google.maps.DirectionsStatus.OK) {
+        directionsRenderer.setDirections(result);
+      } else {
+        alert('Could not display directions due to: ' + status);
+      }
+    });
   };
 
   return (
@@ -166,4 +195,3 @@ const MapComponent = () => {
 };
 
 export default MapComponent;
-
