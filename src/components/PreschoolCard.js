@@ -9,10 +9,10 @@ const PreschoolCard = ({ preschool, onSelect }) => (
     {preschool.description && <p>Description: {preschool.description}</p>}
     {preschool.pdfData && preschool.pdfData.$values && preschool.pdfData.$values.length > 0 && (
       <div>
-        <h4>PDF Data:</h4>
-        <p>{preschool.pdfData.$values[0].namn}</p>
-        <p>Helhetsomdome: {preschool.pdfData.$values[0].helhetsomdome}</p>
-        <p>Svarsfrekvens: {preschool.pdfData.$values[0].svarsfrekvens}</p>
+    
+        <p>Antal Svar: {preschool.pdfData.$values[0].antalSvar}st</p>
+        <p>Helhetsomdome: {preschool.pdfData.$values[0].helhetsomdome}%</p>
+        <p>Svarsfrekvens: {preschool.pdfData.$values[0].svarsfrekvens}%</p>
       </div>
     )}
   </div>

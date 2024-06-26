@@ -67,31 +67,7 @@ const MapComponent = () => {
             url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
           },
         });
-        
-        // Fetch school details by address
-        console.log(`Fetching school details for address: ${results[0].formatted_address}`);
-        const schoolDetails = await fetchSchoolDetailsByAddress(results[0].formatted_address);
-        console.log('Fetched school details by address:', schoolDetails);
-        
-        // Assign school details to places
-        if (schoolDetails && schoolDetails.$values && schoolDetails.$values.length > 0) {
-          const placeDetails = schoolDetails.$values[0]; // Assuming the first result is the one we want
-          const cleanName = placeDetails.namn.replace(/^Förskolan\s+/i, '');
-          
-          // Fetch PDF data
-          console.log(`Fetching PDF data for school name: ${cleanName}`);
-          const pdfData = await fetchSchoolDetailsByGoogleName(cleanName);
-          console.log('Fetched PDF data:', pdfData);
-          
-          setSelectedPlace({
-            name: placeDetails.namn,
-            vicinity: placeDetails.adress,
-            address: placeDetails.adress,
-            description: placeDetails.beskrivning,
-            pdfData: pdfData // Assuming you want to use all data in pdfData
-          });
-        }
-        
+
         findNearbyPlaces(results[0].geometry.location);
         setShowPlaces(true);
       } else {
@@ -100,7 +76,13 @@ const MapComponent = () => {
     });
   }, [geocoder, map]);
 
-  const findNearbyPlaces = useCallback((location) => {
+  const extractRelevantAddress = (fullAddress) => {
+    const addressParts = fullAddress.split(',');
+    // Assuming the relevant address is the first part, trim any extra spaces
+    return addressParts[0].trim();
+  };
+
+  const findNearbyPlaces = useCallback(async (location) => {
     const request = {
       location: location,
       radius: '400',
@@ -116,7 +98,19 @@ const MapComponent = () => {
           place.name.toLowerCase().includes('förskolan')
         );
 
-        setNearbyPlaces(validResults);
+        const detailedResults = await Promise.all(validResults.map(async (place) => {
+          const cleanName = place.name.replace(/^Förskolan\s+/i, '');
+          console.log(`Fetching PDF data for school name: ${cleanName}`);
+          const pdfData = await fetchSchoolDetailsByGoogleName(cleanName);
+          const relevantAddress = extractRelevantAddress(place.vicinity);
+          console.log(`Fetching school details for address: ${relevantAddress}`);
+          const schoolDetails = await fetchSchoolDetailsByAddress(relevantAddress);
+          console.log('Fetched PDF data:', pdfData);
+          console.log('Fetched school details by address:', schoolDetails);
+          return { ...place, pdfData, schoolDetails };
+        }));
+
+        setNearbyPlaces(detailedResults);
         clearMarkers();
         validResults.forEach(result => createMarker(result));
       } else {
@@ -134,12 +128,14 @@ const MapComponent = () => {
     marker.addListener('click', async () => {
       infowindow.setContent(place.name);
       infowindow.open(map, marker);
-      console.log('Fetching details for place:', place.name);
       
+      // Fetch PDF data and school details again when clicking on a marker
       const cleanName = place.name.replace(/^Förskolan\s+/i, '');
       const pdfData = await fetchSchoolDetailsByGoogleName(cleanName);
-      console.log('Fetched pdfData:', pdfData);
-      setSelectedPlace({ ...place, pdfData });
+      const relevantAddress = extractRelevantAddress(place.vicinity);
+      const schoolDetails = await fetchSchoolDetailsByAddress(relevantAddress);
+      
+      setSelectedPlace({ ...place, pdfData, schoolDetails });
     });
 
     setMarkers((prevMarkers) => [...prevMarkers, marker]);
