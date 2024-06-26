@@ -1,13 +1,12 @@
 import React from 'react';
 import MapComponent from './components/MapComponent';
 import './App.css';
+import Header from './components/Header';
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <h1>Forskolan Locator</h1>
-      </header>
+     <Header></Header>
       <main>
         <MapComponent />
       </main>

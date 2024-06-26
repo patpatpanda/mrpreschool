@@ -1,8 +1,17 @@
 import axios from 'axios';
 
+const normalizeName = (name) => {
+  // Ta bort prefix "Förskola" eller "Förskolan"
+  let normalizedName = name.replace(/^(Förskola\s+|Förskolan\s+)/i, '').trim();
+  // Ta bort suffix "Förskola" eller "Förskolan"
+  normalizedName = normalizedName.replace(/(\s+Förskola|\s+Förskolan)$/i, '').trim();
+  return normalizedName;
+};
+
 export const fetchSchoolDetailsByGoogleName = async (name) => {
   try {
-    const encodedName = encodeURIComponent(name.trim());
+    const normalizedName = normalizeName(name.trim());
+    const encodedName = encodeURIComponent(normalizedName);
     console.log(`Encoded name for API request: ${encodedName}`);
     const url = `https://masterkinder20240523125154.azurewebsites.net/api/PdfData/name/${encodedName}`;
     console.log(`API request URL (name): ${url}`);

@@ -58,7 +58,6 @@ const MapComponent = () => {
 
     geocoder.geocode({ address: address }, async (results, status) => {
       if (status === 'OK') {
-        console.log('Geocoded address:', results[0].formatted_address);
         map.setCenter(results[0].geometry.location);
         new google.maps.Marker({
           map: map,
@@ -78,7 +77,6 @@ const MapComponent = () => {
 
   const extractRelevantAddress = (fullAddress) => {
     const addressParts = fullAddress.split(',');
-    // Assuming the relevant address is the first part, trim any extra spaces
     return addressParts[0].trim();
   };
 
@@ -99,14 +97,10 @@ const MapComponent = () => {
         );
 
         const detailedResults = await Promise.all(validResults.map(async (place) => {
-          const cleanName = place.name.replace(/^Förskolan\s+/i, '');
-          console.log(`Fetching PDF data for school name: ${cleanName}`);
+          const cleanName = place.name.replace(/^(Förskola\s+|Förskolan\s+)|(\s+Förskola|\s+Förskolan)$/i, '').trim();
           const pdfData = await fetchSchoolDetailsByGoogleName(cleanName);
           const relevantAddress = extractRelevantAddress(place.vicinity);
-          console.log(`Fetching school details for address: ${relevantAddress}`);
           const schoolDetails = await fetchSchoolDetailsByAddress(relevantAddress);
-          console.log('Fetched PDF data:', pdfData);
-          console.log('Fetched school details by address:', schoolDetails);
           return { ...place, pdfData, schoolDetails };
         }));
 
@@ -128,13 +122,12 @@ const MapComponent = () => {
     marker.addListener('click', async () => {
       infowindow.setContent(place.name);
       infowindow.open(map, marker);
-      
-      // Fetch PDF data and school details again when clicking on a marker
-      const cleanName = place.name.replace(/^Förskolan\s+/i, '');
+
+      const cleanName = place.name.replace(/^(Förskola\s+|Förskolan\s+)|(\s+Förskola|\s+Förskolan)$/i, '').trim();
       const pdfData = await fetchSchoolDetailsByGoogleName(cleanName);
       const relevantAddress = extractRelevantAddress(place.vicinity);
       const schoolDetails = await fetchSchoolDetailsByAddress(relevantAddress);
-      
+
       setSelectedPlace({ ...place, pdfData, schoolDetails });
     });
 
@@ -173,3 +166,4 @@ const MapComponent = () => {
 };
 
 export default MapComponent;
+
