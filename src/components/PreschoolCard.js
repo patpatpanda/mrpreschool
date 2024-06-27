@@ -3,15 +3,14 @@ import PropTypes from 'prop-types';
 
 const PreschoolCard = ({ preschool, onSelect }) => (
   <div onClick={() => onSelect(preschool)} className="card">
-    <h3>{preschool.name}</h3>
-    <p>{preschool.vicinity}</p>
-    {preschool.address && <p>Address: {preschool.address}</p>}
+    <h3>{preschool.namn}</h3>
+    <p>{preschool.adress}</p>
     {preschool.description && <p>Description: {preschool.description}</p>}
-    {preschool.pdfData && preschool.pdfData.$values && preschool.pdfData.$values.length > 0 && (
+    {preschool.pdfData && (
       <div>
-        <p>Antal Svar: {preschool.pdfData.$values[0].antalSvar}st</p>
-        <p>Helhetsomdome: {preschool.pdfData.$values[0].helhetsomdome}%</p>
-        <p>Svarsfrekvens: {preschool.pdfData.$values[0].svarsfrekvens}%</p>
+        <p>Antal Svar: {preschool.pdfData.antalSvar}st</p>
+        <p>Helhetsomdome: {preschool.pdfData.helhetsomdome}%</p>
+        <p>Svarsfrekvens: {preschool.pdfData.svarsfrekvens}%</p>
       </div>
     )}
   </div>
@@ -19,9 +18,8 @@ const PreschoolCard = ({ preschool, onSelect }) => (
 
 PreschoolCard.propTypes = {
   preschool: PropTypes.shape({
-    name: PropTypes.string.isRequired,
-    vicinity: PropTypes.string.isRequired,
-    address: PropTypes.string,
+    namn: PropTypes.string.isRequired,
+    adress: PropTypes.string.isRequired,
     description: PropTypes.string,
     pdfData: PropTypes.object,
   }).isRequired,

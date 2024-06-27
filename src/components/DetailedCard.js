@@ -8,35 +8,28 @@ const DetailedCard = ({ schoolData, onClose }) => {
     <div className="detailed-card">
       <div className="detailed-card-content">
         <button onClick={onClose}>×</button>
-        <h2>{schoolData.name}</h2>
-        <p>{schoolData.vicinity}</p>
-        {schoolData.pdfData && schoolData.pdfData.$values && schoolData.pdfData.$values.length > 0 && (
+        <h2>{schoolData.namn}</h2>
+        <p>{schoolData.adress}</p>
+        {schoolData.pdfData && (
           <div>
-          
-            
-            <p>Helhetsomdome: {schoolData.pdfData.$values[0].helhetsomdome}</p>
-            <p>Svarsfrekvens: {schoolData.pdfData.$values[0].svarsfrekvens}</p>
+            <p>Helhetsomdome: {schoolData.pdfData.helhetsomdome}</p>
+            <p>Svarsfrekvens: {schoolData.pdfData.svarsfrekvens}</p>
+            <p>Antal Svar: {schoolData.pdfData.antalSvar}st</p>
           </div>
         )}
-        {schoolData.schoolDetails && schoolData.schoolDetails.$values && schoolData.schoolDetails.$values.length > 0 && (
-          <div>
-            <h3>School Address Details:</h3>
-            <p>Typ av Service: {schoolData.schoolDetails.$values[0].typAvService}</p>
-            <p>Verksam i: {schoolData.schoolDetails.$values[0].verksamI}</p>
-            <p>Organisationsform: {schoolData.schoolDetails.$values[0].organisationsform}</p>
-            <p>Antal Barn: {schoolData.schoolDetails.$values[0].antalBarn}</p>
-            <p>Antal Barn per Årsarbetare: {schoolData.schoolDetails.$values[0].antalBarnPerArsarbetare}</p>
-            <p>Andel Legitimerade Förskollärare: {schoolData.schoolDetails.$values[0].andelLegitimeradeForskollarare}</p>
-            <p>Webbplats: <a href={schoolData.schoolDetails.$values[0].webbplats} target="_blank" rel="noopener noreferrer">{schoolData.schoolDetails.$values[0].webbplats}</a></p>
-            <p>Inriktning och Profil: {schoolData.schoolDetails.$values[0].inriktningOchProfil}</p>
-           
-            <p>Mer om Oss: {schoolData.schoolDetails.$values[0].merOmOss}</p>
-          </div>
-        )}
-        {schoolData.schoolDetails && schoolData.schoolDetails.$values && schoolData.schoolDetails.$values[0].kontakter && schoolData.schoolDetails.$values[0].kontakter.$values.length > 0 && (
+        {schoolData.typAvService && <p>Typ av Service: {schoolData.typAvService}</p>}
+        {schoolData.verksamI && <p>Verksam i: {schoolData.verksamI}</p>}
+        {schoolData.organisationsform && <p>Organisationsform: {schoolData.organisationsform}</p>}
+        {schoolData.antalBarn && <p>Antal Barn: {schoolData.antalBarn}</p>}
+        {schoolData.antalBarnPerArsarbetare && <p>Antal Barn per Årsarbetare: {schoolData.antalBarnPerArsarbetare}</p>}
+        {schoolData.andelLegitimeradeForskollarare && <p>Andel Legitimerade Förskollärare: {schoolData.andelLegitimeradeForskollarare} %</p>}
+        {schoolData.webbplats && <p>Webbplats: <a href={schoolData.webbplats} target="_blank" rel="noopener noreferrer">{schoolData.webbplats}</a></p>}
+        {schoolData.inriktningOchProfil && <p>Inriktning och Profil: {schoolData.inriktningOchProfil}</p>}
+        {schoolData.merOmOss && <p>Mer om Oss: {schoolData.merOmOss}</p>}
+        {schoolData.kontakter && schoolData.kontakter.$values && schoolData.kontakter.$values.length > 0 && (
           <div>
             <h3>Kontaktinformation:</h3>
-            {schoolData.schoolDetails.$values[0].kontakter.$values.map((kontakt, index) => (
+            {schoolData.kontakter.$values.map((kontakt, index) => (
               <div key={index}>
                 <p>Namn: {kontakt.namn}</p>
                 <p>Roll: {kontakt.roll}</p>
@@ -46,7 +39,7 @@ const DetailedCard = ({ schoolData, onClose }) => {
             ))}
           </div>
         )}
-        {schoolData.address && <p>Address: {schoolData.address}</p>}
+        {schoolData.adress && <p>Address: {schoolData.adress}</p>}
         {schoolData.description && <p>Description: {schoolData.description}</p>}
       </div>
     </div>
@@ -55,12 +48,24 @@ const DetailedCard = ({ schoolData, onClose }) => {
 
 DetailedCard.propTypes = {
   schoolData: PropTypes.shape({
-    name: PropTypes.string.isRequired,
-    vicinity: PropTypes.string.isRequired,
+    namn: PropTypes.string.isRequired,
+    adress: PropTypes.string.isRequired,
     pdfData: PropTypes.object,
     schoolDetails: PropTypes.object,
-    address: PropTypes.string,
     description: PropTypes.string,
+    typAvService: PropTypes.string,
+    verksamI: PropTypes.string,
+    organisationsform: PropTypes.string,
+    antalBarn: PropTypes.number,
+    antalBarnPerArsarbetare: PropTypes.number,
+    andelLegitimeradeForskollarare: PropTypes.number,
+    webbplats: PropTypes.string,
+    inriktningOchProfil: PropTypes.string,
+    inneOchUtemiljo: PropTypes.string,
+    kostOchMaltider: PropTypes.string,
+    malOchVision: PropTypes.string,
+    merOmOss: PropTypes.string,
+    kontakter: PropTypes.object,
   }).isRequired,
   onClose: PropTypes.func.isRequired,
 };
