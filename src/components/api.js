@@ -36,6 +36,7 @@ export const fetchSchoolDetailsByAddress = async (address) => {
   }
 };
 
+
 // Funktion för att hämta närliggande förskolor baserat på latitud och longitud
 export const fetchNearbySchools = async (lat, lng) => {
   try {

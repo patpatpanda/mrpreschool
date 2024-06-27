@@ -106,9 +106,9 @@ const MapComponent = () => {
 
                     return {
                         ...place,
-                        pdfData: pdfData ? pdfData : null, // Anpassa pdfData för att matcha komponentens förväntningar
-                        address: place.adress, // Säkerställ att address finns i datan
-                        description: place.beskrivning, // Säkerställ att description finns i datan
+                        pdfData: pdfData ? pdfData : null,
+                        address: place.adress,
+                        description: place.beskrivning,
                     };
                 }));
 
@@ -123,7 +123,7 @@ const MapComponent = () => {
             console.error('Error fetching nearby places:', error);
             alert('Ett fel inträffade vid hämtning av närliggande förskolor.');
         }
-    }, []);
+    }, [map]);
 
     const createMarker = (place) => {
         const marker = new google.maps.Marker({
@@ -154,6 +154,22 @@ const MapComponent = () => {
         });
 
         setMarkers((prevMarkers) => [...prevMarkers, marker]);
+    };
+
+    const handleCardSelect = async (data) => {
+        const cleanName = data.namn.replace(/^(Förskola\s+|Förskolan\s+)/i, '').trim();
+        const pdfData = await fetchPdfDataByName(cleanName);
+        const relevantAddress = extractRelevantAddress(data.adress);
+        const schoolDetails = await fetchSchoolDetailsByAddress(relevantAddress);
+
+        const detailedPlace = {
+            ...data,
+            pdfData: pdfData ? pdfData : null,
+            schoolDetails: schoolDetails ? schoolDetails : null,
+        };
+
+        console.log("Selected place details from card:", detailedPlace);
+        setSelectedPlace(detailedPlace);
     };
 
     const clearMarkers = () => {
@@ -191,10 +207,7 @@ const MapComponent = () => {
                     <PreschoolCard
                         key={place.id}
                         preschool={place}
-                        onSelect={(data) => {
-                            console.log("Selected place from card:", data);
-                            setSelectedPlace(data);
-                        }}
+                        onSelect={handleCardSelect}
                     />
                 ))}
             </div>
