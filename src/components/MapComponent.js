@@ -8,6 +8,7 @@ import { fetchPdfDataByName, fetchSchoolDetailsByAddress, fetchNearbySchools } f
 
 const MapComponent = () => {
     const mapRef = useRef(null);
+    const containerRef = useRef(null);
     const [map, setMap] = useState(null);
     const [geocoder, setGeocoder] = useState(null);
     const [infowindow, setInfowindow] = useState(null);
@@ -57,6 +58,74 @@ const MapComponent = () => {
         } else {
             initMap();
         }
+    }, []);
+
+    useEffect(() => {
+        const dragContainer = containerRef.current;
+        let startY = 0;
+        let startHeight = 0;
+        let animationFrameId;
+
+        const onMouseMove = (e) => {
+            const newHeight = startHeight - (e.clientY - startY);
+            if (newHeight >= 20 && newHeight <= window.innerHeight - 50) {
+                dragContainer.style.height = `${newHeight}px`;
+            }
+        };
+
+        const onTouchMove = (e) => {
+            const touch = e.touches[0];
+            const newHeight = startHeight - (touch.clientY - startY);
+            if (newHeight >= 20 && newHeight <= window.innerHeight - 50) {
+                dragContainer.style.height = `${newHeight}px`;
+            }
+        };
+
+        const onMouseDown = (e) => {
+            startY = e.clientY;
+            startHeight = dragContainer.getBoundingClientRect().height;
+
+            const moveHandler = (e) => {
+                if (animationFrameId) return;
+                animationFrameId = requestAnimationFrame(() => {
+                    onMouseMove(e);
+                    animationFrameId = null;
+                });
+            };
+
+            document.addEventListener('mousemove', moveHandler);
+            document.addEventListener('mouseup', () => {
+                document.removeEventListener('mousemove', moveHandler);
+            }, { once: true });
+        };
+
+        const onTouchStart = (e) => {
+            const touch = e.touches[0];
+            startY = touch.clientY;
+            startHeight = dragContainer.getBoundingClientRect().height;
+
+            const moveHandler = (e) => {
+                if (animationFrameId) return;
+                animationFrameId = requestAnimationFrame(() => {
+                    onTouchMove(e);
+                    animationFrameId = null;
+                });
+            };
+
+            document.addEventListener('touchmove', moveHandler);
+            document.addEventListener('touchend', () => {
+                document.removeEventListener('touchmove', moveHandler);
+            }, { once: true });
+        };
+
+        const dragHandle = dragContainer.querySelector('.drag-handle');
+        dragHandle.addEventListener('mousedown', onMouseDown);
+        dragHandle.addEventListener('touchstart', onTouchStart);
+
+        return () => {
+            dragHandle.removeEventListener('mousedown', onMouseDown);
+            dragHandle.removeEventListener('touchstart', onTouchStart);
+        };
     }, []);
 
     const geocodeAddress = useCallback(() => {
@@ -202,7 +271,8 @@ const MapComponent = () => {
                 <button className="styled-button" onClick={geocodeAddress}>Hitta Förskolor</button>
             </div>
 
-            <div className="cards-container">
+            <div className="cards-container" id="draggable-container" ref={containerRef}>
+                <div className="drag-handle"></div>
                 {showPlaces && nearbyPlaces.map((place) => (
                     <PreschoolCard
                         key={place.id}

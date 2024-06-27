@@ -4,6 +4,11 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
+// Förhindra dubbelklickszoomning
+document.addEventListener('dblclick', function (e) {
+    e.preventDefault();
+}, { passive: false });
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
