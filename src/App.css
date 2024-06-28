@@ -5,22 +5,22 @@ body, html {
   height: 100%;
   width: 100%;
   font-family: 'Roboto', sans-serif;
-  background-color: #f0f2f5;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
-
 
 /* Header */
 .header {
-  height: 200px;
-  background-color: #17bcc2;
+  height: 130px;
+  background-color: rgb(28, 184, 184); /* Genomskinlig bakgrundsfärg */
   text-align: center;
   color: white;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  border-bottom: 3px solid #b5dce7;
+  border-bottom: 3px solid rgba(181, 220, 231, 0.8); /* Genomskinlig kantfärg */
   position: relative;
   top: 0;
-  z-index: 1;
+  z-index: 15;
   animation: slideIn 1s ease-out;
   display: flex;
   align-items: center;
@@ -28,28 +28,40 @@ body, html {
 }
 
 .header-image {
-  width: 50%; /* Adjust percentage as needed */
+  width:300px;
   max-width: 600px; /* Max width to ensure it's not too large */
-  height: auto; /* Ensure the aspect ratio is maintained */
+  height: 120px; /* Ensure the aspect ratio is maintained */
 }
 
 @media (max-width: 768px) {
   .header {
-    height: 100px;
+    height: 80px;
     text-align: center;
     color: white;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border-bottom: 3px solid #b5dce7;
+    border-bottom: 3px solid rgba(181, 220, 231, 0.8); /* Genomskinlig kantfärg */
     position: relative;
     top: 0;
-    z-index: 1; /* Ensure header remains on top */
+    z-index: 10; /* Ensure header remains on top */
     animation: slideIn 1s ease-out;
   }
   
   .header-image {
-    width: 80%; /* Adjust percentage for better visibility */
+    width: 50%; /* Adjust percentage for better visibility */
     max-width: 300px; /* Ensure it's not too large */
-    height: auto; /* Maintain aspect ratio */
+    height: 80px; /* Maintain aspect ratio */
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    height: 80px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .header-image {
+    width: 90%;
+    max-width: 200px;
   }
 }
 
@@ -63,8 +75,6 @@ body, html {
   }
 }
 
-/* Rest of your styles */
-
 /* Container for Map and Cards */
 .app-container {
   display: flex;
@@ -73,27 +83,34 @@ body, html {
   overflow: hidden;
 }
 
+main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
 /* Map Container */
 .map-container {
-  height: 100vh;
+  flex: 1;
   position: relative;
 }
 
 .search-container {
-  margin-top:200px;
+  margin-top: 180px;
   position: absolute;
   top: 10px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 5;
-  background: white;
-  padding: 10px;
+  background-color: white;
+  padding: 20px;
   border-radius: 5px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  width: 500px;
 }
 
 .styled-input {
-  padding: 5px;
+  padding: 10px;
   border: 1px solid #ccc;
   border-radius: 3px;
   width: 300px;
@@ -102,7 +119,7 @@ body, html {
 
 .styled-button {
   padding: 5px 10px;
-  background-color: #007bff;
+  background-color: rgba(0, 123, 255, 0.8); /* Genomskinlig bakgrundsfärg */
   color: white;
   border: none;
   border-radius: 3px;
@@ -110,7 +127,7 @@ body, html {
 }
 
 .styled-button:hover {
-  background-color: #0056b3;
+  background-color: rgba(0, 86, 179, 0.8); /* Genomskinlig bakgrundsfärg vid hover */
 }
 
 /* Cards Container */
@@ -124,36 +141,50 @@ body, html {
   bottom: 0;
   left: 0;
   right: 0;
-  height: 20vh; /* Starta med en liten höjd */
-  background-color: #fafafa;
+  height: 20vh; /* Startar med en liten höjd */
+  background-color: white;
   overflow-y: auto;
   padding: 15px;
   box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
-  transition: height 0.3s ease;
+  transition: height 0.3s ease, bottom 0.3s ease;
   z-index: 10; /* Lägg till hög z-index här */
 }
 
 .drag-handle {
   width: 100%;
-  height: 40px; /* Öka höjden på draghandtaget */
-  background-color: #ddd;
+  height: 30px; /* Justera höjden för att matcha mer exakt */
   text-align: center;
-  cursor: grab;
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
+  cursor: grab; /* Ändra markören till "grab" för en mer intuitiv känsla */
+  border-top-left-radius: 12px; /* Rundare hörn */
+  border-top-right-radius: 12px; /* Rundare hörn */
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 .drag-handle:after {
-  content: 'Drag to resize';
-  font-size: 16px;
-  color: #555;
+  content: '';
+  width: 40px; /* Justera bredden */
+  height: 4px; /* Justera höjden */
+  background-color: rgba(187, 187, 187, 0.8); /* Genomskinlig bakgrundsfärg */
+  border-radius: 2px; /* Rundade kanter */
+  display: block; /* Visa som blockelement */
 }
 
+.cards-container.half-screen {
+  height: 50vh; /* Tar upp halva skärmen */
+}
+
+.cards-container.full-screen {
+  height: 100vh; /* Tar upp hela skärmen */
+}
+
+.cards-container.hidden {
+  height: 0; /* Försvinner från skärmen */
+  bottom: -100px; /* Flytta utanför synfältet */
+}
 .card {
-  background-color: #fff;
+  background-color: white;
   margin: 10px 0;
   padding: 20px;
   border-radius: 15px;
@@ -190,7 +221,6 @@ body, html {
   z-index: 1; /* Se till att kartan har lägre z-index */
 }
 
-
 /* Detailed Card */
 .detailed-card {
   position: fixed;
@@ -198,7 +228,7 @@ body, html {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.7); /* Genomskinlig bakgrundsfärg */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -206,7 +236,7 @@ body, html {
 }
 
 .detailed-card-content {
-  background-color: #fff;
+  background-color: white;
   padding: 30px;
   border-radius: 20px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
@@ -223,7 +253,7 @@ body, html {
 }
 
 .detailed-card button {
-  background: #f44336;
+  background: rgba(244, 67, 54, 0.8); /* Genomskinlig bakgrundsfärg */
   color: #fff;
   border: none;
   padding: 10px;
@@ -242,7 +272,7 @@ body, html {
 }
 
 .detailed-card button:hover {
-  background: #d32f2f;
+  background: rgba(211, 47, 47, 0.8); /* Genomskinlig bakgrundsfärg vid hover */
 }
 
 .detailed-card h2 {
@@ -275,14 +305,15 @@ body, html {
   }
   .search-container {
     display: flex;
-    margin-top:100px;
+    margin-top: 100px;
     position: absolute;
     top: 10px;
     left: 50%;
     transform: translateX(-50%);
     width: 400px;
     z-index: 5;
-    background: white;
+     background-color: white;
+    
     padding: 10px;
     border-radius: 5px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -290,8 +321,8 @@ body, html {
   .styled-button {
     padding: 10px 20px;
     font-size: 9px;
-    margin-left:40px;
-    margin-top:5px;
+    margin-left: 40px;
+    margin-top: 5px;
   }
   
   .card h3 {
@@ -314,68 +345,35 @@ body, html {
 
 /* For mobile devices */
 @media (max-width: 480px) {
-  .header {
-    height: 100px; /* Reduced height for mobile */
-  }
   .search-container {
-    display: flex;
-    margin-top:100px;
-    position: absolute;
-    top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 300px;
-    z-index: 5;
-    background: white;
+    width: 90%;
     padding: 10px;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   }
   .styled-input {
-    width: 30%;
-    padding: 12px 20px;
-    margin-right: 10px;
-    border: 1px solid #ddd;
-    border-radius: 25px;
+    width: 70%;
     font-size: 12px;
-    transition: box-shadow 0.3s ease;
   }
-  
-  
-  
   .styled-button {
-    padding: 6px 12px;
-    background-color: #4285f4;
-    color: #fff;
-    border: none;
-    border-radius: 25px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.3s ease;
+    padding: 5px 10px;
+    font-size: 12px;
+    margin: 0;
   }
-  
-  .header-image {
-    width: 80%; /* Adjust percentage for better visibility */
-    max-width: 300px; /* Ensure it's not too large */
-    height: auto; /* Maintain aspect ratio */
-  }
-
-  
-  
   .card {
-    margin: 5px 0;
     padding: 15px;
   }
-  
   .card h3 {
     font-size: 16px;
   }
-  
   .card p {
-    font-size: 10px;
+    font-size: 12px;
   }
-  
   .detailed-card-content {
-    padding: 15px;
+    width: 95%;
+    padding: 10px;
+  }
+  .detailed-card button {
+    width: 30px;
+    height: 30px;
+    font-size: 16px;
   }
 }

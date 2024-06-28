@@ -15,7 +15,8 @@ const MapComponent = () => {
     const [nearbyPlaces, setNearbyPlaces] = useState([]);
     const [selectedPlace, setSelectedPlace] = useState(null);
     const [showPlaces, setShowPlaces] = useState(false);
-    const [markers, setMarkers] = useState([]);
+    const [currentMarker, setCurrentMarker] = useState(null);
+    const [originMarker, setOriginMarker] = useState(null);
     const [directionsService, setDirectionsService] = useState(null);
     const [directionsRenderer, setDirectionsRenderer] = useState(null);
 
@@ -39,7 +40,7 @@ const MapComponent = () => {
             const directionsService = new google.maps.DirectionsService();
             setDirectionsService(directionsService);
 
-            const directionsRenderer = new google.maps.DirectionsRenderer();
+            const directionsRenderer = new google.maps.DirectionsRenderer({ suppressMarkers: true });
             directionsRenderer.setMap(map);
             setDirectionsRenderer(directionsRenderer);
         };
@@ -64,7 +65,6 @@ const MapComponent = () => {
         const dragContainer = containerRef.current;
         let startY = 0;
         let startHeight = 0;
-        let animationFrameId;
 
         const onMouseMove = (e) => {
             const newHeight = startHeight - (e.clientY - startY);
@@ -85,18 +85,8 @@ const MapComponent = () => {
             startY = e.clientY;
             startHeight = dragContainer.getBoundingClientRect().height;
 
-            const moveHandler = (e) => {
-                if (animationFrameId) return;
-                animationFrameId = requestAnimationFrame(() => {
-                    onMouseMove(e);
-                    animationFrameId = null;
-                });
-            };
-
-            document.addEventListener('mousemove', moveHandler);
-            document.addEventListener('mouseup', () => {
-                document.removeEventListener('mousemove', moveHandler);
-            }, { once: true });
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp, { once: true });
         };
 
         const onTouchStart = (e) => {
@@ -104,18 +94,18 @@ const MapComponent = () => {
             startY = touch.clientY;
             startHeight = dragContainer.getBoundingClientRect().height;
 
-            const moveHandler = (e) => {
-                if (animationFrameId) return;
-                animationFrameId = requestAnimationFrame(() => {
-                    onTouchMove(e);
-                    animationFrameId = null;
-                });
-            };
+            document.addEventListener('touchmove', onTouchMove);
+            document.addEventListener('touchend', onTouchEnd, { once: true });
+        };
 
-            document.addEventListener('touchmove', moveHandler);
-            document.addEventListener('touchend', () => {
-                document.removeEventListener('touchmove', moveHandler);
-            }, { once: true });
+        const onMouseUp = () => {
+            document.removeEventListener('mousemove', onMouseMove);
+            adjustContainerHeight();
+        };
+
+        const onTouchEnd = () => {
+            document.removeEventListener('touchmove', onTouchMove);
+            adjustContainerHeight();
         };
 
         const dragHandle = dragContainer.querySelector('.drag-handle');
@@ -128,6 +118,24 @@ const MapComponent = () => {
         };
     }, []);
 
+    const adjustContainerHeight = () => {
+        const dragContainer = containerRef.current;
+        const height = dragContainer.getBoundingClientRect().height;
+        if (height > window.innerHeight * 0.75) {
+            dragContainer.classList.remove('half-screen');
+            dragContainer.classList.remove('hidden');
+            dragContainer.classList.add('full-screen');
+        } else if (height < window.innerHeight * 0.25) {
+            dragContainer.classList.remove('half-screen');
+            dragContainer.classList.remove('full-screen');
+            dragContainer.classList.add('hidden');
+        } else {
+            dragContainer.classList.remove('full-screen');
+            dragContainer.classList.remove('hidden');
+            dragContainer.classList.add('half-screen');
+        }
+    };
+
     const geocodeAddress = useCallback(() => {
         const address = document.getElementById('address').value.trim();
         if (!address) {
@@ -138,7 +146,13 @@ const MapComponent = () => {
         geocoder.geocode({ address: address }, async (results, status) => {
             if (status === 'OK') {
                 map.setCenter(results[0].geometry.location);
-                const originMarker = new google.maps.Marker({
+                map.setZoom(15); // Zooma in kartan här
+
+                if (originMarker) {
+                    originMarker.setMap(null);
+                }
+
+                const marker = new google.maps.Marker({
                     map: map,
                     position: results[0].geometry.location,
                     icon: {
@@ -146,16 +160,20 @@ const MapComponent = () => {
                     },
                 });
 
+                setOriginMarker(marker);
+
                 console.log("Geocoded location:", results[0].geometry.location);
                 findNearbyPlaces(results[0].geometry.location);
                 setShowPlaces(true);
 
-                setMarkers((prevMarkers) => [...prevMarkers, originMarker]);
+                // Sätt cards-container till halv skärm
+                containerRef.current.classList.remove('hidden');
+                containerRef.current.classList.add('half-screen');
             } else {
                 alert('Search was not successful for the following reason: ' + status);
             }
         });
-    }, [geocoder, map]);
+    }, [geocoder, map, originMarker]);
 
     const extractRelevantAddress = (fullAddress) => {
         const addressParts = fullAddress.split(',');
@@ -195,6 +213,10 @@ const MapComponent = () => {
     }, [map]);
 
     const createMarker = (place) => {
+        if (currentMarker) {
+            currentMarker.setMap(null);
+        }
+
         const marker = new google.maps.Marker({
             map: map,
             position: { lat: place.latitude, lng: place.longitude },
@@ -222,7 +244,7 @@ const MapComponent = () => {
             calculateRoute(document.getElementById('address').value.trim(), { lat: place.latitude, lng: place.longitude });
         });
 
-        setMarkers((prevMarkers) => [...prevMarkers, marker]);
+        setCurrentMarker(marker);
     };
 
     const handleCardSelect = async (data) => {
@@ -239,11 +261,29 @@ const MapComponent = () => {
 
         console.log("Selected place details from card:", detailedPlace);
         setSelectedPlace(detailedPlace);
+
+        if (currentMarker) {
+            currentMarker.setMap(null);
+        }
+
+        const marker = new google.maps.Marker({
+            map: map,
+            position: { lat: data.latitude, lng: data.longitude },
+            title: data.namn
+        });
+
+        infowindow.setContent(data.namn);
+        infowindow.open(map, marker);
+
+        setCurrentMarker(marker);
+
+        calculateRoute(document.getElementById('address').value.trim(), { lat: data.latitude, lng: data.longitude });
     };
 
     const clearMarkers = () => {
-        markers.forEach(marker => marker.setMap(null));
-        setMarkers([]);
+        if (currentMarker) {
+            currentMarker.setMap(null);
+        }
     };
 
     const calculateRoute = (origin, destination) => {
@@ -271,7 +311,7 @@ const MapComponent = () => {
                 <button className="styled-button" onClick={geocodeAddress}>Hitta Förskolor</button>
             </div>
 
-            <div className="cards-container" id="draggable-container" ref={containerRef}>
+            <div className="cards-container hidden" id="draggable-container" ref={containerRef}>
                 <div className="drag-handle"></div>
                 {showPlaces && nearbyPlaces.map((place) => (
                     <PreschoolCard
