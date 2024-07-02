@@ -8,17 +8,18 @@ import { fetchPdfDataByName, fetchSchoolDetailsByAddress, fetchNearbySchools } f
 
 const MapComponent = () => {
     const mapRef = useRef(null);
-    const containerRef = useRef(null);
     const [map, setMap] = useState(null);
     const [geocoder, setGeocoder] = useState(null);
     const [infowindow, setInfowindow] = useState(null);
     const [nearbyPlaces, setNearbyPlaces] = useState([]);
     const [selectedPlace, setSelectedPlace] = useState(null);
     const [showPlaces, setShowPlaces] = useState(false);
-    const [currentMarker, setCurrentMarker] = useState(null);
+    const [currentMarkers, setCurrentMarkers] = useState([]);
     const [originMarker, setOriginMarker] = useState(null);
     const [directionsService, setDirectionsService] = useState(null);
     const [directionsRenderer, setDirectionsRenderer] = useState(null);
+    const [filter, setFilter] = useState('alla');
+    const [view, setView] = useState('map');
 
     useEffect(() => {
         const initMap = () => {
@@ -40,7 +41,23 @@ const MapComponent = () => {
             const directionsService = new google.maps.DirectionsService();
             setDirectionsService(directionsService);
 
-            const directionsRenderer = new google.maps.DirectionsRenderer({ suppressMarkers: true });
+            const directionsRenderer = new google.maps.DirectionsRenderer({
+                suppressMarkers: true,
+                polylineOptions: {
+                    strokeColor: '#39b1b9',
+                    strokeOpacity: 0.7,
+                    strokeWeight: 5,
+                    icons: [{
+                        icon: {
+                            path: google.maps.SymbolPath.FORWARD_OPEN_ARROW,
+                            scale: 3,
+                            strokeColor: '#39b1b9',
+                            strokeOpacity: 0.8
+                        },
+                        repeat: '20px'
+                    }]
+                }
+            });
             directionsRenderer.setMap(map);
             setDirectionsRenderer(directionsRenderer);
         };
@@ -61,129 +78,14 @@ const MapComponent = () => {
         }
     }, []);
 
-    useEffect(() => {
-        const dragContainer = containerRef.current;
-        let startY = 0;
-        let startHeight = 0;
-
-        const onMouseMove = (e) => {
-            const newHeight = startHeight - (e.clientY - startY);
-            if (newHeight >= 20 && newHeight <= window.innerHeight - 50) {
-                dragContainer.style.height = `${newHeight}px`;
-            }
-        };
-
-        const onTouchMove = (e) => {
-            const touch = e.touches[0];
-            const newHeight = startHeight - (touch.clientY - startY);
-            if (newHeight >= 20 && newHeight <= window.innerHeight - 50) {
-                dragContainer.style.height = `${newHeight}px`;
-            }
-        };
-
-        const onMouseDown = (e) => {
-            startY = e.clientY;
-            startHeight = dragContainer.getBoundingClientRect().height;
-
-            document.addEventListener('mousemove', onMouseMove);
-            document.addEventListener('mouseup', onMouseUp, { once: true });
-        };
-
-        const onTouchStart = (e) => {
-            const touch = e.touches[0];
-            startY = touch.clientY;
-            startHeight = dragContainer.getBoundingClientRect().height;
-
-            document.addEventListener('touchmove', onTouchMove);
-            document.addEventListener('touchend', onTouchEnd, { once: true });
-        };
-
-        const onMouseUp = () => {
-            document.removeEventListener('mousemove', onMouseMove);
-            adjustContainerHeight();
-        };
-
-        const onTouchEnd = () => {
-            document.removeEventListener('touchmove', onTouchMove);
-            adjustContainerHeight();
-        };
-
-        const dragHandle = dragContainer.querySelector('.drag-handle');
-        dragHandle.addEventListener('mousedown', onMouseDown);
-        dragHandle.addEventListener('touchstart', onTouchStart);
-
-        return () => {
-            dragHandle.removeEventListener('mousedown', onMouseDown);
-            dragHandle.removeEventListener('touchstart', onTouchStart);
-        };
-    }, []);
-
-    const adjustContainerHeight = () => {
-        const dragContainer = containerRef.current;
-        const height = dragContainer.getBoundingClientRect().height;
-        if (height > window.innerHeight * 0.75) {
-            dragContainer.classList.remove('half-screen');
-            dragContainer.classList.remove('hidden');
-            dragContainer.classList.add('full-screen');
-        } else if (height < window.innerHeight * 0.25) {
-            dragContainer.classList.remove('half-screen');
-            dragContainer.classList.remove('full-screen');
-            dragContainer.classList.add('hidden');
-        } else {
-            dragContainer.classList.remove('full-screen');
-            dragContainer.classList.remove('hidden');
-            dragContainer.classList.add('half-screen');
-        }
-    };
-
-    const geocodeAddress = useCallback(() => {
-        const address = document.getElementById('address').value.trim();
-        if (!address) {
-            alert('Please enter a valid address.');
-            return;
-        }
-
-        geocoder.geocode({ address: address }, async (results, status) => {
-            if (status === 'OK') {
-                map.setCenter(results[0].geometry.location);
-                map.setZoom(15); // Zooma in kartan här
-
-                if (originMarker) {
-                    originMarker.setMap(null);
-                }
-
-                const marker = new google.maps.Marker({
-                    map: map,
-                    position: results[0].geometry.location,
-                    icon: {
-                        url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-                    },
-                });
-
-                setOriginMarker(marker);
-
-                console.log("Geocoded location:", results[0].geometry.location);
-                findNearbyPlaces(results[0].geometry.location);
-                setShowPlaces(true);
-
-                // Sätt cards-container till halv skärm
-                containerRef.current.classList.remove('hidden');
-                containerRef.current.classList.add('half-screen');
-            } else {
-                alert('Search was not successful for the following reason: ' + status);
-            }
-        });
-    }, [geocoder, map, originMarker]);
-
-    const extractRelevantAddress = (fullAddress) => {
-        const addressParts = fullAddress.split(',');
-        return addressParts[0].trim();
+    const handleFilterChange = (event) => {
+        setFilter(event.target.value);
     };
 
     const findNearbyPlaces = useCallback(async (location) => {
         try {
-            console.log(`Fetching nearby places for lat: ${location.lat()}, lng: ${location.lng()}`);
-            const places = await fetchNearbySchools(location.lat(), location.lng());
+            console.log(`Fetching nearby places for lat: ${location.lat()}, lng: ${location.lng()} with filter: ${filter}`);
+            const places = await fetchNearbySchools(location.lat(), location.lng(), filter);
 
             if (places.length > 0) {
                 console.log("Nearby places found:", places);
@@ -210,116 +112,153 @@ const MapComponent = () => {
             console.error('Error fetching nearby places:', error);
             alert('Ett fel inträffade vid hämtning av närliggande förskolor.');
         }
-    }, [map]);
+    }, [map, filter]);
 
-    const createMarker = (place) => {
-        if (currentMarker) {
-            currentMarker.setMap(null);
+    const geocodeAddress = useCallback(() => {
+        const address = document.getElementById('address').value.trim();
+        if (!address) {
+            alert('Please enter a valid address.');
+            return;
         }
 
+        geocoder.geocode({ address: address }, async (results, status) => {
+            if (status === 'OK') {
+                map.setCenter(results[0].geometry.location);
+                
+
+                if (originMarker) {
+                    originMarker.setMap(null);
+                }
+
+                const marker = new google.maps.Marker({
+                    map: map,
+                    position: results[0].geometry.location,
+                    icon: {
+                        url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+                    },
+                });
+
+                setOriginMarker(marker);
+
+                console.log("Geocoded location:", results[0].geometry.location);
+                findNearbyPlaces(results[0].geometry.location);
+                setShowPlaces(true);
+            } else {
+                alert('Search was not successful for the following reason: ' + status);
+            }
+        });
+    }, [geocoder, map, originMarker, findNearbyPlaces]);
+
+    const extractRelevantAddress = (fullAddress) => {
+        const addressParts = fullAddress.split(',');
+        return addressParts[0].trim();
+    };
+
+    const createMarker = (place) => {
         const marker = new google.maps.Marker({
             map: map,
             position: { lat: place.latitude, lng: place.longitude },
             title: place.namn
         });
 
-        marker.addListener('click', async () => {
-            infowindow.setContent(place.namn);
-            infowindow.open(map, marker);
-
-            const cleanName = place.namn.replace(/^(Förskola\s+|Förskolan\s+)/i, '').trim();
-            const pdfData = await fetchPdfDataByName(cleanName);
-            const relevantAddress = extractRelevantAddress(place.adress);
-            const schoolDetails = await fetchSchoolDetailsByAddress(relevantAddress);
-
-            const detailedPlace = {
-                ...place,
-                pdfData: pdfData ? pdfData : null,
-                schoolDetails: schoolDetails ? schoolDetails : null,
-            };
-
-            console.log("Selected place details:", detailedPlace);
-            setSelectedPlace(detailedPlace);
-
-            calculateRoute(document.getElementById('address').value.trim(), { lat: place.latitude, lng: place.longitude });
+        marker.addListener('click', () => {
+            selectPlace(place);
         });
 
-        setCurrentMarker(marker);
+        setCurrentMarkers((prevMarkers) => [...prevMarkers, marker]);
     };
 
-    const handleCardSelect = async (data) => {
-        const cleanName = data.namn.replace(/^(Förskola\s+|Förskolan\s+)/i, '').trim();
+    const selectPlace = async (place) => {
+        const cleanName = place.namn.replace(/^(Förskola\s+|Förskolan\s+)/i, '').trim();
         const pdfData = await fetchPdfDataByName(cleanName);
-        const relevantAddress = extractRelevantAddress(data.adress);
+        const relevantAddress = extractRelevantAddress(place.adress);
         const schoolDetails = await fetchSchoolDetailsByAddress(relevantAddress);
 
         const detailedPlace = {
-            ...data,
+            ...place,
             pdfData: pdfData ? pdfData : null,
             schoolDetails: schoolDetails ? schoolDetails : null,
         };
 
-        console.log("Selected place details from card:", detailedPlace);
+        console.log("Selected place details:", detailedPlace);
         setSelectedPlace(detailedPlace);
 
-        if (currentMarker) {
-            currentMarker.setMap(null);
+        if (view === 'map') {
+            calculateRoute(document.getElementById('address').value.trim(), { lat: place.latitude, lng: place.longitude }, place);
         }
+    };
 
-        const marker = new google.maps.Marker({
-            map: map,
-            position: { lat: data.latitude, lng: data.longitude },
-            title: data.namn
-        });
-
-        infowindow.setContent(data.namn);
-        infowindow.open(map, marker);
-
-        setCurrentMarker(marker);
-
-        calculateRoute(document.getElementById('address').value.trim(), { lat: data.latitude, lng: data.longitude });
+    const handleCardSelect = (place) => {
+        selectPlace(place);
     };
 
     const clearMarkers = () => {
-        if (currentMarker) {
-            currentMarker.setMap(null);
-        }
+        currentMarkers.forEach(marker => marker.setMap(null));
+        setCurrentMarkers([]);
     };
 
-    const calculateRoute = (origin, destination) => {
+    const calculateRoute = (origin, destination, place) => {
         const request = {
             origin: origin,
             destination: destination,
-            travelMode: google.maps.TravelMode.DRIVING,
+            travelMode: google.maps.TravelMode.WALKING,
         };
 
         directionsService.route(request, (result, status) => {
             if (status === google.maps.DirectionsStatus.OK) {
                 directionsRenderer.setDirections(result);
+                const route = result.routes[0];
+                const duration = route.legs[0].duration.text;
+                infowindow.setContent(`${place.namn}<br>Gångtid: ${duration}`);
+                infowindow.open(map, currentMarkers.find(marker => marker.getPosition().lat() === place.latitude && marker.getPosition().lng() === place.longitude));
             } else {
                 alert('Could not display directions due to: ' + status);
             }
         });
     };
 
+    const toggleView = () => {
+        setView(view === 'map' ? 'list' : 'map');
+    };
+
+    useEffect(() => {
+        console.log("View changed to:", view);
+    }, [view]);
+
+    useEffect(() => {
+        console.log("Nearby places updated:", nearbyPlaces);
+    }, [nearbyPlaces]);
+
     return (
         <div className="app-container">
-            <div ref={mapRef} className="map-container"></div>
-
             <div className="search-container">
                 <input id="address" type="text" className="styled-input" placeholder="Ange Address eller Förskolans Namn" />
                 <button className="styled-button" onClick={geocodeAddress}>Hitta Förskolor</button>
+                <select className="styled-select" value={filter} onChange={handleFilterChange}>
+                    <option value="alla">Alla</option>
+                    <option value="Fristående">Fristående</option>
+                    <option value="kommunal">Kommunal</option>
+                    <option value="Fristående (föräldrakooperativ)">Föräldrakooperativ</option>
+                </select>
+                <button className="styled-button" onClick={toggleView}>
+                    {view === 'map' ? 'Visa Lista' : 'Visa Karta'}
+                </button>
             </div>
 
-            <div className="cards-container hidden" id="draggable-container" ref={containerRef}>
-                <div className="drag-handle"></div>
-                {showPlaces && nearbyPlaces.map((place) => (
-                    <PreschoolCard
-                        key={place.id}
-                        preschool={place}
-                        onSelect={handleCardSelect}
-                    />
-                ))}
+            <div ref={mapRef} className={`map-container ${view === 'list' ? 'hidden' : ''}`}></div>
+
+            <div className={`cards-container ${view === 'map' ? 'hidden' : ''}`}>
+                {showPlaces && nearbyPlaces.length > 0 ? (
+                    nearbyPlaces.map((place) => (
+                        <PreschoolCard
+                            key={place.id}
+                            preschool={place}
+                            onSelect={handleCardSelect}
+                        />
+                    ))
+                ) : (
+                    <p>Inga förskolor hittades.</p>
+                )}
             </div>
 
             {selectedPlace && (

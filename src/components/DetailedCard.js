@@ -1,7 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const DetailedCard = ({ schoolData, onClose }) => {
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTimes, faMapMarkerAlt, faClock } from '@fortawesome/free-solid-svg-icons';
+
+const DetailedCard = ({ schoolData, onClose, walkTime }) => {
   console.log('DetailedCard data:', schoolData);
 
   const { namn, adress, pdfData, schoolDetails, description } = schoolData;
@@ -9,17 +12,17 @@ const DetailedCard = ({ schoolData, onClose }) => {
   return (
     <div className="detailed-card">
       <div className="detailed-card-content">
-        <button onClick={onClose}>×</button>
+        <button onClick={onClose} className="close-button"><FontAwesomeIcon icon={faTimes} /></button>
         <h2>{namn}</h2>
-        <p>{adress}</p>
+        <p><FontAwesomeIcon icon={faMapMarkerAlt} /> {adress}</p>
         {pdfData && (
-          <div>
+          <div className="pdf-details">
             <p>Helhetsomdome: {pdfData.helhetsomdome}</p>
             <p>Svarsfrekvens: {pdfData.svarsfrekvens}</p>
           </div>
         )}
         {schoolDetails && (
-          <div>
+          <div className="school-details">
             <h3>School Address Details:</h3>
             <p>Typ av Service: {schoolDetails.typAvService}</p>
             <p>Verksam i: {schoolDetails.verksamI}</p>
@@ -33,10 +36,10 @@ const DetailedCard = ({ schoolData, onClose }) => {
           </div>
         )}
         {schoolDetails && schoolDetails.kontakter && schoolDetails.kontakter.$values && schoolDetails.kontakter.$values.length > 0 && (
-          <div>
+          <div className="contacts">
             <h3>Kontaktinformation:</h3>
             {schoolDetails.kontakter.$values.map((kontakt, index) => (
-              <div key={index}>
+              <div key={index} className="contact-card">
                 <p>Namn: {kontakt.namn}</p>
                 <p>Roll: {kontakt.roll}</p>
                 <p>Epost: {kontakt.epost}</p>
@@ -45,8 +48,8 @@ const DetailedCard = ({ schoolData, onClose }) => {
             ))}
           </div>
         )}
-        {adress && <p>Address: {adress}</p>}
-        {description && <p>Description: {description}</p>}
+        {description && <p className="description">{description}</p>}
+        {walkTime && <p className="walk-time"><FontAwesomeIcon icon={faClock} /> Estimated walk time: {walkTime}</p>}
       </div>
     </div>
   );
@@ -61,6 +64,7 @@ DetailedCard.propTypes = {
     description: PropTypes.string,
   }).isRequired,
   onClose: PropTypes.func.isRequired,
+  walkTime: PropTypes.string,
 };
 
 export default DetailedCard;

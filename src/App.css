@@ -13,11 +13,9 @@ body, html {
 /* Header */
 .header {
   height: 130px;
-  background-color: rgb(28, 184, 184); /* Genomskinlig bakgrundsfärg */
+  background-color: #39b1b9;
   text-align: center;
   color: white;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  border-bottom: 3px solid rgba(181, 220, 231, 0.8); /* Genomskinlig kantfärg */
   position: relative;
   top: 0;
   z-index: 15;
@@ -28,9 +26,9 @@ body, html {
 }
 
 .header-image {
-  width:300px;
-  max-width: 600px; /* Max width to ensure it's not too large */
-  height: 120px; /* Ensure the aspect ratio is maintained */
+  width: 300px;
+  max-width: 600px;
+  height: 120px;
 }
 
 @media (max-width: 768px) {
@@ -38,18 +36,16 @@ body, html {
     height: 80px;
     text-align: center;
     color: white;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border-bottom: 3px solid rgba(181, 220, 231, 0.8); /* Genomskinlig kantfärg */
     position: relative;
     top: 0;
-    z-index: 10; /* Ensure header remains on top */
+    z-index: 10;
     animation: slideIn 1s ease-out;
   }
-  
+
   .header-image {
-    width: 50%; /* Adjust percentage for better visibility */
-    max-width: 300px; /* Ensure it's not too large */
-    height: 80px; /* Maintain aspect ratio */
+    width: 50%;
+    max-width: 300px;
+    height: 80px;
   }
 }
 
@@ -80,7 +76,7 @@ body, html {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  overflow: hidden;
+
 }
 
 main {
@@ -101,7 +97,7 @@ main {
   top: 10px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 5;
+  z-index: 600;
   background-color: white;
   padding: 20px;
   border-radius: 5px;
@@ -111,88 +107,59 @@ main {
 
 .styled-input {
   padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 3px;
-  width: 300px;
+  border: none;
+  width: 400px;
   margin-right: 10px;
 }
 
 .styled-button {
-  padding: 5px 10px;
-  background-color: rgba(0, 123, 255, 0.8); /* Genomskinlig bakgrundsfärg */
+  padding: 10px 20px;
+  background-color: #39b1b9;
   color: white;
   border: none;
   border-radius: 3px;
   cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
 .styled-button:hover {
-  background-color: rgba(0, 86, 179, 0.8); /* Genomskinlig bakgrundsfärg vid hover */
+  background-color: #2a8a92;
+}
+
+.styled-select {
+  padding: 10px;
+  border: none;
+  border-radius: 3px;
+  background-color: #f1f1f1;
+  margin-right: 10px;
+  margin-top: 10px;
 }
 
 /* Cards Container */
-#draggable-container {
-  position: absolute;
-  cursor: grab;
-}
-
 .cards-container {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 20vh; /* Startar med en liten höjd */
-  background-color: white;
+  flex: 1;
   overflow-y: auto;
   padding: 15px;
-  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
-  transition: height 0.3s ease, bottom 0.3s ease;
-  z-index: 10; /* Lägg till hög z-index här */
-}
-
-.drag-handle {
-  width: 100%;
-  height: 30px; /* Justera höjden för att matcha mer exakt */
-  text-align: center;
-  cursor: grab; /* Ändra markören till "grab" för en mer intuitiv känsla */
-  border-top-left-radius: 12px; /* Rundare hörn */
-  border-top-right-radius: 12px; /* Rundare hörn */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.drag-handle:after {
-  content: '';
-  width: 40px; /* Justera bredden */
-  height: 4px; /* Justera höjden */
-  background-color: rgba(187, 187, 187, 0.8); /* Genomskinlig bakgrundsfärg */
-  border-radius: 2px; /* Rundade kanter */
-  display: block; /* Visa som blockelement */
-}
-
-.cards-container.half-screen {
-  height: 50vh; /* Tar upp halva skärmen */
-}
-
-.cards-container.full-screen {
-  height: 100vh; /* Tar upp hela skärmen */
+  padding-top: 200px;
+ 
+  background-color: #f9f9f9;
+  position: relative;
+  z-index: 10;
 }
 
 .cards-container.hidden {
-  height: 0; /* Försvinner från skärmen */
-  bottom: -100px; /* Flytta utanför synfältet */
+  display: none;
 }
+
 .card {
-  background-color: white;
-  margin: 10px 0;
-  padding: 20px;
-  border-radius: 15px;
+  background: linear-gradient(135deg, #ff7e5f, #feb47b);
+  border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  color: #fff;
   cursor: pointer;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  width: 100%;
-  box-sizing: border-box;
+  margin: 20px;
+  padding: 20px;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .card:hover {
@@ -200,17 +167,41 @@ main {
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
-.card h3 {
-  margin: 0;
-  font-size: 20px;
-  color: #333;
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.card p {
-  margin: 10px 0 0;
-  font-size: 14px;
-  color: #666;
+.card-header h3 {
+  margin: 0;
+  font-size: 1.5em;
 }
+
+.card-body {
+  margin-top: 10px;
+}
+
+.card-body p {
+  margin: 5px 0;
+}
+
+.details {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  margin-top: 10px;
+  padding: 10px;
+}
+
+.details p {
+  display: flex;
+  justify-content: space-between;
+}
+
+.details span {
+  font-weight: bold;
+}
+
 
 .map-container {
   position: absolute;
@@ -218,7 +209,7 @@ main {
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 1; /* Se till att kartan har lägre z-index */
+  z-index: 1;
 }
 
 /* Detailed Card */
@@ -228,7 +219,7 @@ main {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.7); /* Genomskinlig bakgrundsfärg */
+  background-color: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -253,7 +244,7 @@ main {
 }
 
 .detailed-card button {
-  background: rgba(244, 67, 54, 0.8); /* Genomskinlig bakgrundsfärg */
+  background: rgba(244, 67, 54, 0.8);
   color: #fff;
   border: none;
   padding: 10px;
@@ -272,7 +263,7 @@ main {
 }
 
 .detailed-card button:hover {
-  background: rgba(211, 47, 47, 0.8); /* Genomskinlig bakgrundsfärg vid hover */
+  background: rgba(211, 47, 47, 0.8);
 }
 
 .detailed-card h2 {
@@ -304,43 +295,28 @@ main {
     font-size: 14px;
   }
   .search-container {
-    display: flex;
+    width: 80%;
     margin-top: 100px;
-    position: absolute;
-    top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 400px;
-    z-index: 5;
-     background-color: white;
     
-    padding: 10px;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+   
   }
   .styled-button {
     padding: 10px 20px;
     font-size: 9px;
-    margin-left: 40px;
+    margin-right: 10px;
     margin-top: 5px;
+    
   }
-  
+
   .card h3 {
     font-size: 18px;
   }
-  
+
   .card p {
     font-size: 12px;
   }
+
   
-  .detailed-card-content {
-    padding: 20px;
-  }
-  
-  .detailed-card button {
-    top: 15px;
-    right: 15px;
-  }
 }
 
 /* For mobile devices */
@@ -348,6 +324,7 @@ main {
   .search-container {
     width: 90%;
     padding: 10px;
+    margin-right: 7px;
   }
   .styled-input {
     width: 70%;
@@ -367,13 +344,51 @@ main {
   .card p {
     font-size: 12px;
   }
-  .detailed-card-content {
-    width: 95%;
-    padding: 10px;
-  }
-  .detailed-card button {
-    width: 30px;
-    height: 30px;
-    font-size: 16px;
-  }
+  
+}
+
+
+.detailed-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.detailed-card-content {
+  padding: 20px;
+  position: relative;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: #333;
+  font-size: 1.5em;
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  cursor: pointer;
+}
+
+h2 {
+  margin-top: 0;
+  font-size: 2em;
+}
+
+p {
+  margin: 10px 0;
+}
+
+.pdf-details, .school-details, .contacts {
+  margin-top: 20px;
+}
+
+
+.description {
+  font-style: italic;
+  margin-top: 20px;
+}
+
+.walk-time {
+  margin-top: 20px;
+  font-weight: bold;
 }
