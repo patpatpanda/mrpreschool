@@ -17,8 +17,8 @@ const DetailedCard = ({ schoolData, onClose, walkTime }) => {
         <p><FontAwesomeIcon icon={faMapMarkerAlt} /> {adress}</p>
         {pdfData && (
           <div className="pdf-details">
-            <p>Helhetsomdome: {pdfData.helhetsomdome}</p>
-            <p>Svarsfrekvens: {pdfData.svarsfrekvens}</p>
+            <p>Helhetsomdome: {pdfData.helhetsomdome}%</p>
+            <p>Svarsfrekvens: {pdfData.svarsfrekvens}%</p>
           </div>
         )}
         {schoolDetails && (

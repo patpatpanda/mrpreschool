@@ -6,6 +6,7 @@ const backendUrl = 'https://masterkinder20240523125154.azurewebsites.net';
 const normalizeName = (name) => {
   let normalizedName = name.replace(/^(Förskola\s+|Förskolan\s+)/i, '').trim();
   normalizedName = normalizedName.replace(/(\s+Förskola|\s+Förskolan)$/i, '').trim();
+  normalizedName = normalizedName.replace(/[^\w\s]/gi, '').toLowerCase(); // Remove special characters and make lowercase
   return normalizedName;
 };
 
@@ -16,12 +17,17 @@ export const fetchPdfDataByName = async (name) => {
     const encodedName = encodeURIComponent(normalizedName);
     const url = `${backendUrl}/api/PdfData/name/${encodedName}`;
     const response = await axios.get(url);
-    return response.data?.$values[0] || null;
+
+    const pdfData = response.data?.$values || [];
+    const filteredPdfData = pdfData.filter(data => data.helhetsomdome && data.svarsfrekvens && data.antalSvar);
+
+    return filteredPdfData.length > 0 ? filteredPdfData[0] : null;
   } catch (error) {
     console.error(`Error fetching PdfData by name (${name}):`, error);
     return null;
   }
 };
+
 
 // Funktion för att hämta förskoledata baserat på adress
 export const fetchSchoolDetailsByAddress = async (address) => {

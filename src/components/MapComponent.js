@@ -20,6 +20,7 @@ const MapComponent = () => {
     const [directionsRenderer, setDirectionsRenderer] = useState(null);
     const [filter, setFilter] = useState('alla');
     const [view, setView] = useState('map');
+    const [walkingTime, setWalkingTime] = useState('');
 
     useEffect(() => {
         const initMap = () => {
@@ -209,6 +210,7 @@ const MapComponent = () => {
                 directionsRenderer.setDirections(result);
                 const route = result.routes[0];
                 const duration = route.legs[0].duration.text;
+                setWalkingTime(duration);
                 infowindow.setContent(`${place.namn}<br>Gångtid: ${duration}`);
                 infowindow.open(map, currentMarkers.find(marker => marker.getPosition().lat() === place.latitude && marker.getPosition().lng() === place.longitude));
             } else {
@@ -243,6 +245,7 @@ const MapComponent = () => {
                 <button className="styled-button" onClick={toggleView}>
                     {view === 'map' ? 'Visa Lista' : 'Visa Karta'}
                 </button>
+                {walkingTime && <p>Gångtid till vald förskola: {walkingTime}</p>}
             </div>
 
             <div ref={mapRef} className={`map-container ${view === 'list' ? 'hidden' : ''}`}></div>
