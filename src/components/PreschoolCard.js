@@ -1,26 +1,32 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-
+import { Card, CardContent, CardHeader, Typography } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMapMarkerAlt, faInfoCircle } from '@fortawesome/free-solid-svg-icons';
 
 const PreschoolCard = ({ preschool, onSelect }) => (
-  <div onClick={() => onSelect(preschool)} className="card">
-    <div className="card-header">
-      <h3>{preschool.namn}</h3>
-    </div>
-    <div className="card-body">
-      <p><FontAwesomeIcon icon={faMapMarkerAlt} /> {preschool.adress}</p>
-      {preschool.description && <p><FontAwesomeIcon icon={faInfoCircle} /> {preschool.description}</p>}
+  <Card onClick={() => onSelect(preschool)} className="card" sx={{ backgroundColor: '#FFF9C4', borderRadius: '20px', boxShadow: 3 }}>
+    <CardHeader
+      title={<Typography variant="h3" sx={{ color: '#E91E63' }}>{preschool.namn}</Typography>}
+    />
+    <CardContent className="card-body">
+      <Typography variant="body1" sx={{ color: '#4CAF50' }}>
+        <FontAwesomeIcon icon={faMapMarkerAlt} /> {preschool.adress}
+      </Typography>
+      {preschool.description && (
+        <Typography variant="body1" sx={{ color: '#FF5722' }}>
+          <FontAwesomeIcon icon={faInfoCircle} /> {preschool.description}
+        </Typography>
+      )}
       {preschool.pdfData && (
         <div className="details">
-          <p><span>Antal Svar:</span> {preschool.pdfData.antalSvar}st</p>
-          <p><span>Helhetsomdome:</span> {preschool.pdfData.helhetsomdome}%</p>
-          <p><span>Svarsfrekvens:</span> {preschool.pdfData.svarsfrekvens}%</p>
+          <Typography variant="body2"><span>Antal Svar:</span> {preschool.pdfData.antalSvar}st</Typography>
+          <Typography variant="body2"><span>Helhetsomdome:</span> {preschool.pdfData.helhetsomdome}%</Typography>
+          <Typography variant="body2"><span>Svarsfrekvens:</span> {preschool.pdfData.svarsfrekvens}%</Typography>
         </div>
       )}
-    </div>
-  </div>
+    </CardContent>
+  </Card>
 );
 
 PreschoolCard.propTypes = {

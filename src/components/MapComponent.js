@@ -3,6 +3,11 @@ import PreschoolCard from './PreschoolCard';
 import DetailedCard from './DetailedCard';
 import '../styles/GoogleMap.css';
 import { fetchPdfDataByName, fetchSchoolDetailsByAddress, fetchNearbySchools } from './api';
+import { TextField, Button, Select, MenuItem, InputLabel, FormControl, Container, Box } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import ListIcon from '@mui/icons-material/List';
+import MapIcon from '@mui/icons-material/Map';
 
 /*global google*/
 
@@ -20,7 +25,7 @@ const MapComponent = () => {
     const [directionsRenderer, setDirectionsRenderer] = useState(null);
     const [filter, setFilter] = useState('alla');
     const [view, setView] = useState('map');
-    const [walkingTime, setWalkingTime] = useState('');
+    const [walkingTimes, setWalkingTimes] = useState({});
 
     useEffect(() => {
         const initMap = () => {
@@ -105,7 +110,10 @@ const MapComponent = () => {
                 console.log("Detailed results:", detailedResults);
                 setNearbyPlaces(detailedResults);
                 clearMarkers();
-                detailedResults.forEach(result => createMarker(result));
+                detailedResults.forEach(result => {
+                    createMarker(result);
+                    calculateRoute(document.getElementById('address').value.trim(), { lat: result.latitude, lng: result.longitude }, result);
+                });
             } else {
                 alert('Inga förskolor hittades på den angivna adressen.');
             }
@@ -125,7 +133,6 @@ const MapComponent = () => {
         geocoder.geocode({ address: address }, async (results, status) => {
             if (status === 'OK') {
                 map.setCenter(results[0].geometry.location);
-                
 
                 if (originMarker) {
                     originMarker.setMap(null);
@@ -210,7 +217,10 @@ const MapComponent = () => {
                 directionsRenderer.setDirections(result);
                 const route = result.routes[0];
                 const duration = route.legs[0].duration.text;
-                setWalkingTime(duration);
+                setWalkingTimes((prevTimes) => ({
+                    ...prevTimes,
+                    [place.id]: duration,
+                }));
                 infowindow.setContent(`${place.namn}<br>Gångtid: ${duration}`);
                 infowindow.open(map, currentMarkers.find(marker => marker.getPosition().lat() === place.latitude && marker.getPosition().lng() === place.longitude));
             } else {
@@ -233,19 +243,43 @@ const MapComponent = () => {
 
     return (
         <div className="app-container">
-            <div className="search-container">
-                <input id="address" type="text" className="styled-input" placeholder="Ange Address eller Förskolans Namn" />
-                <button className="styled-button" onClick={geocodeAddress}>Hitta Förskolor</button>
-                <select className="styled-select" value={filter} onChange={handleFilterChange}>
-                    <option value="alla">Alla</option>
-                    <option value="Fristående">Fristående</option>
-                    <option value="kommunal">Kommunal</option>
-                    <option value="Fristående (föräldrakooperativ)">Föräldrakooperativ</option>
-                </select>
-                <button className="styled-button" onClick={toggleView}>
-                    {view === 'map' ? 'Visa Lista' : 'Visa Karta'}
-                </button>
-                {walkingTime && <p>Gångtid till vald förskola: {walkingTime}</p>}
+            <div className={`search-container ${showPlaces ? 'top' : 'center'}`}>
+                <Container maxWidth="sm">
+                    <Box display="flex" alignItems="center" justifyContent="center" flexWrap="wrap" gap={2}>
+                        <TextField
+                            id="address"
+                            variant="outlined"
+                            placeholder="Ange Address eller Förskolans Namn"
+                            fullWidth
+                            sx={{ backgroundColor: 'white', color: 'black' }}
+                            InputProps={{
+                                style: { color: 'black' },
+                                endAdornment: (
+                                    <Button onClick={geocodeAddress} variant="contained" color="primary" startIcon={<SearchIcon />}>
+                                        Sök
+                                    </Button>
+                                ),
+                            }}
+                        />
+                        <FormControl fullWidth sx={{ backgroundColor: 'white' }}>
+                            <InputLabel sx={{ color: 'black' }}>Filter</InputLabel>
+                            <Select
+                                value={filter}
+                                onChange={handleFilterChange}
+                                sx={{ color: 'black' }}
+                                startIcon={<FilterListIcon />}
+                            >
+                                <MenuItem value="alla">Alla</MenuItem>
+                                <MenuItem value="Fristående">Fristående</MenuItem>
+                                <MenuItem value="kommunal">Kommunal</MenuItem>
+                                <MenuItem value="Fristående (föräldrakooperativ)">Föräldrakooperativ</MenuItem>
+                            </Select>
+                        </FormControl>
+                        <Button onClick={toggleView} variant="contained" color="secondary" startIcon={view === 'map' ? <ListIcon /> : <MapIcon />}>
+                            {view === 'map' ? 'Visa Lista' : 'Visa Karta'}
+                        </Button>
+                    </Box>
+                </Container>
             </div>
 
             <div ref={mapRef} className={`map-container ${view === 'list' ? 'hidden' : ''}`}></div>
@@ -256,6 +290,7 @@ const MapComponent = () => {
                         <PreschoolCard
                             key={place.id}
                             preschool={place}
+                            walkingTime={walkingTimes[place.id]}
                             onSelect={handleCardSelect}
                         />
                     ))
