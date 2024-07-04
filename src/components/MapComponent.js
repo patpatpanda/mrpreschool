@@ -262,7 +262,7 @@ const MapComponent = () => {
                             }}
                         />
                         <FormControl fullWidth sx={{ backgroundColor: 'white' }}>
-                            <InputLabel sx={{ color: 'black' }}>Filter</InputLabel>
+                            <InputLabel sx={{ color: 'black' }}></InputLabel>
                             <Select
                                 value={filter}
                                 onChange={handleFilterChange}
