@@ -58,9 +58,10 @@ export const fetchSchoolDetailsByAddress = async (address) => {
 
 
 // Funktion för att hämta närliggande förskolor baserat på latitud och longitud
-export const fetchNearbySchools = async (lat, lng) => {
+// Funktion för att hämta närliggande förskolor baserat på latitud och longitud
+export const fetchNearbySchools = async (lat, lng, organisationsform, typAvService) => {
   try {
-    const url = `${backendUrl}/api/Forskolan/nearby/${lat}/${lng}`;
+    const url = `${backendUrl}/api/Forskolan/nearby/${lat}/${lng}?organisationsform=${organisationsform}&typAvService=${typAvService}`;
     const response = await axios.get(url);
     return response.data?.$values || [];
   } catch (error) {
@@ -68,3 +69,4 @@ export const fetchNearbySchools = async (lat, lng) => {
     return [];
   }
 };
+

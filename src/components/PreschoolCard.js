@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Card, CardContent, CardHeader, Typography } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMapMarkerAlt, faInfoCircle } from '@fortawesome/free-solid-svg-icons';
+import { faMapMarkerAlt,} from '@fortawesome/free-solid-svg-icons';
 
 const PreschoolCard = ({ preschool, onSelect }) => (
   <Card onClick={() => onSelect(preschool)} className="card" sx={{ backgroundColor: '#FFF9C4', borderRadius: '20px', boxShadow: 3 }}>
@@ -15,7 +15,7 @@ const PreschoolCard = ({ preschool, onSelect }) => (
       </Typography>
       {preschool.description && (
         <Typography variant="body1" sx={{ color: '#FF5722' }}>
-          <FontAwesomeIcon icon={faInfoCircle} /> {preschool.description}
+          
         </Typography>
       )}
       {preschool.pdfData && (

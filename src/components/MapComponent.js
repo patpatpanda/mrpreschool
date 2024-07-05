@@ -5,7 +5,7 @@ import '../styles/GoogleMap.css';
 import { fetchPdfDataByName, fetchSchoolDetailsByAddress, fetchNearbySchools } from './api';
 import { TextField, Button, Select, MenuItem, InputLabel, FormControl, Container, Box } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import FilterListIcon from '@mui/icons-material/FilterList';
+
 import ListIcon from '@mui/icons-material/List';
 import MapIcon from '@mui/icons-material/Map';
 
@@ -24,8 +24,10 @@ const MapComponent = () => {
     const [directionsService, setDirectionsService] = useState(null);
     const [directionsRenderer, setDirectionsRenderer] = useState(null);
     const [filter, setFilter] = useState('alla');
-    const [view, setView] = useState('map');
+    const [serviceType, setServiceType] = useState('alla');
+    const [view, setView] = useState('list'); // Ändra standardvärdet till 'list'
     const [walkingTimes, setWalkingTimes] = useState({});
+    const [showText, setShowText] = useState(true); // Ny state för att hantera synlighet av texten
 
     useEffect(() => {
         const initMap = () => {
@@ -88,13 +90,15 @@ const MapComponent = () => {
         setFilter(event.target.value);
     };
 
+    const handleServiceTypeChange = (event) => {
+        setServiceType(event.target.value);
+    };
+
     const findNearbyPlaces = useCallback(async (location) => {
         try {
-            console.log(`Fetching nearby places for lat: ${location.lat()}, lng: ${location.lng()} with filter: ${filter}`);
-            const places = await fetchNearbySchools(location.lat(), location.lng(), filter);
+            const places = await fetchNearbySchools(location.lat(), location.lng(), filter, serviceType);
 
             if (places.length > 0) {
-                console.log("Nearby places found:", places);
                 const detailedResults = await Promise.all(places.map(async (place) => {
                     const cleanName = place.namn.replace(/^(Förskola\s+|Förskolan\s+)/i, '').trim();
                     const pdfData = await fetchPdfDataByName(cleanName);
@@ -107,7 +111,6 @@ const MapComponent = () => {
                     };
                 }));
 
-                console.log("Detailed results:", detailedResults);
                 setNearbyPlaces(detailedResults);
                 clearMarkers();
                 detailedResults.forEach(result => {
@@ -121,7 +124,7 @@ const MapComponent = () => {
             console.error('Error fetching nearby places:', error);
             alert('Ett fel inträffade vid hämtning av närliggande förskolor.');
         }
-    }, [map, filter]);
+    }, [map, filter, serviceType]);
 
     const geocodeAddress = useCallback(() => {
         const address = document.getElementById('address').value.trim();
@@ -148,9 +151,9 @@ const MapComponent = () => {
 
                 setOriginMarker(marker);
 
-                console.log("Geocoded location:", results[0].geometry.location);
                 findNearbyPlaces(results[0].geometry.location);
                 setShowPlaces(true);
+                setShowText(false); // Dölj texten när en sökning görs
             } else {
                 alert('Search was not successful for the following reason: ' + status);
             }
@@ -188,7 +191,6 @@ const MapComponent = () => {
             schoolDetails: schoolDetails ? schoolDetails : null,
         };
 
-        console.log("Selected place details:", detailedPlace);
         setSelectedPlace(detailedPlace);
 
         if (view === 'map') {
@@ -234,15 +236,18 @@ const MapComponent = () => {
     };
 
     useEffect(() => {
-        console.log("View changed to:", view);
-    }, [view]);
-
-    useEffect(() => {
-        console.log("Nearby places updated:", nearbyPlaces);
-    }, [nearbyPlaces]);
+        if (originMarker) {
+            findNearbyPlaces(originMarker.getPosition());
+        }
+    }, [filter, serviceType]);
 
     return (
         <div className="app-container">
+            {showText && (
+                <div className="initial-text">
+                    <h1>Förskolekollen.se</h1>
+                </div>
+            )}
             <div className={`search-container ${showPlaces ? 'top' : 'center'}`}>
                 <Container maxWidth="sm">
                     <Box display="flex" alignItems="center" justifyContent="center" flexWrap="wrap" gap={2}>
@@ -262,19 +267,31 @@ const MapComponent = () => {
                             }}
                         />
                         <FormControl fullWidth sx={{ backgroundColor: 'white' }}>
-                            <InputLabel sx={{ color: 'black' }}></InputLabel>
+                            <InputLabel sx={{ color: 'black', marginTop: '8px' }}>Organisationsform</InputLabel>
                             <Select
                                 value={filter}
                                 onChange={handleFilterChange}
                                 sx={{ color: 'black' }}
-                                startIcon={<FilterListIcon />}
                             >
                                 <MenuItem value="alla">Alla</MenuItem>
                                 <MenuItem value="Fristående">Fristående</MenuItem>
-                                <MenuItem value="kommunal">Kommunal</MenuItem>
-                                <MenuItem value="Fristående (föräldrakooperativ)">Föräldrakooperativ</MenuItem>
+                                <MenuItem value="Kommunal">Kommunal</MenuItem>
+                                <MenuItem value="Föräldrakooperativ">Föräldrakooperativ</MenuItem>
                             </Select>
                         </FormControl>
+                        <FormControl fullWidth sx={{ backgroundColor: 'white' }}>
+                            <InputLabel sx={{ color: 'black', marginTop: '8px' }}>Typ Av Service</InputLabel>
+                            <Select
+                                value={serviceType}
+                                onChange={handleServiceTypeChange}
+                                sx={{ color: 'black' }}
+                            >
+                                <MenuItem value="alla">Alla</MenuItem>
+                                <MenuItem value="Förskola">Förskola</MenuItem>
+                                <MenuItem value="Pedagogisk omsorg">Pedagogisk omsorg</MenuItem>
+                            </Select>
+                        </FormControl>
+
                         <Button onClick={toggleView} variant="contained" color="secondary" startIcon={view === 'map' ? <ListIcon /> : <MapIcon />}>
                             {view === 'map' ? 'Visa Lista' : 'Visa Karta'}
                         </Button>
@@ -295,7 +312,7 @@ const MapComponent = () => {
                         />
                     ))
                 ) : (
-                    <p>Inga förskolor hittades.</p>
+                    <p></p>
                 )}
             </div>
 

@@ -17,7 +17,7 @@ const theme = createTheme({
     },
   },
   typography: {
-    fontFamily: 'Comic Sans MS, Comic Sans',
+    fontFamily: 'Comic Sans MS, Comic Sans, ',
     h1: {
       fontSize: '3rem',
       fontWeight: 'bold',
@@ -56,7 +56,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           margin: 0,
-          fontFamily: 'Comic Sans MS, Comic Sans',
+          fontFamily: 'Comic Sans MS, Comic Sans, ',
         },
       },
     },
