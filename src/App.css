@@ -94,8 +94,7 @@ main {
   z-index: 100;
   height: 100vh;
   padding-top: 400px;
-  border: 5px solid rgba(42, 230, 25, 0.3); /* Ljusare kant för glasutseende */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  
 }
 
 .cards-container.hidden {
@@ -310,7 +309,7 @@ main {
   .card {
     padding: 15px;
     width: 356px; /* Full width for smaller screens */
-    height: 500px; /* Set a fixed height */
+    height: 600px; /* Set a fixed height */
     font-family: Comic Sans MS, Comic Sans;
     margin-left: 10px; /* Move cards slightly to the left */
   }
@@ -335,7 +334,7 @@ main {
     transform: translateX(-50%);
     z-index: 100;
     font-size: 1rem;
-    color: #FFF;
+    color: #fff;
     padding: 10px 20px;
     background: rgba(255, 255, 255, 0.2); /* Semi-transparent bakgrund */
     border-radius: 10px;
@@ -360,6 +359,7 @@ main {
     width: 80%;
     font-size: 16px;
     font-family: Comic Sans MS, Comic Sans;
+    overflow-x: hidden;
   }
 
   .search-container.center {
@@ -369,8 +369,8 @@ main {
   }
 
   .search-container.top {
-    top: 10px;
-    margin-top: 0;
+    top: 5px;
+    
     font-size: 16px;
     margin-right: 15px;
     position: absolute; /* Changed from fixed to absolute */
@@ -390,7 +390,7 @@ main {
 
   .card {
     width: 300px; /* Full width for smaller screens */
-    height: 420px; /* Set a fixed height */
+    height: 500px; /* Set a fixed height */
     font-size: 16px;
     margin-left: 10px; /* Move cards slightly to the left */
   }

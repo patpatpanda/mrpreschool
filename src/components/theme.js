@@ -60,6 +60,29 @@ const theme = createTheme({
         },
       },
     },
+    MuiDialogTitle: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#FFEB3B',
+          color: '#FF5722',
+          textAlign: 'center',
+        },
+      },
+    },
+    MuiDialogContent: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#FFFDE7',
+        },
+      },
+    },
+    MuiIconButton: {
+      styleOverrides: {
+        root: {
+          color: '#fff',
+        },
+      },
+    },
   },
 });
 
