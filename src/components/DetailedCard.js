@@ -13,8 +13,8 @@ const StyledBox = styled(Box)({
   marginBottom: '10px',
 });
 
-const DetailedCard = ({ schoolData, onClose, walkTime }) => {
-  const { namn, adress, pdfData, schoolDetails, description } = schoolData;
+const DetailedCard = ({ schoolData, onClose }) => {
+  const { namn, adress, pdfData, schoolDetails, description, walkingTime } = schoolData;
 
   return (
     <ThemeProvider theme={theme}>
@@ -34,6 +34,7 @@ const DetailedCard = ({ schoolData, onClose, walkTime }) => {
               <StyledBox className="pdf-details">
                 <Typography variant="body2">Helhetsomdome: {pdfData.helhetsomdome}%</Typography>
                 <Typography variant="body2">Svarsfrekvens: {pdfData.svarsfrekvens}%</Typography>
+                
               </StyledBox>
             )}
             {schoolDetails && (
@@ -64,7 +65,7 @@ const DetailedCard = ({ schoolData, onClose, walkTime }) => {
               </StyledBox>
             )}
             {description && <StyledBox className="description" mb={2}><Typography variant="body2">{description}</Typography></StyledBox>}
-            {walkTime && <StyledBox className="walk-time"><Typography variant="body2"><FontAwesomeIcon icon={faClock} /> Estimated walk time: {walkTime}</Typography></StyledBox>}
+            {walkingTime && <StyledBox className="walk-time"><Typography variant="body2"><FontAwesomeIcon icon={faClock} /> Estimated walk time: {walkingTime}</Typography></StyledBox>}
           </StyledBox>
         </DialogContent>
       </Dialog>
@@ -79,9 +80,9 @@ DetailedCard.propTypes = {
     pdfData: PropTypes.object,
     schoolDetails: PropTypes.object,
     description: PropTypes.string,
+    walkingTime: PropTypes.string,
   }).isRequired,
   onClose: PropTypes.func.isRequired,
-  walkTime: PropTypes.string,
 };
 
 export default DetailedCard;

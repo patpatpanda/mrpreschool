@@ -72,9 +72,9 @@ main {
   transform: translateX(-50%);
   z-index: 100;
   font-size: 2rem;
-  color: #FFF;
+  color: white;
   padding: 10px 20px;
-  background: rgba(255, 255, 255, 0.2); /* Semi-transparent bakgrund */
+  background: rgba(10, 182, 182, 0.2); /* Semi-transparent bakgrund */
   border-radius: 10px;
   backdrop-filter: blur(10px); /* Blur effekten för glaseffekt */
   border: 1px solid rgba(255, 255, 255, 0.3); /* Ljusare kant för glasutseende */

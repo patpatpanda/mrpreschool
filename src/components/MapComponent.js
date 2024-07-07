@@ -9,13 +9,10 @@ import SearchIcon from '@mui/icons-material/Search';
 import ListIcon from '@mui/icons-material/List';
 import MapIcon from '@mui/icons-material/Map';
 
-/*global google*/
-
 const MapComponent = () => {
     const mapRef = useRef(null);
     const [map, setMap] = useState(null);
     const [geocoder, setGeocoder] = useState(null);
-    const [infowindow, setInfowindow] = useState(null);
     const [nearbyPlaces, setNearbyPlaces] = useState([]);
     const [selectedPlace, setSelectedPlace] = useState(null);
     const [showPlaces, setShowPlaces] = useState(false);
@@ -25,49 +22,63 @@ const MapComponent = () => {
     const [directionsRenderer, setDirectionsRenderer] = useState(null);
     const [filter, setFilter] = useState('alla');
     const [serviceType, setServiceType] = useState('alla');
-    const [view, setView] = useState('list'); // Ändra standardvärdet till 'list'
+    const [view, setView] = useState('map'); // Ändra standardvärdet till 'map'
     const [walkingTimes, setWalkingTimes] = useState({});
     const [showText, setShowText] = useState(true); // Ny state för att hantera synlighet av texten
 
     useEffect(() => {
         const initMap = () => {
-            const stockholm = new google.maps.LatLng(59.3293, 18.0686);
+            const stockholm = new window.google.maps.LatLng(59.3293, 18.0686);
 
-            const map = new google.maps.Map(mapRef.current, {
+            const map = new window.google.maps.Map(mapRef.current, {
                 center: stockholm,
                 zoom: 12,
                 disableDefaultUI: true,
             });
             setMap(map);
 
-            const geocoder = new google.maps.Geocoder();
+            const geocoder = new window.google.maps.Geocoder();
             setGeocoder(geocoder);
 
-            const infowindow = new google.maps.InfoWindow();
-            setInfowindow(infowindow);
-
-            const directionsService = new google.maps.DirectionsService();
+            const directionsService = new window.google.maps.DirectionsService();
             setDirectionsService(directionsService);
 
-            const directionsRenderer = new google.maps.DirectionsRenderer({
+            const directionsRenderer = new window.google.maps.DirectionsRenderer({
                 suppressMarkers: true,
                 polylineOptions: {
-                    strokeColor: '#39b1b9',
-                    strokeOpacity: 0.7,
-                    strokeWeight: 5,
-                    icons: [{
-                        icon: {
-                            path: google.maps.SymbolPath.FORWARD_OPEN_ARROW,
-                            scale: 3,
-                            strokeColor: '#39b1b9',
-                            strokeOpacity: 0.8
+                    strokeColor: '#FF6347', // En tydlig tomatröd färg
+                    strokeOpacity: 0.9,
+                    strokeWeight: 7, // Linjens tjocklek
+                    icons: [
+                        {
+                            icon: {
+                                path: 'M 0,-1 0,1', // Enkel linje
+                                strokeOpacity: 1,
+                                scale: 4,
+                            },
+                            offset: '0',
+                            repeat: '20px',
                         },
-                        repeat: '20px'
-                    }]
-                }
+                        {
+                            icon: {
+                                path: window.google.maps.SymbolPath.CIRCLE,
+                                fillColor: '#FF6347',
+                                fillOpacity: 1,
+                                strokeColor: 'white',
+                                strokeWeight: 2,
+                                scale: 3,
+                            },
+                            offset: '0%',
+                            repeat: '20px',
+                        },
+                    ],
+                },
             });
             directionsRenderer.setMap(map);
             setDirectionsRenderer(directionsRenderer);
+
+            const infowindow = new window.google.maps.InfoWindow();
+            window.infowindow = infowindow;
         };
 
         const loadScript = (url) => {
@@ -100,7 +111,7 @@ const MapComponent = () => {
 
             if (places.length > 0) {
                 const detailedResults = await Promise.all(places.map(async (place) => {
-                    const cleanName = place.namn.replace(/^(Förskola\s+|Förskolan\s+)/i, '').trim();
+                    const cleanName = place.namn.replace(/^(Förskola\s+|Förskolan\s+|Dagmamma\s+|Föräldrakooperativ\s+)/i, '').trim();
                     const pdfData = await fetchPdfDataByName(cleanName);
 
                     return {
@@ -114,8 +125,7 @@ const MapComponent = () => {
                 setNearbyPlaces(detailedResults);
                 clearMarkers();
                 detailedResults.forEach(result => {
-                    createMarker(result);
-                    calculateRoute(document.getElementById('address').value.trim(), { lat: result.latitude, lng: result.longitude }, result);
+                    createMarker(result, location);
                 });
             } else {
                 alert('Inga förskolor hittades på den angivna adressen.');
@@ -136,12 +146,13 @@ const MapComponent = () => {
         geocoder.geocode({ address: address }, async (results, status) => {
             if (status === 'OK') {
                 map.setCenter(results[0].geometry.location);
+                map.setZoom(15); // Justera zoomnivån här
 
                 if (originMarker) {
                     originMarker.setMap(null);
                 }
 
-                const marker = new google.maps.Marker({
+                const marker = new window.google.maps.Marker({
                     map: map,
                     position: results[0].geometry.location,
                     icon: {
@@ -165,34 +176,40 @@ const MapComponent = () => {
         return addressParts[0].trim();
     };
 
-    const createMarker = (place) => {
-        const marker = new google.maps.Marker({
+    const createMarker = (place, originLocation) => {
+        const marker = new window.google.maps.Marker({
             map: map,
             position: { lat: place.latitude, lng: place.longitude },
             title: place.namn
         });
 
         marker.addListener('click', () => {
-            selectPlace(place);
+            map.setZoom(15);
+            map.setCenter(marker.getPosition());
+            calculateRoute(originLocation, { lat: place.latitude, lng: place.longitude }, place, marker);
         });
 
         setCurrentMarkers((prevMarkers) => [...prevMarkers, marker]);
     };
 
-    const selectPlace = async (place) => {
-        const cleanName = place.namn.replace(/^(Förskola\s+|Förskolan\s+)/i, '').trim();
+    const selectPlace = async (place, showDetailedCard = true) => {
+        const cleanName = place.namn.replace(/^(Förskola\s+|Förskolan\s+|Dagmamma\s+|Föräldrakooperativet\s+)/i, '').trim();
         const pdfData = await fetchPdfDataByName(cleanName);
         const relevantAddress = extractRelevantAddress(place.adress);
         const schoolDetails = await fetchSchoolDetailsByAddress(relevantAddress);
-
+    
         const detailedPlace = {
             ...place,
             pdfData: pdfData ? pdfData : null,
             schoolDetails: schoolDetails ? schoolDetails : null,
         };
-
-        setSelectedPlace(detailedPlace);
-
+    
+        if (showDetailedCard) {
+            setSelectedPlace(detailedPlace);
+        } else {
+            setSelectedPlace(null);
+        }
+    
         if (view === 'map') {
             calculateRoute(document.getElementById('address').value.trim(), { lat: place.latitude, lng: place.longitude }, place);
         }
@@ -207,15 +224,15 @@ const MapComponent = () => {
         setCurrentMarkers([]);
     };
 
-    const calculateRoute = (origin, destination, place) => {
+    const calculateRoute = (origin, destination, place, marker) => {
         const request = {
             origin: origin,
             destination: destination,
-            travelMode: google.maps.TravelMode.WALKING,
+            travelMode: window.google.maps.TravelMode.WALKING,
         };
 
         directionsService.route(request, (result, status) => {
-            if (status === google.maps.DirectionsStatus.OK) {
+            if (status === window.google.maps.DirectionsStatus.OK) {
                 directionsRenderer.setDirections(result);
                 const route = result.routes[0];
                 const duration = route.legs[0].duration.text;
@@ -223,16 +240,59 @@ const MapComponent = () => {
                     ...prevTimes,
                     [place.id]: duration,
                 }));
-                infowindow.setContent(`${place.namn}<br>Gångtid: ${duration}`);
-                infowindow.open(map, currentMarkers.find(marker => marker.getPosition().lat() === place.latitude && marker.getPosition().lng() === place.longitude));
+                window.infowindow.setContent(`${place.namn}<br>Gångtid: ${duration}<br><button id="more-info-btn">Läs mer</button>`);
+                window.infowindow.open(map, marker);
+                window.google.maps.event.addListenerOnce(window.infowindow, 'domready', () => {
+                    document.getElementById('more-info-btn').addEventListener('click', () => {
+                        selectPlace(place, true);
+                    });
+                });
             } else {
-                alert('Could not display directions due to: ' + status);
+                console.error('Could not display directions due to: ' + status);
             }
         });
     };
 
     const toggleView = () => {
         setView(view === 'map' ? 'list' : 'map');
+    };
+
+    const filterAndSortPreschools = (places, origin) => {
+        const filteredPlaces = places.filter(place => {
+            const distance = calculateDistance(origin, new window.google.maps.LatLng(place.latitude, place.longitude));
+            return distance <= 2 && place.pdfData && place.pdfData.antalSvar >= 12;
+        });
+
+        const sortedPlaces = filteredPlaces.sort((a, b) => b.pdfData.helhetsomdome - a.pdfData.helhetsomdome);
+
+        return sortedPlaces.slice(0, 5);
+    };
+
+    const handleTopRanked = () => {
+        if (!originMarker) {
+            alert('Ange en adress först.');
+            return;
+        }
+
+        const topPlaces = filterAndSortPreschools(nearbyPlaces, originMarker.getPosition());
+
+        setNearbyPlaces(topPlaces);
+        clearMarkers();
+        topPlaces.forEach(result => {
+            createMarker(result, originMarker.getPosition());
+        });
+    };
+
+    const calculateDistance = (origin, destination) => {
+        const R = 6371; // Radius of the Earth in km
+        const dLat = (destination.lat() - origin.lat()) * Math.PI / 180;
+        const dLng = (destination.lng() - origin.lng()) * Math.PI / 180;
+        const a = 
+            0.5 - Math.cos(dLat) / 2 + 
+            Math.cos(origin.lat() * Math.PI / 180) * Math.cos(destination.lat() * Math.PI / 180) * 
+            (1 - Math.cos(dLng)) / 2;
+
+        return R * 2 * Math.asin(Math.sqrt(a));
     };
 
     useEffect(() => {
@@ -276,7 +336,7 @@ const MapComponent = () => {
                                 <MenuItem value="alla">Alla</MenuItem>
                                 <MenuItem value="Fristående">Fristående</MenuItem>
                                 <MenuItem value="Kommunal">Kommunal</MenuItem>
-                                <MenuItem value="Föräldrakooperativ">Föräldrakooperativ</MenuItem>
+                                <MenuItem value="Fristående (föräldrakooperativ)">Föräldrakooperativ</MenuItem>
                             </Select>
                         </FormControl>
                         <FormControl fullWidth sx={{ backgroundColor: 'white' }}>
@@ -288,12 +348,15 @@ const MapComponent = () => {
                             >
                                 <MenuItem value="alla">Alla</MenuItem>
                                 <MenuItem value="Förskola">Förskola</MenuItem>
-                                <MenuItem value="Pedagogisk omsorg">Pedagogisk omsorg</MenuItem>
+                                <MenuItem value="Pedagogisk omsorg">Dagmamma</MenuItem>
                             </Select>
                         </FormControl>
 
                         <Button onClick={toggleView} variant="contained" color="secondary" startIcon={view === 'map' ? <ListIcon /> : <MapIcon />}>
                             {view === 'map' ? 'Visa Lista' : 'Visa Karta'}
+                        </Button>
+                        <Button onClick={handleTopRanked} variant="contained" color="secondary">
+                            Högst rank
                         </Button>
                     </Box>
                 </Container>
@@ -317,7 +380,10 @@ const MapComponent = () => {
             </div>
 
             {selectedPlace && (
-                <DetailedCard schoolData={selectedPlace} onClose={() => setSelectedPlace(null)} />
+                <DetailedCard
+                    schoolData={selectedPlace}
+                    onClose={() => setSelectedPlace(null)}
+                />
             )}
         </div>
     );
