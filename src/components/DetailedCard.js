@@ -21,6 +21,8 @@ const StyledDialogTitle = styled(DialogTitle)(({ theme }) => ({
 
 const StyledDialogContent = styled(DialogContent)(({ theme }) => ({
   backgroundColor: '#e0e7ff',
+  overflowY: 'auto', // Make content scrollable
+  maxHeight: '70vh', // Set a maximum height for the content
 }));
 
 const DetailedCard = ({ schoolData, onClose }) => {

@@ -397,7 +397,7 @@ const MapComponent = () => {
                         <TextField
                             id="address"
                             variant="outlined"
-                            placeholder="Skriv din adress för att hitta"
+                            placeholder="Skriv din adress för att hitta förskola" 
                             fullWidth
                             sx={{ backgroundColor: 'white', color: 'black' }}
                             InputProps={{
