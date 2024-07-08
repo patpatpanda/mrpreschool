@@ -56,6 +56,7 @@ main {
   display: flex;
   justify-content: center;
   padding: 20px;
+  background: rgba(255, 255, 255, 0.6); /* Semi-transparent bakgrund */
 }
 
 .search-container.center {
@@ -64,9 +65,16 @@ main {
 }
 
 .search-container.top {
-  top: 1px;
-  margin-top: 0;
+  top: 10px;
+  
   font-size: 16px;
+}
+.loading-spinner {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
 }
 
 .initial-text {
@@ -74,7 +82,7 @@ main {
   top: 80px; /* Justera efter behov */
   left: 50%;
   transform: translateX(-50%);
-  z-index: 100;
+  z-index: 1000;
   font-size: 1rem;
   color: #fff;
   padding: 10px 20px;
@@ -91,7 +99,7 @@ main {
   overflow-y: auto;
   overflow-x: hidden; /* Prevent cards-container from scrolling horizontally */
   padding: 15px;
-  background: url('/src/images/stalin_resized_1920x1080.png') no-repeat center center; /* Add the background image */
+  background: url('/src/images/yeye.webp') no-repeat center center; /* Add the background image */
   background-size: cover; /* Ensure the image covers the entire container */
   position: relative;
   z-index: 100;
@@ -100,7 +108,7 @@ main {
 
   /* Additional styles to make the background more lively */
   box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.5); /* Add a subtle inner shadow */
-  filter: brightness(1.1) saturate(1.1); /* Increase brightness and saturation */
+  filter: brightness() saturate(1.1); /* Increase brightness and saturation */
   
 }
 

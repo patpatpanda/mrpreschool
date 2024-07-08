@@ -3,7 +3,7 @@ import PreschoolCard from './PreschoolCard';
 import DetailedCard from './DetailedCard';
 import '../styles/GoogleMap.css';
 import { fetchPdfDataByName, fetchSchoolDetailsByAddress, fetchNearbySchools } from './api';
-import { TextField, Button, Select, MenuItem, FormControl, Container, Box, Accordion, AccordionSummary, AccordionDetails, Typography } from '@mui/material';
+import { TextField, Button, Select, MenuItem, FormControl, Container, Box, Accordion, AccordionSummary, AccordionDetails, Typography, CircularProgress } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ListIcon from '@mui/icons-material/List';
@@ -27,6 +27,7 @@ const MapComponent = () => {
     const [showText, setShowText] = useState(true); // Ny state för att hantera synlighet av texten
     const [showFilters, setShowFilters] = useState(false); // Ny state för att hantera synlighet av filtrering
     const [expanded, setExpanded] = useState(true); // Ny state för att hantera expansionen av Accordion
+    const [loading, setLoading] = useState(false); // State för att hantera laddningsstatus
 
     useEffect(() => {
         const initMap = () => {
@@ -135,6 +136,8 @@ const MapComponent = () => {
         } catch (error) {
             console.error('Error fetching nearby places:', error);
             alert('Ett fel inträffade vid hämtning av närliggande förskolor.');
+        } finally {
+            setLoading(false); // Stäng av laddningsspinnaren när sökningen är klar
         }
     }, [map, filter, serviceType]);
 
@@ -144,6 +147,8 @@ const MapComponent = () => {
             alert('Please enter a valid address.');
             return;
         }
+
+        setLoading(true); // Visa laddningsspinnaren när sökningen börjar
 
         geocoder.geocode({ address: address }, async (results, status) => {
             if (status === 'OK') {
@@ -164,7 +169,7 @@ const MapComponent = () => {
 
                 setOriginMarker(marker);
 
-                findNearbyPlaces(results[0].geometry.location);
+                await findNearbyPlaces(results[0].geometry.location);
                 setShowPlaces(true);
                 setShowText(false); // Dölj texten när en sökning görs
                 setView('map'); // Byt till kartvy
@@ -172,6 +177,7 @@ const MapComponent = () => {
                 setExpanded(false); // Stäng filterelementet efter sökning
             } else {
                 alert('Search was not successful for the following reason: ' + status);
+                setLoading(false); // Stäng av laddningsspinnaren vid fel
             }
         });
     }, [geocoder, map, originMarker, findNearbyPlaces]);
@@ -298,6 +304,7 @@ const MapComponent = () => {
         const sortedPlaces = nearbyPlaces.sort((a, b) => {
             const distanceA = calculateDistance(originMarker.getPosition(), new window.google.maps.LatLng(a.latitude, a.longitude));
             const distanceB = calculateDistance(originMarker.getPosition(), new window.google.maps.LatLng(b.latitude, b.longitude));
+           
             return distanceA - distanceB;
         });
 
@@ -410,6 +417,12 @@ const MapComponent = () => {
                     </Box>
                 </Container>
             </div>
+
+            {loading && (
+                <div className="loading-spinner">
+                    <CircularProgress />
+                </div>
+            )}
 
             <div ref={mapRef} className={`map-container ${view === 'list' ? 'hidden' : ''}`}></div>
 
