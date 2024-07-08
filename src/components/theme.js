@@ -1,5 +1,5 @@
 import { createTheme } from '@mui/material/styles';
-import { pink, purple, yellow, green } from '@mui/material/colors';
+import { pink, purple, yellow,  blueGrey, deepOrange } from '@mui/material/colors';
 
 const theme = createTheme({
   palette: {
@@ -13,11 +13,12 @@ const theme = createTheme({
       default: yellow[50],
     },
     text: {
-      primary: green[900],
+      primary: blueGrey[900], // Mörkare färg för bättre kontrast
+      secondary: blueGrey[600], // Mjukare sekundärfärg
     },
   },
   typography: {
-    fontFamily: 'Comic Sans MS, Comic Sans, ',
+    fontFamily: 'Comic Sans MS, Comic Sans',
     h1: {
       fontSize: '3rem',
       fontWeight: 'bold',
@@ -32,14 +33,14 @@ const theme = createTheme({
     },
     body1: {
       fontSize: '1rem',
-      color: green[700],
+      color: blueGrey[800], // Använd primary textfärg
       '@media (max-width:600px)': {
         fontSize: '0.875rem',
       },
     },
     body2: {
       fontSize: '0.875rem',
-      color: green[700],
+      color: blueGrey[700], // Använd secondary textfärg
     },
   },
   components: {
@@ -49,6 +50,10 @@ const theme = createTheme({
           borderRadius: '20px',
           textTransform: 'none',
           fontWeight: 'bold',
+          '@media (max-width:600px)': {
+            fontSize: '0.75rem',  // Mindre textstorlek för mobil
+            padding: '4px 8px',  // Mindre padding för mobil
+          },
         },
       },
     },
@@ -56,7 +61,8 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           margin: 0,
-          fontFamily: 'Comic Sans MS, Comic Sans, ',
+          fontFamily: 'Comic Sans MS, Comic Sans',
+          color: blueGrey[900], // Använd primary textfärg som standard
         },
       },
     },
@@ -64,7 +70,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           backgroundColor: '#FFEB3B',
-          color: '#FF5722',
+          color: deepOrange[900], // Mörkare färg för bättre kontrast
           textAlign: 'center',
         },
       },
@@ -73,6 +79,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           backgroundColor: '#FFFDE7',
+          color: blueGrey[800], // Använd primary textfärg
         },
       },
     },

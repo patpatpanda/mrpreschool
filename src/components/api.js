@@ -71,4 +71,3 @@ export const fetchNearbySchools = async (lat, lng, organisationsform, typAvServi
 };
 
 
-

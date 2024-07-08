@@ -12,6 +12,10 @@ body, html {
   background-color: #FFF9C4; /* Light yellow background */
 }
 
+
+
+
+
 /* Container for Map and Cards */
 .app-container {
   display: flex;
@@ -87,7 +91,7 @@ main {
   overflow-y: auto;
   overflow-x: hidden; /* Prevent cards-container from scrolling horizontally */
   padding: 15px;
-  background: url('/src/images/kinder.webp') no-repeat center center; /* Add the background image */
+  background: url('/src/images/stalin_resized_1920x1080.png') no-repeat center center; /* Add the background image */
   background-size: cover; /* Ensure the image covers the entire container */
   position: relative;
   z-index: 100;
@@ -96,8 +100,8 @@ main {
 
   /* Additional styles to make the background more lively */
   box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.5); /* Add a subtle inner shadow */
-  filter: brightness(1.2) saturate(1.2); /* Increase brightness and saturation */
-  animation: backgroundAnimation 20s infinite alternate; /* Add a subtle animation */
+  filter: brightness(1.1) saturate(1.1); /* Increase brightness and saturation */
+  
 }
 
 /* Keyframes for the background animation */
@@ -321,11 +325,12 @@ main {
     background-color: #FFF;
     position: relative;
     z-index: 10;
-    padding-top: 400px;
+    padding-top: 450px;
     overflow-x: hidden; /* Prevent horizontal scrolling */
-    overflow-y: auto;
     background: url('/src/images/stalin.png') no-repeat center center;
-  }
+    background-size: cover; /* Adjust the background size */
+}
+
 
   .card {
     padding: 15px;
@@ -373,12 +378,13 @@ main {
     padding-top: 450px;
     overflow-x: hidden; /* Prevent horizontal scrolling */
     background: url('/src/images/stalin.png') no-repeat center center;
-  }
+    background-size: cover; /* Adjust the background size */
+}
 
   .search-container {
     position: fixed; /* Changed from fixed to absolute */
     left: 50%;
-    width: 80%;
+    width: 90%;
     font-size: 16px;
     font-family: Comic Sans MS, Comic Sans;
     overflow-x: hidden;
@@ -399,10 +405,11 @@ main {
   }
 
   .styled-input {
-    width: calc(100% - 70px);
+    width: calc(100% - 10px); /* Minska subtraktionen för att göra det bredare */
     font-size: 16px;
     font-family: Comic Sans MS, Comic Sans;
-  }
+}
+
 
   .styled-button {
     padding: 5px 10px;
