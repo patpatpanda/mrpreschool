@@ -3,9 +3,9 @@ import PreschoolCard from './PreschoolCard';
 import DetailedCard from './DetailedCard';
 import '../styles/GoogleMap.css';
 import { fetchPdfDataByName, fetchSchoolDetailsByAddress, fetchNearbySchools } from './api';
-import { TextField, Button, Select, MenuItem, InputLabel, FormControl, Container, Box } from '@mui/material';
+import { TextField, Button, Select, MenuItem, InputLabel, FormControl, Container, Box, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ListIcon from '@mui/icons-material/List';
 import MapIcon from '@mui/icons-material/Map';
 
@@ -22,9 +22,10 @@ const MapComponent = () => {
     const [directionsRenderer, setDirectionsRenderer] = useState(null);
     const [filter, setFilter] = useState('alla');
     const [serviceType, setServiceType] = useState('alla');
-    const [view, setView] = useState('map'); // Ändra standardvärdet till 'map'
+    const [view, setView] = useState('list'); // Ändra standardvärdet till 'list'
     const [walkingTimes, setWalkingTimes] = useState({});
     const [showText, setShowText] = useState(true); // Ny state för att hantera synlighet av texten
+    const [showFilters, setShowFilters] = useState(false); // Ny state för att hantera synlighet av filtrering
 
     useEffect(() => {
         const initMap = () => {
@@ -165,6 +166,8 @@ const MapComponent = () => {
                 findNearbyPlaces(results[0].geometry.location);
                 setShowPlaces(true);
                 setShowText(false); // Dölj texten när en sökning görs
+                setView('map'); // Byt till kartvy
+                setShowFilters(true); // Visa filtrering
             } else {
                 alert('Search was not successful for the following reason: ' + status);
             }
@@ -326,38 +329,50 @@ const MapComponent = () => {
                                 ),
                             }}
                         />
-                        <FormControl fullWidth sx={{ backgroundColor: 'white' }}>
-                            <InputLabel sx={{ color: 'black', marginTop: '8px' }}>Organisationsform</InputLabel>
-                            <Select
-                                value={filter}
-                                onChange={handleFilterChange}
-                                sx={{ color: 'black' }}
-                            >
-                                <MenuItem value="alla">Alla</MenuItem>
-                                <MenuItem value="Fristående">Fristående</MenuItem>
-                                <MenuItem value="Kommunal">Kommunal</MenuItem>
-                                <MenuItem value="Fristående (föräldrakooperativ)">Föräldrakooperativ</MenuItem>
-                            </Select>
-                        </FormControl>
-                        <FormControl fullWidth sx={{ backgroundColor: 'white' }}>
-                            <InputLabel sx={{ color: 'black', marginTop: '8px' }}>Typ Av Service</InputLabel>
-                            <Select
-                                value={serviceType}
-                                onChange={handleServiceTypeChange}
-                                sx={{ color: 'black' }}
-                            >
-                                <MenuItem value="alla">Alla</MenuItem>
-                                <MenuItem value="Förskola">Förskola</MenuItem>
-                                <MenuItem value="Pedagogisk omsorg">Dagmamma</MenuItem>
-                            </Select>
-                        </FormControl>
-
-                        <Button onClick={toggleView} variant="contained" color="secondary" startIcon={view === 'map' ? <ListIcon /> : <MapIcon />}>
-                            {view === 'map' ? 'Visa Lista' : 'Visa Karta'}
-                        </Button>
-                        <Button onClick={handleTopRanked} variant="contained" color="secondary">
-                            Högst rank
-                        </Button>
+                        {showFilters && (
+                            <Accordion sx={{ width: '100%', backgroundColor: 'white' }}>
+                                <AccordionSummary
+                                    expandIcon={<ExpandMoreIcon />}
+                                    aria-controls="panel1a-content"
+                                    id="panel1a-header"
+                                >
+                                    <Typography sx={{ color: 'black' }}>Filter</Typography>
+                                </AccordionSummary>
+                                <AccordionDetails>
+                                    <FormControl fullWidth sx={{ backgroundColor: 'white', marginBottom: '8px' }}>
+                                        <InputLabel sx={{ color: 'black' }}>Organisationsform</InputLabel>
+                                        <Select
+                                            value={filter}
+                                            onChange={handleFilterChange}
+                                            sx={{ color: 'black' }}
+                                        >
+                                            <MenuItem value="alla">Alla</MenuItem>
+                                            <MenuItem value="Fristående">Fristående</MenuItem>
+                                            <MenuItem value="Kommunal">Kommunal</MenuItem>
+                                            <MenuItem value="Fristående (föräldrakooperativ)">Föräldrakooperativ</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                    <FormControl fullWidth sx={{ backgroundColor: 'white', marginBottom: '8px' }}>
+                                        <InputLabel sx={{ color: 'black' }}>Typ Av Service</InputLabel>
+                                        <Select
+                                            value={serviceType}
+                                            onChange={handleServiceTypeChange}
+                                            sx={{ color: 'black' }}
+                                        >
+                                            <MenuItem value="alla">Alla</MenuItem>
+                                            <MenuItem value="Förskola">Förskola</MenuItem>
+                                            <MenuItem value="Pedagogisk omsorg">Dagmamma</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                    <Button onClick={toggleView} variant="contained" color="secondary" startIcon={view === 'map' ? <ListIcon /> : <MapIcon />}>
+                                        {view === 'map' ? 'Visa Lista' : 'Visa Karta'}
+                                    </Button>
+                                    <Button onClick={handleTopRanked} variant="contained" color="secondary" sx={{ marginTop: '8px' }}>
+                                        Högst rank
+                                    </Button>
+                                </AccordionDetails>
+                            </Accordion>
+                        )}
                     </Box>
                 </Container>
             </div>
