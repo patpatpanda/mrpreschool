@@ -21,6 +21,8 @@ body, html {
   flex-direction: column;
   height: 100vh;
   overflow-x: hidden; /* Prevent container from scrolling horizontally */
+  margin: 0;
+  padding: 0;
 }
 
 main {
@@ -44,13 +46,11 @@ main {
 }
 
 .search-container {
-  user-select: none;
  
-  touch-action: none;
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 600;
+  z-index: 1000;
   width: 100%;
   max-width: 700px;
   font-size: 16px;
@@ -58,7 +58,12 @@ main {
   display: flex;
   justify-content: center;
   padding: 20px;
+  overflow-y: auto;
+  overflow-x: hidden; /* Prevent cards-container from scrolling horizontally */
   
+}
+.detailed-card{
+  z-index: 10000;
 }
 
 .search-container.center {
@@ -203,7 +208,12 @@ main {
   .styled-input {
     width: calc(100% - 80px);
     font-size: 16px;
+    overflow-y: auto;
+    overflow-x: hidden; /* Prevent cards-container from scrolling horizontally */
   }
+  .hidden-mobile {
+    display: none;
+}
 
   .search-container {
     user-select: none;
@@ -213,6 +223,8 @@ main {
     width: 80%;
     font-size: 16px;
     background-color: none;
+    overflow-y: auto;
+    overflow-x: hidden; /* Prevent cards-container from scrolling horizontally */
   }
 
   .search-container.center {
@@ -323,8 +335,8 @@ main {
     width: 90%;
     font-size: 16px;
     font-family: Comic Sans MS, Comic Sans;
-    overflow-x: hidden;
-    background-color: none;
+    overflow-y: auto;
+  overflow-x: hidden; /* Prevent cards-container from scrolling horizontally */
   }
 
   .search-container.center {
@@ -334,7 +346,7 @@ main {
   }
 
   .search-container.top {
-    top: 10px;
+    top: 20px;
     
     font-size: 16px;
     margin-right: 15px;
@@ -421,3 +433,51 @@ p {
   margin-top: 20px;
   font-weight: bold;
 }
+
+
+
+
+.gm-style .gm-style-iw-c {
+  display: flex;
+  position: absolute;
+  overflow: hidden;
+  transform: translate3d(-50%, -100%, 0);
+  background: rgba(255, 255, 255, 0.8); /* Ökad transparens för bättre läsbarhet */
+  border-radius: 8px; /* Minskat radie för att spara plats */
+  backdrop-filter: blur(5px); /* Mindre blur för klarare text */
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2); /* Minskat skugga */
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 140px !important; /* Minskad bredd */
+  height: 140px !important; /* Minskad höjd */
+  text-align: center;
+}
+
+.gm-style .gm-style-iw-d {
+  overflow: hidden !important; /* Förhindrar att innehållet sträcker sig utanför */
+}
+
+.info-window-title {
+  font-size: 10px; /* Mindre textstorlek */
+  margin: 0;
+  padding-bottom: 3px; /* Mindre padding */
+}
+
+.info-window-rating,
+.info-window-walking-time {
+  font-size: 10px; /* Mindre textstorlek */
+  margin: 0;
+  padding-bottom: 3px; /* Mindre padding */
+}
+
+.info-window-rating {
+  color: #007BFF;
+  font-weight: bold; /* Tydligare text */
+}
+
+.info-window-walking-time {
+  color: #28a745;
+  font-weight: bold; /* Tydligare text */
+}
+

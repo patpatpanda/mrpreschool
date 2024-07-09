@@ -30,44 +30,61 @@ const normalizeName = (name) => {
 
 
 // Funktion för att hämta PdfData baserat på förskolans namn
+const pdfDataCache = new Map();
+const schoolDetailsCache = new Map();
+const nearbySchoolsCache = new Map();
+
 export const fetchPdfDataByName = async (name) => {
   try {
     const normalizedName = normalizeName(name.trim());
+    if (pdfDataCache.has(normalizedName)) {
+      return pdfDataCache.get(normalizedName);
+    }
     const encodedName = encodeURIComponent(normalizedName);
     const url = `${backendUrl}/api/PdfData/name/${encodedName}`;
     const response = await axios.get(url);
-    return response.data?.$values[0] || null;
+    const data = response.data?.$values[0] || null;
+    pdfDataCache.set(normalizedName, data);
+    return data;
   } catch (error) {
     console.error(`Error fetching PdfData by name (${name}):`, error);
     return null;
   }
 };
 
-// Funktion för att hämta förskoledata baserat på adress
 export const fetchSchoolDetailsByAddress = async (address) => {
   try {
+    if (schoolDetailsCache.has(address)) {
+      return schoolDetailsCache.get(address);
+    }
     const encodedAddress = encodeURIComponent(address.trim());
     const url = `${backendUrl}/api/Forskolan/address/${encodedAddress}`;
     const response = await axios.get(url);
-    return response.data?.$values[0] || null;
+    const data = response.data?.$values[0] || null;
+    schoolDetailsCache.set(address, data);
+    return data;
   } catch (error) {
     console.error('Error fetching school details by address:', error);
     return null;
   }
 };
 
-
-// Funktion för att hämta närliggande förskolor baserat på latitud och longitud
-// Funktion för att hämta närliggande förskolor baserat på latitud och longitud
 export const fetchNearbySchools = async (lat, lng, organisationsform, typAvService) => {
   try {
+    const cacheKey = `${lat},${lng},${organisationsform},${typAvService}`;
+    if (nearbySchoolsCache.has(cacheKey)) {
+      return nearbySchoolsCache.get(cacheKey);
+    }
     const url = `${backendUrl}/api/Forskolan/nearby/${lat}/${lng}?organisationsform=${organisationsform}&typAvService=${typAvService}`;
     const response = await axios.get(url);
-    return response.data?.$values || [];
+    const data = response.data?.$values || [];
+    nearbySchoolsCache.set(cacheKey, data);
+    return data;
   } catch (error) {
     console.error('Error fetching nearby schools:', error);
     return [];
   }
 };
+
 
 

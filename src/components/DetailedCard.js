@@ -38,9 +38,11 @@ const DetailedCard = ({ schoolData, onClose }) => {
       </StyledDialogTitle>
       <StyledDialogContent>
         <StyledBox>
-          <Typography variant="h6" gutterBottom>
-            <FontAwesomeIcon icon={faMapMarkerAlt} /> {adress}
-          </Typography>
+          {adress && (
+            <Typography variant="h6" gutterBottom>
+              <FontAwesomeIcon icon={faMapMarkerAlt} /> {adress}
+            </Typography>
+          )}
           <Grid container spacing={2}>
             {pdfData && (
               <Grid item xs={12}>
