@@ -8,6 +8,10 @@ import SearchIcon from '@mui/icons-material/Search';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ListIcon from '@mui/icons-material/List';
 import MapIcon from '@mui/icons-material/Map';
+import kommunalMarker from '../images/icons8-children-16.png';
+import friskolaMarker from '../images/icons8-children-48.png';
+
+/*global google*/
 
 const MapComponent = () => {
     const mapRef = useRef(null);
@@ -18,69 +22,31 @@ const MapComponent = () => {
     const [showPlaces, setShowPlaces] = useState(false);
     const [currentMarkers, setCurrentMarkers] = useState([]);
     const [originMarker, setOriginMarker] = useState(null);
-    const [directionsService, setDirectionsService] = useState(null);
-    const [directionsRenderer, setDirectionsRenderer] = useState(null);
     const [filter, setFilter] = useState('alla');
     const [serviceType, setServiceType] = useState('alla');
-    const [view, setView] = useState('list'); // Ändra standardvärdet till 'list'
+    const [view, setView] = useState('list');
     const [walkingTimes, setWalkingTimes] = useState({});
-    const [showText, setShowText] = useState(true); // Ny state för att hantera synlighet av texten
-    const [showFilters, setShowFilters] = useState(false); // Ny state för att hantera synlighet av filtrering
-    const [expanded, setExpanded] = useState(true); // Ny state för att hantera expansionen av Accordion
-    const [loading, setLoading] = useState(false); // State för att hantera laddningsstatus
+    const [showText, setShowText] = useState(true);
+    const [showFilters, setShowFilters] = useState(false);
+    const [expanded, setExpanded] = useState(true);
+    const [loading, setLoading] = useState(false);
+    const directionsRendererRef = useRef(null);
 
     useEffect(() => {
         const initMap = () => {
-            const stockholm = new window.google.maps.LatLng(59.3293, 18.0686);
+            const stockholm = new google.maps.LatLng(59.3293, 18.0686);
 
-            const map = new window.google.maps.Map(mapRef.current, {
+            const map = new google.maps.Map(mapRef.current, {
                 center: stockholm,
                 zoom: 12,
                 disableDefaultUI: true,
             });
             setMap(map);
 
-            const geocoder = new window.google.maps.Geocoder();
+            const geocoder = new google.maps.Geocoder();
             setGeocoder(geocoder);
 
-            const directionsService = new window.google.maps.DirectionsService();
-            setDirectionsService(directionsService);
-
-            const directionsRenderer = new window.google.maps.DirectionsRenderer({
-                suppressMarkers: true,
-                polylineOptions: {
-                    strokeColor: '#FF6347', // En tydlig tomatröd färg
-                    strokeOpacity: 0.9,
-                    strokeWeight: 7, // Linjens tjocklek
-                    icons: [
-                        {
-                            icon: {
-                                path: 'M 0,-1 0,1', // Enkel linje
-                                strokeOpacity: 1,
-                                scale: 4,
-                            },
-                            offset: '0',
-                            repeat: '20px',
-                        },
-                        {
-                            icon: {
-                                path: window.google.maps.SymbolPath.CIRCLE,
-                                fillColor: '#FF6347',
-                                fillOpacity: 1,
-                                strokeColor: 'white',
-                                strokeWeight: 2,
-                                scale: 3,
-                            },
-                            offset: '0%',
-                            repeat: '20px',
-                        },
-                    ],
-                },
-            });
-            directionsRenderer.setMap(map);
-            setDirectionsRenderer(directionsRenderer);
-
-            const infowindow = new window.google.maps.InfoWindow();
+            const infowindow = new google.maps.InfoWindow();
             window.infowindow = infowindow;
         };
 
@@ -94,7 +60,7 @@ const MapComponent = () => {
         };
 
         if (!window.google) {
-            loadScript('https://maps.googleapis.com/maps/api/js?key=AIzaSyCbJmqNnZHTZ99pPQ2uHfkDXwpMxOpfYLw&libraries=places');
+            loadScript('https://maps.googleapis.com/maps/api/js?key=AIzaSyCbJmqNnZHTZ99pPQ2uHfkDXwpMxOpfYLw&libraries=places,directions');
         } else {
             initMap();
         }
@@ -137,7 +103,7 @@ const MapComponent = () => {
             console.error('Error fetching nearby places:', error);
             alert('Ett fel inträffade vid hämtning av närliggande förskolor.');
         } finally {
-            setLoading(false); // Stäng av laddningsspinnaren när sökningen är klar
+            setLoading(false);
         }
     }, [map, filter, serviceType]);
 
@@ -148,18 +114,18 @@ const MapComponent = () => {
             return;
         }
 
-        setLoading(true); // Visa laddningsspinnaren när sökningen börjar
+        setLoading(true);
 
         geocoder.geocode({ address: address }, async (results, status) => {
             if (status === 'OK') {
                 map.setCenter(results[0].geometry.location);
-                map.setZoom(15); // Justera zoomnivån här
+                map.setZoom(17);
 
                 if (originMarker) {
                     originMarker.setMap(null);
                 }
 
-                const marker = new window.google.maps.Marker({
+                const marker = new google.maps.Marker({
                     map: map,
                     position: results[0].geometry.location,
                     icon: {
@@ -171,13 +137,13 @@ const MapComponent = () => {
 
                 await findNearbyPlaces(results[0].geometry.location);
                 setShowPlaces(true);
-                setShowText(false); // Dölj texten när en sökning görs
-                setView('map'); // Byt till kartvy
-                setShowFilters(true); // Visa filtrering
-                setExpanded(false); // Stäng filterelementet efter sökning
+                setShowText(false);
+                setView('map');
+                setShowFilters(true);
+                setExpanded(false);
             } else {
                 alert('Search was not successful for the following reason: ' + status);
-                setLoading(false); // Stäng av laddningsspinnaren vid fel
+                setLoading(false);
             }
         });
     }, [geocoder, map, originMarker, findNearbyPlaces]);
@@ -188,19 +154,34 @@ const MapComponent = () => {
     };
 
     const createMarker = (place, originLocation) => {
-        const marker = new window.google.maps.Marker({
+        let iconUrl;
+
+        if (place.organisationsform === 'Kommunal') {
+            iconUrl = kommunalMarker;
+        } else if (place.organisationsform === 'Fristående') {
+            iconUrl = friskolaMarker;
+        } else {
+            iconUrl = 'http://maps.google.com/mapfiles/ms/icons/red-dot.png';
+        }
+
+        const marker = new google.maps.Marker({
             map: map,
             position: { lat: place.latitude, lng: place.longitude },
-            title: place.namn
+            title: place.namn,
+            icon: {
+                url: iconUrl,
+                scaledSize: new google.maps.Size(32, 32),
+            },
         });
 
         marker.addListener('click', () => {
-            map.setZoom(15);
-            map.setCenter(marker.getPosition());
-            calculateRoute(originLocation, { lat: place.latitude, lng: place.longitude }, place, marker);
+            selectPlace(place, true);
+            drawRoute(originLocation, { lat: place.latitude, lng: place.longitude });
         });
 
         setCurrentMarkers((prevMarkers) => [...prevMarkers, marker]);
+
+        calculateWalkingTime(originLocation, { lat: place.latitude, lng: place.longitude }, place, marker);
     };
 
     const selectPlace = async (place, showDetailedCard = true) => {
@@ -208,21 +189,17 @@ const MapComponent = () => {
         const pdfData = await fetchPdfDataByName(cleanName);
         const relevantAddress = extractRelevantAddress(place.adress);
         const schoolDetails = await fetchSchoolDetailsByAddress(relevantAddress);
-    
+
         const detailedPlace = {
             ...place,
             pdfData: pdfData ? pdfData : null,
             schoolDetails: schoolDetails ? schoolDetails : null,
         };
-    
+
         if (showDetailedCard) {
             setSelectedPlace(detailedPlace);
         } else {
             setSelectedPlace(null);
-        }
-    
-        if (view === 'map') {
-            calculateRoute(document.getElementById('address').value.trim(), { lat: place.latitude, lng: place.longitude }, place);
         }
     };
 
@@ -235,34 +212,39 @@ const MapComponent = () => {
         setCurrentMarkers([]);
     };
 
-    const calculateRoute = (origin, destination, place, marker) => {
-        const request = {
-            origin: origin,
-            destination: destination,
-            travelMode: window.google.maps.TravelMode.WALKING,
-        };
-
-        directionsService.route(request, (result, status) => {
-            if (status === window.google.maps.DirectionsStatus.OK) {
-                directionsRenderer.setDirections(result);
-                const route = result.routes[0];
-                const duration = route.legs[0].duration.text;
-                setWalkingTimes((prevTimes) => ({
-                    ...prevTimes,
-                    [place.id]: duration,
-                }));
-                window.infowindow.setContent(`${place.namn}<br>Gångtid: ${duration}<br><button id="more-info-btn">Läs mer</button>`);
-                window.infowindow.open(map, marker);
-                window.google.maps.event.addListenerOnce(window.infowindow, 'domready', () => {
-                    document.getElementById('more-info-btn').addEventListener('click', () => {
-                        selectPlace(place, true);
+    const calculateWalkingTime = (origin, destination, place, marker) => {
+        const service = new google.maps.DistanceMatrixService();
+        service.getDistanceMatrix(
+            {
+                origins: [origin],
+                destinations: [destination],
+                travelMode: google.maps.TravelMode.WALKING,
+            },
+            (response, status) => {
+                if (status === google.maps.DistanceMatrixStatus.OK) {
+                    const duration = response.rows[0].elements[0].duration.text;
+                    setWalkingTimes((prevTimes) => ({
+                        ...prevTimes,
+                        [place.id]: duration,
+                    }));
+                    const contentString = `
+                      <div style="font-size: 12px; max-height: 150px; overflow-y: auto;">
+                        <strong>${place.namn}</strong><br>
+                        Helhetsomdöme: ${place.pdfData ? place.pdfData.helhetsomdome : 'N/A'} %<br>
+                        Gångtid: ${duration}
+                      </div>
+                    `;
+                    const infowindow = new google.maps.InfoWindow({
+                        content: contentString
                     });
-                });
-            } else {
-                console.error('Could not display directions due to: ' + status);
+                    infowindow.open(map, marker);
+                } else {
+                    console.error('Could not calculate walking time due to: ' + status);
+                }
             }
-        });
+        );
     };
+    
 
     const toggleView = () => {
         setView(view === 'map' ? 'list' : 'map');
@@ -270,7 +252,7 @@ const MapComponent = () => {
 
     const filterAndSortPreschools = (places, origin) => {
         const filteredPlaces = places.filter(place => {
-            const distance = calculateDistance(origin, new window.google.maps.LatLng(place.latitude, place.longitude));
+            const distance = calculateDistance(origin, new google.maps.LatLng(place.latitude, place.longitude));
             return distance <= 2 && place.pdfData && place.pdfData.antalSvar >= 12;
         });
 
@@ -292,7 +274,7 @@ const MapComponent = () => {
         topPlaces.forEach(result => {
             createMarker(result, originMarker.getPosition());
         });
-        setExpanded(false); // Stäng filterelementet efter att filtret appliceras
+        setExpanded(false);
     };
 
     const filterClosestPreschools = () => {
@@ -302,8 +284,8 @@ const MapComponent = () => {
         }
 
         const sortedPlaces = nearbyPlaces.sort((a, b) => {
-            const distanceA = calculateDistance(originMarker.getPosition(), new window.google.maps.LatLng(a.latitude, a.longitude));
-            const distanceB = calculateDistance(originMarker.getPosition(), new window.google.maps.LatLng(b.latitude, b.longitude));
+            const distanceA = calculateDistance(originMarker.getPosition(), new google.maps.LatLng(a.latitude, a.longitude));
+            const distanceB = calculateDistance(originMarker.getPosition(), new google.maps.LatLng(b.latitude, b.longitude));
            
             return distanceA - distanceB;
         });
@@ -315,11 +297,11 @@ const MapComponent = () => {
         closestPlaces.forEach(result => {
             createMarker(result, originMarker.getPosition());
         });
-        setExpanded(false); // Stäng filterelementet efter att filtret appliceras
+        setExpanded(false);
     };
 
     const calculateDistance = (origin, destination) => {
-        const R = 6371; // Radius of the Earth in km
+        const R = 6371;
         const dLat = (destination.lat() - origin.lat()) * Math.PI / 180;
         const dLng = (destination.lng() - origin.lng()) * Math.PI / 180;
         const a = 
@@ -328,6 +310,33 @@ const MapComponent = () => {
             (1 - Math.cos(dLng)) / 2;
 
         return R * 2 * Math.asin(Math.sqrt(a));
+    };
+
+    const drawRoute = (origin, destination) => {
+        if (directionsRendererRef.current) {
+            directionsRendererRef.current.setMap(null);
+        }
+
+        const directionsService = new google.maps.DirectionsService();
+        const newDirectionsRenderer = new google.maps.DirectionsRenderer();
+        newDirectionsRenderer.setMap(map);
+
+        directionsService.route(
+            {
+                origin: origin,
+                destination: destination,
+                travelMode: google.maps.TravelMode.WALKING,
+            },
+            (response, status) => {
+                if (status === google.maps.DirectionsStatus.OK) {
+                    newDirectionsRenderer.setDirections(response);
+                } else {
+                    console.error('Directions request failed due to ' + status);
+                }
+            }
+        );
+
+        directionsRendererRef.current = newDirectionsRenderer;
     };
 
     useEffect(() => {
@@ -397,7 +406,7 @@ const MapComponent = () => {
                         <TextField
                             id="address"
                             variant="outlined"
-                            placeholder="Skriv din adress för att hitta förskola" 
+                            placeholder="Skriv din adress för att hitta förskola"
                             fullWidth
                             sx={{ backgroundColor: 'white', color: 'black' }}
                             InputProps={{

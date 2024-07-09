@@ -15,7 +15,6 @@ body, html {
 
 
 
-
 /* Container for Map and Cards */
 .app-container {
   display: flex;
@@ -45,7 +44,10 @@ main {
 }
 
 .search-container {
-  position: absolute; /* Changed from fixed to absolute */
+  user-select: none;
+ 
+  touch-action: none;
+  position: absolute;
   left: 50%;
   transform: translateX(-50%);
   z-index: 600;
@@ -204,7 +206,10 @@ main {
   }
 
   .search-container {
-    position: absolute; /* Changed from fixed to absolute */
+    user-select: none;
+
+    touch-action: none;
+    position: absolute;
     width: 80%;
     font-size: 16px;
     background-color: none;
@@ -310,7 +315,10 @@ main {
 }
 
   .search-container {
-    position: fixed; /* Changed from fixed to absolute */
+    user-select: none;
+   
+    touch-action: none;
+    position: absolute;
     left: 50%;
     width: 90%;
     font-size: 16px;
