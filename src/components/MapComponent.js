@@ -20,10 +20,44 @@ const ResponsiveButton = styled(Button)(({ theme }) => ({
   },
 }));
 
+const STOCKHOLM_BOUNDS = {
+  north: 59.435,
+  south: 59.261,
+  west: 17.757,
+  east: 18.228,
+};
+
 const geocodeAddress = async (address) => {
   try {
-    const response = await axios.get(`https://masterkinder20240523125154.azurewebsites.net/api/Forskolan/geocode/${address}`);
-    return response.data;
+    const response = await axios.get(`https://nominatim.openstreetmap.org/search`, {
+      params: {
+        q: `${address}, Stockholm, Sweden`,
+        format: 'json',
+        addressdetails: 1,
+        limit: 1
+      },
+    });
+
+    if (response.data.length > 0) {
+      const result = response.data[0];
+      const latitude = parseFloat(result.lat);
+      const longitude = parseFloat(result.lon);
+
+      if (
+        latitude >= STOCKHOLM_BOUNDS.south &&
+        latitude <= STOCKHOLM_BOUNDS.north &&
+        longitude >= STOCKHOLM_BOUNDS.west &&
+        longitude <= STOCKHOLM_BOUNDS.east
+      ) {
+        return { latitude, longitude };
+      } else {
+        console.error('Address is not within Stockholm.');
+        return null;
+      }
+    } else {
+      console.error('Geocoding was not successful.');
+      return null;
+    }
   } catch (error) {
     console.error('Error geocoding address:', error);
     return null;
@@ -92,7 +126,7 @@ const MapComponent = () => {
         const nearestPlace = places[0];
         const distanceToNearestPlace = calculateDistance(location, new google.maps.LatLng(nearestPlace.latitude, nearestPlace.longitude));
 
-        if (distanceToNearestPlace > 2.2) {
+        if (distanceToNearestPlace > 3) {
           setErrorMessage('För närvarande stödjer vi bara stockholmsområdet. Prova igen.');
           setLoading(false);
           return;
@@ -162,7 +196,7 @@ const MapComponent = () => {
       setShowText(false);
       setView('map');
     } else {
-      alert('Geocoding was not successful for the following reason: ');
+      setErrorMessage('För närvarande stödjer vi bara stockholmsområdet. Prova igen.');
       setLoading(false);
     }
   }, [map, originMarker, findNearbyPlaces]);
@@ -238,7 +272,7 @@ const MapComponent = () => {
 
     // Visa endast info-window om kartan är tillräckligt inzoomad
     const zoomLevel = map.getZoom();
-    if (zoomLevel > 16) { // Justera zoomnivån enligt behov
+    if (zoomLevel >=  17) { // Justera zoomnivån enligt behov
       label.open(map, marker);
     }
 
@@ -253,7 +287,7 @@ const MapComponent = () => {
     // Lägg till en listener för att öppna infowindow om kartan zoomas in tillräckligt
     google.maps.event.addListener(map, 'zoom_changed', () => {
       const newZoomLevel = map.getZoom();
-      if (newZoomLevel > 16) { // Justera zoomnivån enligt behov
+      if (newZoomLevel >= 17) { // Justera zoomnivån enligt behov
         label.open(map, marker);
       } else {
         label.close();
