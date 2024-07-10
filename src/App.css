@@ -4,14 +4,26 @@ body, html {
   padding: 0;
   height: 100%;
   width: 100%;
-  font-family: 'Comic Sans MS, Comic Sans, cursive';
-  display: flex;
-  flex-direction: column;
-  overflow-x: hidden; /* Prevent horizontal scrolling */
-  overflow-y: hidden; /* Prevent vertical scrolling */
-  background-color: #FFF9C4; /* Light yellow background */
+  overflow: hidden; /* Förhindra skrollning */
+}
+body.fixed-position {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
 }
 
+.custom-snackbar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  margin-bottom: 400px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  max-width: 500px; /* Maxbredd för att förhindra att den blir för stor på större skärmar */
+  z-index: 1400; /* Se till att den är över andra element */
+}
 
 
 
@@ -20,18 +32,11 @@ body, html {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  overflow-x: hidden; /* Prevent container from scrolling horizontally */
+  overflow: hidden; /* Förhindra skrollning */
   margin: 0;
   padding: 0;
 }
 
-main {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  overflow-x: hidden; /* Prevent main from scrolling horizontally */
-  position: relative; /* Ensure map-container is positioned correctly */
-}
 
 /* Map Container */
 .map-container {
@@ -41,8 +46,8 @@ main {
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 1; /* Ensure map is behind header */
-  overflow-x: hidden; /* Prevent map-container from scrolling horizontally */
+  z-index: 1;
+  overflow: hidden; /* Förhindra skrollning */
 }
 
 .search-container {
@@ -138,6 +143,7 @@ main {
   padding: 20px;
   transition: transform 0.2s, box-shadow 0.2s;
   display: flex;
+  overflow-x: hidden;
   flex-direction: column;
   justify-content: space-between; /* Ensure content is spaced out */
   width: 450px; /* Full width for smaller screens */
@@ -293,6 +299,19 @@ main {
     font-size: 16px;
     font-family: Comic Sans MS, Comic Sans;
   }
+  .custom-snackbar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    max-width: 500px; /* Maxbredd för att förhindra att den blir för stor på större skärmar */
+    z-index: 1400; /* Se till att den är över andra element */
+    margin-left:220px;
+  }
 }
 
 /* For mobile devices */
@@ -311,6 +330,19 @@ main {
     backdrop-filter: blur(10px); /* Blur effekten för glaseffekt */
     border: 1px solid rgba(255, 255, 255, 0.3); /* Ljusare kant för glasutseende */
     text-align: center; /* Centrera texten */
+  }
+  .custom-snackbar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    max-width: 500px; /* Maxbredd för att förhindra att den blir för stor på större skärmar */
+    z-index: 1400; /* Se till att den är över andra element */
+    margin-left:220px;
   }
   .cards-container {
     display: grid;
@@ -346,7 +378,7 @@ main {
   }
 
   .search-container.top {
-    top: 20px;
+    top: 22px;
     
     font-size: 16px;
     margin-right: 15px;
@@ -435,14 +467,13 @@ p {
 }
 
 
-
-
 .gm-style .gm-style-iw-c {
   display: flex;
   position: absolute;
+  
   overflow: hidden;
   transform: translate3d(-50%, -100%, 0);
-  background: rgba(255, 255, 255, 0.8); /* Ökad transparens för bättre läsbarhet */
+  background: rgba(255, 255, 255, 0.7); /* Ökad transparens för bättre läsbarhet */
   border-radius: 8px; /* Minskat radie för att spara plats */
   backdrop-filter: blur(5px); /* Mindre blur för klarare text */
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2); /* Minskat skugga */
@@ -450,7 +481,7 @@ p {
   align-items: center;
   justify-content: center;
   width: 140px !important; /* Minskad bredd */
-  height: 140px !important; /* Minskad höjd */
+  height: 165px !important; /* Minskad höjd */
   text-align: center;
 }
 
@@ -459,14 +490,14 @@ p {
 }
 
 .info-window-title {
-  font-size: 10px; /* Mindre textstorlek */
+  font-size: 12px; /* Mindre textstorlek */
   margin: 0;
   padding-bottom: 3px; /* Mindre padding */
 }
 
 .info-window-rating,
 .info-window-walking-time {
-  font-size: 10px; /* Mindre textstorlek */
+  font-size: 12px; /* Mindre textstorlek */
   margin: 0;
   padding-bottom: 3px; /* Mindre padding */
 }
@@ -480,4 +511,3 @@ p {
   color: #28a745;
   font-weight: bold; /* Tydligare text */
 }
-

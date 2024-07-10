@@ -4,7 +4,7 @@ import PreschoolCard from './PreschoolCard';
 import DetailedCard from './DetailedCard';
 import '../styles/GoogleMap.css';
 import { fetchPdfDataByName, fetchSchoolDetailsByAddress, fetchNearbySchools } from './api';
-import { TextField, Button, Container, Box, CircularProgress } from '@mui/material';
+import { TextField, Button, Container, Box, CircularProgress, Snackbar, Alert } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ListIcon from '@mui/icons-material/List';
 import MapIcon from '@mui/icons-material/Map';
@@ -37,7 +37,7 @@ const MapComponent = () => {
   const [selectedPlace, setSelectedPlace] = useState(null);
   const [showPlaces, setShowPlaces] = useState(false);
   const [currentMarkers, setCurrentMarkers] = useState([]);
-  const [currentInfoWindows, setCurrentInfoWindows] = useState([]); // Add this state to manage info windows
+  const [currentInfoWindows, setCurrentInfoWindows] = useState([]);
   const [originMarker, setOriginMarker] = useState(null);
   const [filter, setFilter] = useState('alla');
   const [serviceType, setServiceType] = useState('alla');
@@ -45,6 +45,7 @@ const MapComponent = () => {
   const [walkingTimes, setWalkingTimes] = useState({});
   const [showText, setShowText] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     const initMap = () => {
@@ -87,6 +88,16 @@ const MapComponent = () => {
       const places = await fetchNearbySchools(location.lat(), location.lng(), filter, serviceType);
 
       if (places.length > 0) {
+        // Kontrollera avståndet till den närmaste förskolan
+        const nearestPlace = places[0];
+        const distanceToNearestPlace = calculateDistance(location, new google.maps.LatLng(nearestPlace.latitude, nearestPlace.longitude));
+
+        if (distanceToNearestPlace > 2.2) {
+          setErrorMessage('För närvarande stödjer vi bara stockholmsområdet. Prova igen.');
+          setLoading(false);
+          return;
+        }
+
         const detailedResults = await Promise.all(places.map(async (place) => {
           const cleanName = place.namn.replace(/^(Förskola\s+|Förskolan\s+|Dagmamma\s+|Föräldrakooperativ\s+)/i, '').trim();
           const pdfData = await fetchPdfDataByName(cleanName);
@@ -100,7 +111,7 @@ const MapComponent = () => {
         }));
 
         setNearbyPlaces(detailedResults);
-        clearMarkersAndInfoWindows(); // Clear both markers and info windows
+        clearMarkersAndInfoWindows();
         detailedResults.forEach(result => {
           createMarker(result, location);
         });
@@ -126,7 +137,7 @@ const MapComponent = () => {
 
     const coordinates = await geocodeAddress(address);
     if (coordinates) {
-      const { latitude, longitude } = coordinates; // Note the lowercase variable names
+      const { latitude, longitude } = coordinates;
       const location = new google.maps.LatLng(latitude, longitude);
 
       map.setCenter(location);
@@ -161,61 +172,6 @@ const MapComponent = () => {
     return addressParts[0].trim();
   };
 
-  const createMarker = async (place, originLocation) => {
-    let iconUrl;
-  
-    if (place.organisationsform === 'Kommunal') {
-      iconUrl = kommunalMarker;
-    } else if (place.organisationsform === 'Fristående') {
-      iconUrl = friskolaMarker;
-    } else {
-      iconUrl = 'http://maps.google.com/mapfiles/ms/icons/red-dot.png';
-    }
-  
-    const marker = new google.maps.Marker({
-      map: map,
-      position: { lat: place.latitude, lng: place.longitude },
-      title: place.namn,
-      icon: {
-        url: iconUrl,
-        scaledSize: new google.maps.Size(32, 32),
-      },
-    });
-  
-    const walkingTimeInMinutes = await calculateWalkingTime(originLocation, { lat: place.latitude, lng: place.longitude });
-    const formattedWalkingTime = walkingTimeInMinutes !== null && !isNaN(walkingTimeInMinutes) ? walkingTimeInMinutes.toFixed(2) : "N/A";
-  
-    setWalkingTimes((prevTimes) => ({
-      ...prevTimes,
-      [place.id]: formattedWalkingTime,
-    }));
-  
-    const infowindowContent = `
-    <div class="info-window">
-        <p class="info-window-title">${place.namn}</p>
-        <p class="info-window-rating">Helhetsomdöme: ${place.pdfData ? place.pdfData.helhetsomdome : 'N/A'}%</p>
-        <p class="info-window-walking-time">Gångtid: ${formattedWalkingTime} minuter</p>
-    </div>
-  `;
-  
-  
-    const infowindow = new google.maps.InfoWindow({
-      content: infowindowContent,
-    });
-  
-    infowindow.open(map, marker);
-  
-    marker.addListener('click', () => {
-      infowindow.open(map, marker);
-      selectPlace(place, true);
-    });
-  
-    setCurrentMarkers((prevMarkers) => [...prevMarkers, marker]);
-    setCurrentInfoWindows((prevWindows) => [...prevWindows, infowindow]);
-  };
-  
-  
-
   const calculateWalkingTime = async (origin, destination) => {
     try {
       const response = await axios.get(`https://masterkinder20240523125154.azurewebsites.net/api/Forskolan/walking-time`, {
@@ -226,7 +182,7 @@ const MapComponent = () => {
           lon2: destination.lng,
         },
       });
-      const timeInHours = response.data; // Time in hours
+      const timeInHours = response.data;
       if (typeof timeInHours !== 'number' || isNaN(timeInHours)) {
         console.error('Invalid response for walking time:', response.data);
         return null;
@@ -239,25 +195,90 @@ const MapComponent = () => {
     }
   };
 
+  const createMarker = async (place, originLocation) => {
+    let iconUrl;
+
+    if (place.organisationsform === 'Kommunal') {
+      iconUrl = kommunalMarker;
+    } else if (place.organisationsform === 'Fristående') {
+      iconUrl = friskolaMarker;
+    } else {
+      iconUrl = 'http://maps.google.com/mapfiles/ms/icons/red-dot.png';
+    }
+
+    const marker = new google.maps.Marker({
+      map: map,
+      position: { lat: place.latitude, lng: place.longitude },
+      title: place.namn,
+      icon: {
+        url: iconUrl,
+        scaledSize: new google.maps.Size(32, 32),
+      },
+    });
+
+    const walkingTimeInMinutes = await calculateWalkingTime(originLocation, { lat: place.latitude, lng: place.longitude });
+    const formattedWalkingTime = walkingTimeInMinutes !== null && !isNaN(walkingTimeInMinutes) ? walkingTimeInMinutes.toFixed(2) : "N/A";
+
+    setWalkingTimes((prevTimes) => ({
+      ...prevTimes,
+      [place.id]: formattedWalkingTime,
+    }));
+
+    // Lägg till en etikett direkt ovanför markören
+    const label = new google.maps.InfoWindow({
+      content: `
+        <div class="info-window">
+          <div class="info-window-title">${place.namn}</div>
+          <div class="info-window-rating">Helhetsomdöme: ${place.pdfData ? place.pdfData.helhetsomdome : 'N/A'}%</div>
+          <div class="info-window-walking-time">Gångtid: ${formattedWalkingTime} minuter</div>
+        </div>
+      `,
+      disableAutoPan: true,
+    });
+
+    // Visa endast info-window om kartan är tillräckligt inzoomad
+    const zoomLevel = map.getZoom();
+    if (zoomLevel > 16) { // Justera zoomnivån enligt behov
+      label.open(map, marker);
+    }
+
+    marker.addListener('click', () => {
+      label.open(map, marker);
+      selectPlace(place, true);
+    });
+
+    setCurrentMarkers((prevMarkers) => [...prevMarkers, marker]);
+    setCurrentInfoWindows((prevWindows) => [...prevWindows, label]);
+
+    // Lägg till en listener för att öppna infowindow om kartan zoomas in tillräckligt
+    google.maps.event.addListener(map, 'zoom_changed', () => {
+      const newZoomLevel = map.getZoom();
+      if (newZoomLevel > 16) { // Justera zoomnivån enligt behov
+        label.open(map, marker);
+      } else {
+        label.close();
+      }
+    });
+  };
+
   const selectPlace = async (place, showDetailedCard = true) => {
     const cleanName = place.namn.replace(/^(Förskola\s+|Förskolan\s+|Dagmamma\s+|Föräldrakooperativet\s+)/i, '').trim();
     const pdfData = await fetchPdfDataByName(cleanName);
     const relevantAddress = extractRelevantAddress(place.adress);
     const schoolDetails = await fetchSchoolDetailsByAddress(relevantAddress);
-  
+
     const detailedPlace = {
       ...place,
       pdfData: pdfData ? pdfData : null,
       schoolDetails: schoolDetails ? schoolDetails : null,
     };
-  
+
     if (showDetailedCard) {
       setSelectedPlace(detailedPlace);
     } else {
       setSelectedPlace(null);
     }
   };
-  
 
   const handleCardSelect = (place) => {
     selectPlace(place);
@@ -339,6 +360,25 @@ const MapComponent = () => {
       findNearbyPlaces(originMarker.getPosition());
     }
   }, [filter, serviceType]);
+
+  // Lägg till dessa eventlyssnare
+  useEffect(() => {
+    const addressInput = document.getElementById('address');
+    const disableMapZoom = () => map.setOptions({ gestureHandling: 'none' });
+    const enableMapZoom = () => map.setOptions({ gestureHandling: 'auto' });
+
+    if (addressInput) {
+      addressInput.addEventListener('focus', disableMapZoom);
+      addressInput.addEventListener('blur', enableMapZoom);
+    }
+
+    return () => {
+      if (addressInput) {
+        addressInput.removeEventListener('focus', disableMapZoom);
+        addressInput.removeEventListener('blur', enableMapZoom);
+      }
+    };
+  }, [map]);
 
   return (
     <div className="app-container">
@@ -426,6 +466,18 @@ const MapComponent = () => {
           onClose={() => setSelectedPlace(null)}
         />
       )}
+
+      <Snackbar
+        open={Boolean(errorMessage)}
+        autoHideDuration={6000}
+        onClose={() => setErrorMessage('')}
+        anchorOrigin={{ vertical: 'center', horizontal: 'center' }}
+        className="custom-snackbar"
+      >
+        <Alert onClose={() => setErrorMessage('')} severity="error" sx={{ width: '100%' }}>
+          {errorMessage}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };
