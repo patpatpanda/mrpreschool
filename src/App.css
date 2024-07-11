@@ -467,47 +467,65 @@ p {
 }
 
 
+/* Ensure the map container handles overflow correctly */
+.map-container {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Style the info-window */
 .gm-style .gm-style-iw-c {
   display: flex;
   position: absolute;
-  
   overflow: hidden;
   transform: translate3d(-50%, -100%, 0);
-  background: rgba(255, 255, 255, 0.7); /* Ökad transparens för bättre läsbarhet */
-  border-radius: 8px; /* Minskat radie för att spara plats */
-  backdrop-filter: blur(5px); /* Mindre blur för klarare text */
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2); /* Minskat skugga */
+  background: rgba(255, 255, 255, 0.7); /* Increased transparency for better readability */
+  border-radius: 8px; /* Reduced radius to save space */
+  backdrop-filter: blur(5px); /* Less blur for clearer text */
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2); /* Reduced shadow */
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 140px !important; /* Minskad bredd */
-  height: 165px !important; /* Minskad höjd */
+  width: 140px !important; /* Reduced width */
+  height: 165px !important; /* Reduced height */
   text-align: center;
+  pointer-events: none; /* Disable interactions */
+  
 }
 
+/* Ensure content stays within the info-window */
 .gm-style .gm-style-iw-d {
-  overflow: hidden !important; /* Förhindrar att innehållet sträcker sig utanför */
+  overflow: hidden !important;
+}
+
+/* Hide the close button in the info-window */
+.gm-style .gm-style-iw-t::after {
+  content: none !important;
+}
+
+.gm-style-iw button.gm-ui-hover-effect {
+  display: none !important;
 }
 
 .info-window-title {
-  font-size: 12px; /* Mindre textstorlek */
+  font-size: 12px; /* Smaller text size */
   margin: 0;
-  padding-bottom: 3px; /* Mindre padding */
+  padding-bottom: 3px; /* Reduced padding */
 }
 
 .info-window-rating,
 .info-window-walking-time {
-  font-size: 12px; /* Mindre textstorlek */
+  font-size: 12px; /* Smaller text size */
   margin: 0;
-  padding-bottom: 3px; /* Mindre padding */
+  padding-bottom: 3px; /* Reduced padding */
 }
 
 .info-window-rating {
   color: #007BFF;
-  font-weight: bold; /* Tydligare text */
+  font-weight: bold; /* Clearer text */
 }
 
 .info-window-walking-time {
   color: #28a745;
-  font-weight: bold; /* Tydligare text */
+  font-weight: bold; /* Clearer text */
 }

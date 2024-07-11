@@ -1,7 +1,8 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback,} from 'react';
 import { styled } from '@mui/material/styles';
 import PreschoolCard from './PreschoolCard';
 import DetailedCard from './DetailedCard';
+import SplashScreen from './SplashScreen';
 import '../styles/GoogleMap.css';
 import { fetchPdfDataByName, fetchSchoolDetailsByAddress, fetchNearbySchools } from './api';
 import { TextField, Button, Container, Box, CircularProgress, Snackbar, Alert } from '@mui/material';
@@ -11,6 +12,7 @@ import MapIcon from '@mui/icons-material/Map';
 import kommunalMarker from '../images/icons8-toy-train-64.png';
 import friskolaMarker from '../images/icons8-children-48.png';
 import axios from 'axios';
+
 
 /*global google*/
 
@@ -28,6 +30,7 @@ const STOCKHOLM_BOUNDS = {
 };
 
 const geocodeAddress = async (address) => {
+  console.log('Geocoding address:', address);  // Log for debugging
   try {
     const response = await axios.get(`https://nominatim.openstreetmap.org/search`, {
       params: {
@@ -66,6 +69,7 @@ const geocodeAddress = async (address) => {
 
 const MapComponent = () => {
   const mapRef = useRef(null);
+  const addressRef = useRef(null);
   const [map, setMap] = useState(null);
   const [nearbyPlaces, setNearbyPlaces] = useState([]);
   const [selectedPlace, setSelectedPlace] = useState(null);
@@ -80,6 +84,8 @@ const MapComponent = () => {
   const [showText, setShowText] = useState(true);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [infoWindowsVisible, setInfoWindowsVisible] = useState(true);
+  const [showSplashScreen, setShowSplashScreen] = useState(true);
 
   useEffect(() => {
     const initMap = () => {
@@ -91,6 +97,32 @@ const MapComponent = () => {
         disableDefaultUI: true,
       });
       setMap(map);
+
+      // Initialize Autocomplete
+      if (addressRef.current) {
+        const autocomplete = new google.maps.places.Autocomplete(addressRef.current, {
+          bounds: {
+            north: STOCKHOLM_BOUNDS.north,
+            south: STOCKHOLM_BOUNDS.south,
+            east: STOCKHOLM_BOUNDS.east,
+            west: STOCKHOLM_BOUNDS.west,
+          },
+          componentRestrictions: { country: 'se' },
+          fields: ['geometry'],
+          strictBounds: false,
+          types: ['address'],
+        });
+
+        autocomplete.addListener('place_changed', () => {
+          const place = autocomplete.getPlace();
+          if (place.geometry) {
+            const location = place.geometry.location;
+            map.setCenter(location);
+            map.setZoom(17);
+            handlePlaceSelect(location);
+          }
+        });
+      }
     };
 
     const loadScript = () => {
@@ -109,20 +141,13 @@ const MapComponent = () => {
     }
   }, []);
 
-  const handleFilterChange = (newFilter) => {
-    setFilter(newFilter);
-  };
-
-  const handleServiceTypeChange = (newServiceType) => {
-    setServiceType(newServiceType);
-  };
-
   const findNearbyPlaces = useCallback(async (location) => {
     try {
+      setLoading(true);  // Start loading indicator
+      console.log('Fetching nearby places for location:', location);  // Log for debugging
       const places = await fetchNearbySchools(location.lat(), location.lng(), filter, serviceType);
 
       if (places.length > 0) {
-        // Kontrollera avståndet till den närmaste förskolan
         const nearestPlace = places[0];
         const distanceToNearestPlace = calculateDistance(location, new google.maps.LatLng(nearestPlace.latitude, nearestPlace.longitude));
 
@@ -156,9 +181,42 @@ const MapComponent = () => {
       console.error('Error fetching nearby places:', error);
       alert('Ett fel inträffade vid hämtning av närliggande förskolor.');
     } finally {
-      setLoading(false);
+      setLoading(false);  // Stop loading indicator
     }
   }, [map, filter, serviceType]);
+
+  const handleFilterChange = (newFilter) => {
+    setFilter(newFilter);
+  };
+
+  const handleServiceTypeChange = (newServiceType) => {
+    setServiceType(newServiceType);
+  };
+
+  const handlePlaceSelect = useCallback(async (location) => {
+    if (originMarker) {
+      originMarker.setMap(null);
+    }
+
+    const marker = new google.maps.Marker({
+      map: map,
+      position: location,
+      icon: {
+        url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+      },
+    });
+
+    setOriginMarker(marker);
+    await findNearbyPlaces(location);
+    setShowPlaces(true);
+    setShowText(false);
+    setView('map');
+  }, [map, originMarker, findNearbyPlaces]);
+
+  const extractRelevantAddress = (fullAddress) => {
+    const addressParts = fullAddress.split(',');
+    return addressParts[0].trim();
+  };
 
   const geocodeAddressHandler = useCallback(async () => {
     const address = document.getElementById('address').value.trim();
@@ -169,7 +227,9 @@ const MapComponent = () => {
 
     setLoading(true);
 
-    const coordinates = await geocodeAddress(address);
+    const relevantAddress = extractRelevantAddress(address);
+    console.log('Relevant address extracted:', relevantAddress);  // Log for debugging
+    const coordinates = await geocodeAddress(relevantAddress);
     if (coordinates) {
       const { latitude, longitude } = coordinates;
       const location = new google.maps.LatLng(latitude, longitude);
@@ -200,11 +260,6 @@ const MapComponent = () => {
       setLoading(false);
     }
   }, [map, originMarker, findNearbyPlaces]);
-
-  const extractRelevantAddress = (fullAddress) => {
-    const addressParts = fullAddress.split(',');
-    return addressParts[0].trim();
-  };
 
   const calculateWalkingTime = async (origin, destination) => {
     try {
@@ -258,10 +313,9 @@ const MapComponent = () => {
       [place.id]: formattedWalkingTime,
     }));
 
-    // Lägg till en etikett direkt ovanför markören
     const label = new google.maps.InfoWindow({
       content: `
-        <div class="info-window">
+        <div class="info-window" style="pointer-events: none;">
           <div class="info-window-title">${place.namn}</div>
           <div class="info-window-rating">Helhetsomdöme: ${place.pdfData ? place.pdfData.helhetsomdome : 'N/A'}%</div>
           <div class="info-window-walking-time">Gångtid: ${formattedWalkingTime} minuter</div>
@@ -270,11 +324,7 @@ const MapComponent = () => {
       disableAutoPan: true,
     });
 
-    // Visa endast info-window om kartan är tillräckligt inzoomad
-    const zoomLevel = map.getZoom();
-    if (zoomLevel >=  17) { // Justera zoomnivån enligt behov
-      label.open(map, marker);
-    }
+    label.open(map, marker);
 
     marker.addListener('click', () => {
       label.open(map, marker);
@@ -283,16 +333,6 @@ const MapComponent = () => {
 
     setCurrentMarkers((prevMarkers) => [...prevMarkers, marker]);
     setCurrentInfoWindows((prevWindows) => [...prevWindows, label]);
-
-    // Lägg till en listener för att öppna infowindow om kartan zoomas in tillräckligt
-    google.maps.event.addListener(map, 'zoom_changed', () => {
-      const newZoomLevel = map.getZoom();
-      if (newZoomLevel >= 17) { // Justera zoomnivån enligt behov
-        label.open(map, marker);
-      } else {
-        label.close();
-      }
-    });
   };
 
   const selectPlace = async (place, showDetailedCard = true) => {
@@ -327,6 +367,15 @@ const MapComponent = () => {
 
   const toggleView = () => {
     setView(view === 'map' ? 'list' : 'map');
+  };
+
+  const toggleInfoWindows = () => {
+    if (infoWindowsVisible) {
+      currentInfoWindows.forEach(infoWindow => infoWindow.close());
+    } else {
+      currentInfoWindows.forEach(infoWindow => infoWindow.open(map, infoWindow.anchor));
+    }
+    setInfoWindowsVisible(!infoWindowsVisible);
   };
 
   const filterAndSortPreschools = (places, origin) => {
@@ -395,7 +444,6 @@ const MapComponent = () => {
     }
   }, [filter, serviceType]);
 
-  // Lägg till dessa eventlyssnare
   useEffect(() => {
     const addressInput = document.getElementById('address');
     const disableMapZoom = () => map.setOptions({ gestureHandling: 'none' });
@@ -416,6 +464,7 @@ const MapComponent = () => {
 
   return (
     <div className="app-container">
+      {showSplashScreen && <SplashScreen onProceed={() => setShowSplashScreen(false)} />}
       {showText && (
         <div className="initial-text">
           <h1>Förskolekollen.se</h1>
@@ -452,6 +501,7 @@ const MapComponent = () => {
               placeholder="Skriv din adress för att hitta förskola"
               fullWidth
               sx={{ backgroundColor: 'white', color: 'black' }}
+              inputRef={addressRef}
               InputProps={{
                 style: { color: 'black' },
                 endAdornment: (
@@ -461,10 +511,12 @@ const MapComponent = () => {
                 ),
               }}
             />
-
             <Box display="flex" justifyContent="center" width="100%" mt={2} gap={2}>
               <Button onClick={toggleView} variant="contained" color="secondary" startIcon={view === 'map' ? <ListIcon /> : <MapIcon />}>
                 {view === 'map' ? 'Visa Lista' : 'Visa Karta'}
+              </Button>
+              <Button onClick={toggleInfoWindows} variant="contained" color="secondary">
+                {infoWindowsVisible ? 'Dölj Info-Fönster' : 'Visa Info-Fönster'}
               </Button>
             </Box>
           </Box>
