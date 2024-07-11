@@ -1,8 +1,8 @@
-import React, { useEffect, useRef, useState, useCallback,} from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { styled } from '@mui/material/styles';
 import PreschoolCard from './PreschoolCard';
 import DetailedCard from './DetailedCard';
-import SplashScreen from './SplashScreen';
+import SplashScreen from './SplashScreen'; // Import the SplashScreen component
 import '../styles/GoogleMap.css';
 import { fetchPdfDataByName, fetchSchoolDetailsByAddress, fetchNearbySchools } from './api';
 import { TextField, Button, Container, Box, CircularProgress, Snackbar, Alert } from '@mui/material';
@@ -12,7 +12,6 @@ import MapIcon from '@mui/icons-material/Map';
 import kommunalMarker from '../images/icons8-toy-train-64.png';
 import friskolaMarker from '../images/icons8-children-48.png';
 import axios from 'axios';
-
 
 /*global google*/
 
@@ -30,46 +29,27 @@ const STOCKHOLM_BOUNDS = {
 };
 
 const geocodeAddress = async (address) => {
-  console.log('Geocoding address:', address);  // Log for debugging
-  try {
-    const response = await axios.get(`https://nominatim.openstreetmap.org/search`, {
-      params: {
-        q: `${address}, Stockholm, Sweden`,
-        format: 'json',
-        addressdetails: 1,
-        limit: 1
-      },
-    });
-
-    if (response.data.length > 0) {
-      const result = response.data[0];
-      const latitude = parseFloat(result.lat);
-      const longitude = parseFloat(result.lon);
-
-      if (
-        latitude >= STOCKHOLM_BOUNDS.south &&
-        latitude <= STOCKHOLM_BOUNDS.north &&
-        longitude >= STOCKHOLM_BOUNDS.west &&
-        longitude <= STOCKHOLM_BOUNDS.east
-      ) {
-        return { latitude, longitude };
+    console.log('Geocoding address:', address); // Log for debugging
+    try {
+      const fullAddress = `${address}, Stockholm, Sweden`; // Specificera Stockholm som en del av adressen
+      const response = await axios.get(`https://masterkinder20240523125154.azurewebsites.net/api/Forskolan/geocode/${encodeURIComponent(fullAddress)}`);
+      const data = response.data;
+  
+      if (data && data.latitude && data.longitude) {
+        return { latitude: data.latitude, longitude: data.longitude };
       } else {
-        console.error('Address is not within Stockholm.');
+        console.error('Geocoding was not successful.');
         return null;
       }
-    } else {
-      console.error('Geocoding was not successful.');
+    } catch (error) {
+      console.error('Error geocoding address:', error);
       return null;
     }
-  } catch (error) {
-    console.error('Error geocoding address:', error);
-    return null;
-  }
-};
+  };
 
 const MapComponent = () => {
   const mapRef = useRef(null);
-  const addressRef = useRef(null);
+  const addressRef = useRef(null); // Create a reference for the address input
   const [map, setMap] = useState(null);
   const [nearbyPlaces, setNearbyPlaces] = useState([]);
   const [selectedPlace, setSelectedPlace] = useState(null);
@@ -113,13 +93,14 @@ const MapComponent = () => {
           types: ['address'],
         });
 
-        autocomplete.addListener('place_changed', () => {
+        autocomplete.addListener('place_changed', async () => {
           const place = autocomplete.getPlace();
           if (place.geometry) {
             const location = place.geometry.location;
             map.setCenter(location);
             map.setZoom(17);
-            handlePlaceSelect(location);
+            console.log('Place selected:', place); // Log for debugging
+            await handlePlaceSelect(location); // Trigger search directly
           }
         });
       }
@@ -127,7 +108,8 @@ const MapComponent = () => {
 
     const loadScript = () => {
       const script = document.createElement('script');
-      script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyCbJmqNnZHTZ99pPQ2uHfkDXwpMxOpfYLw&libraries=places';
+      script.src =
+        'https://maps.googleapis.com/maps/api/js?key=AIzaSyCbJmqNnZHTZ99pPQ2uHfkDXwpMxOpfYLw&libraries=places';
       script.async = true;
       script.defer = true;
       script.onload = () => initMap();
@@ -143,13 +125,16 @@ const MapComponent = () => {
 
   const findNearbyPlaces = useCallback(async (location) => {
     try {
-      setLoading(true);  // Start loading indicator
-      console.log('Fetching nearby places for location:', location);  // Log for debugging
+      setLoading(true); // Start loading indicator
+      console.log('Fetching nearby places for location:', location); // Log for debugging
       const places = await fetchNearbySchools(location.lat(), location.lng(), filter, serviceType);
 
       if (places.length > 0) {
         const nearestPlace = places[0];
-        const distanceToNearestPlace = calculateDistance(location, new google.maps.LatLng(nearestPlace.latitude, nearestPlace.longitude));
+        const distanceToNearestPlace = calculateDistance(
+          location,
+          new google.maps.LatLng(nearestPlace.latitude, nearestPlace.longitude)
+        );
 
         if (distanceToNearestPlace > 3) {
           setErrorMessage('För närvarande stödjer vi bara stockholmsområdet. Prova igen.');
@@ -157,21 +142,25 @@ const MapComponent = () => {
           return;
         }
 
-        const detailedResults = await Promise.all(places.map(async (place) => {
-          const cleanName = place.namn.replace(/^(Förskola\s+|Förskolan\s+|Dagmamma\s+|Föräldrakooperativ\s+)/i, '').trim();
-          const pdfData = await fetchPdfDataByName(cleanName);
+        const detailedResults = await Promise.all(
+          places.map(async (place) => {
+            const cleanName = place.namn
+              .replace(/^(Förskola\s+|Förskolan\s+|Dagmamma\s+|Föräldrakooperativ\s+)/i, '')
+              .trim();
+            const pdfData = await fetchPdfDataByName(cleanName);
 
-          return {
-            ...place,
-            pdfData: pdfData ? pdfData : null,
-            address: place.adress,
-            description: place.beskrivning,
-          };
-        }));
+            return {
+              ...place,
+              pdfData: pdfData ? pdfData : null,
+              address: place.adress,
+              description: place.beskrivning,
+            };
+          })
+        );
 
         setNearbyPlaces(detailedResults);
         clearMarkersAndInfoWindows();
-        detailedResults.forEach(result => {
+        detailedResults.forEach((result) => {
           createMarker(result, location);
         });
       } else {
@@ -181,7 +170,7 @@ const MapComponent = () => {
       console.error('Error fetching nearby places:', error);
       alert('Ett fel inträffade vid hämtning av närliggande förskolor.');
     } finally {
-      setLoading(false);  // Stop loading indicator
+      setLoading(false); // Stop loading indicator
     }
   }, [map, filter, serviceType]);
 
@@ -193,25 +182,28 @@ const MapComponent = () => {
     setServiceType(newServiceType);
   };
 
-  const handlePlaceSelect = useCallback(async (location) => {
-    if (originMarker) {
-      originMarker.setMap(null);
-    }
+  const handlePlaceSelect = useCallback(
+    async (location) => {
+      if (originMarker) {
+        originMarker.setMap(null);
+      }
 
-    const marker = new google.maps.Marker({
-      map: map,
-      position: location,
-      icon: {
-        url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-      },
-    });
+      const marker = new google.maps.Marker({
+        map: map,
+        position: location,
+        icon: {
+          url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+        },
+      });
 
-    setOriginMarker(marker);
-    await findNearbyPlaces(location);
-    setShowPlaces(true);
-    setShowText(false);
-    setView('map');
-  }, [map, originMarker, findNearbyPlaces]);
+      setOriginMarker(marker);
+      await findNearbyPlaces(location);
+      setShowPlaces(true);
+      setShowText(false);
+      setView('map');
+    },
+    [map, originMarker, findNearbyPlaces]
+  );
 
   const extractRelevantAddress = (fullAddress) => {
     const addressParts = fullAddress.split(',');
@@ -228,7 +220,7 @@ const MapComponent = () => {
     setLoading(true);
 
     const relevantAddress = extractRelevantAddress(address);
-    console.log('Relevant address extracted:', relevantAddress);  // Log for debugging
+    console.log('Relevant address extracted:', relevantAddress); // Log for debugging
     const coordinates = await geocodeAddress(relevantAddress);
     if (coordinates) {
       const { latitude, longitude } = coordinates;
@@ -263,14 +255,17 @@ const MapComponent = () => {
 
   const calculateWalkingTime = async (origin, destination) => {
     try {
-      const response = await axios.get(`https://masterkinder20240523125154.azurewebsites.net/api/Forskolan/walking-time`, {
-        params: {
-          lat1: origin.lat(),
-          lon1: origin.lng(),
-          lat2: destination.lat,
-          lon2: destination.lng,
-        },
-      });
+      const response = await axios.get(
+        `https://masterkinder20240523125154.azurewebsites.net/api/Forskolan/walking-time`,
+        {
+          params: {
+            lat1: origin.lat(),
+            lon1: origin.lng(),
+            lat2: destination.lat,
+            lon2: destination.lng,
+          },
+        }
+      );
       const timeInHours = response.data;
       if (typeof timeInHours !== 'number' || isNaN(timeInHours)) {
         console.error('Invalid response for walking time:', response.data);
@@ -305,8 +300,14 @@ const MapComponent = () => {
       },
     });
 
-    const walkingTimeInMinutes = await calculateWalkingTime(originLocation, { lat: place.latitude, lng: place.longitude });
-    const formattedWalkingTime = walkingTimeInMinutes !== null && !isNaN(walkingTimeInMinutes) ? walkingTimeInMinutes.toFixed(2) : "N/A";
+    const walkingTimeInMinutes = await calculateWalkingTime(originLocation, {
+      lat: place.latitude,
+      lng: place.longitude,
+    });
+    const formattedWalkingTime =
+      walkingTimeInMinutes !== null && !isNaN(walkingTimeInMinutes)
+        ? walkingTimeInMinutes.toFixed(2)
+        : 'N/A';
 
     setWalkingTimes((prevTimes) => ({
       ...prevTimes,
@@ -317,7 +318,9 @@ const MapComponent = () => {
       content: `
         <div class="info-window" style="pointer-events: none;">
           <div class="info-window-title">${place.namn}</div>
-          <div class="info-window-rating">Helhetsomdöme: ${place.pdfData ? place.pdfData.helhetsomdome : 'N/A'}%</div>
+          <div class="info-window-rating">Helhetsomdöme: ${
+            place.pdfData ? place.pdfData.helhetsomdome : 'N/A'
+          }%</div>
           <div class="info-window-walking-time">Gångtid: ${formattedWalkingTime} minuter</div>
         </div>
       `,
@@ -336,7 +339,9 @@ const MapComponent = () => {
   };
 
   const selectPlace = async (place, showDetailedCard = true) => {
-    const cleanName = place.namn.replace(/^(Förskola\s+|Förskolan\s+|Dagmamma\s+|Föräldrakooperativet\s+)/i, '').trim();
+    const cleanName = place.namn
+      .replace(/^(Förskola\s+|Förskolan\s+|Dagmamma\s+|Föräldrakooperativet\s+)/i, '')
+      .trim();
     const pdfData = await fetchPdfDataByName(cleanName);
     const relevantAddress = extractRelevantAddress(place.adress);
     const schoolDetails = await fetchSchoolDetailsByAddress(relevantAddress);
@@ -359,8 +364,8 @@ const MapComponent = () => {
   };
 
   const clearMarkersAndInfoWindows = () => {
-    currentMarkers.forEach(marker => marker.setMap(null));
-    currentInfoWindows.forEach(infowindow => infowindow.close());
+    currentMarkers.forEach((marker) => marker.setMap(null));
+    currentInfoWindows.forEach((infowindow) => infowindow.close());
     setCurrentMarkers([]);
     setCurrentInfoWindows([]);
   };
@@ -371,16 +376,19 @@ const MapComponent = () => {
 
   const toggleInfoWindows = () => {
     if (infoWindowsVisible) {
-      currentInfoWindows.forEach(infoWindow => infoWindow.close());
+      currentInfoWindows.forEach((infoWindow) => infoWindow.close());
     } else {
-      currentInfoWindows.forEach(infoWindow => infoWindow.open(map, infoWindow.anchor));
+      currentInfoWindows.forEach((infoWindow) => infoWindow.open(map, infoWindow.anchor));
     }
     setInfoWindowsVisible(!infoWindowsVisible);
   };
 
   const filterAndSortPreschools = (places, origin) => {
-    const filteredPlaces = places.filter(place => {
-      const distance = calculateDistance(origin, new google.maps.LatLng(place.latitude, place.longitude));
+    const filteredPlaces = places.filter((place) => {
+      const distance = calculateDistance(
+        origin,
+        new google.maps.LatLng(place.latitude, place.longitude)
+      );
       return distance <= 2 && place.pdfData && place.pdfData.antalSvar >= 12;
     });
 
@@ -399,7 +407,7 @@ const MapComponent = () => {
 
     setNearbyPlaces(topPlaces);
     clearMarkersAndInfoWindows();
-    topPlaces.forEach(result => {
+    topPlaces.forEach((result) => {
       createMarker(result, originMarker.getPosition());
     });
   };
@@ -411,8 +419,14 @@ const MapComponent = () => {
     }
 
     const sortedPlaces = nearbyPlaces.sort((a, b) => {
-      const distanceA = calculateDistance(originMarker.getPosition(), new google.maps.LatLng(a.latitude, a.longitude));
-      const distanceB = calculateDistance(originMarker.getPosition(), new google.maps.LatLng(b.latitude, b.longitude));
+      const distanceA = calculateDistance(
+        originMarker.getPosition(),
+        new google.maps.LatLng(a.latitude, a.longitude)
+      );
+      const distanceB = calculateDistance(
+        originMarker.getPosition(),
+        new google.maps.LatLng(b.latitude, b.longitude)
+      );
 
       return distanceA - distanceB;
     });
@@ -421,7 +435,7 @@ const MapComponent = () => {
 
     setNearbyPlaces(closestPlaces);
     clearMarkersAndInfoWindows();
-    closestPlaces.forEach(result => {
+    closestPlaces.forEach((result) => {
       createMarker(result, originMarker.getPosition());
     });
   };
@@ -431,9 +445,12 @@ const MapComponent = () => {
     const dLat = (destination.lat() - origin.lat()) * Math.PI / 180;
     const dLng = (destination.lng() - origin.lng()) * Math.PI / 180;
     const a =
-      0.5 - Math.cos(dLat) / 2 +
-      Math.cos(origin.lat() * Math.PI / 180) * Math.cos(destination.lat() * Math.PI / 180) *
-      (1 - Math.cos(dLng)) / 2;
+      0.5 -
+      Math.cos(dLat) / 2 +
+      (Math.cos(origin.lat() * Math.PI / 180) *
+        Math.cos(destination.lat() * Math.PI / 180) *
+        (1 - Math.cos(dLng))) /
+        2;
 
     return R * 2 * Math.asin(Math.sqrt(a));
   };
