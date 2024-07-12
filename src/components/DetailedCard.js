@@ -14,7 +14,7 @@ const StyledBox = styled(Box)(({ theme }) => ({
 }));
 
 const StyledDialogTitle = styled(DialogTitle)(({ theme }) => ({
-  backgroundColor: '#0077b6',
+  backgroundColor: 'pink',
   color: '#ffffff',
   textAlign: 'center',
 }));

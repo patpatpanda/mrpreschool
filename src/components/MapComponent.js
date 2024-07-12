@@ -28,24 +28,29 @@ const STOCKHOLM_BOUNDS = {
   east: 18.228,
 };
 
+const SERGELSTORG_COORDINATES = {
+  latitude: 59.33258,
+  longitude: 18.0649,
+};
+
 const geocodeAddress = async (address) => {
-    console.log('Geocoding address:', address); // Log for debugging
-    try {
-      const fullAddress = `${address}, Stockholm, Sweden`; // Specificera Stockholm som en del av adressen
-      const response = await axios.get(`https://masterkinder20240523125154.azurewebsites.net/api/Forskolan/geocode/${encodeURIComponent(fullAddress)}`);
-      const data = response.data;
-  
-      if (data && data.latitude && data.longitude) {
-        return { latitude: data.latitude, longitude: data.longitude };
-      } else {
-        console.error('Geocoding was not successful.');
-        return null;
-      }
-    } catch (error) {
-      console.error('Error geocoding address:', error);
+  console.log('Geocoding address:', address); // Log for debugging
+  try {
+    const fullAddress = `${address}, Stockholm, Sweden`; // Specificera Stockholm som en del av adressen
+    const response = await axios.get(`https://masterkinder20240523125154.azurewebsites.net/api/Forskolan/geocode/${encodeURIComponent(fullAddress)}`);
+    const data = response.data;
+
+    if (data && data.latitude && data.longitude) {
+      return { latitude: data.latitude, longitude: data.longitude };
+    } else {
+      console.error('Geocoding was not successful. Data:', data);
       return null;
     }
-  };
+  } catch (error) {
+    console.error('Error geocoding address:', error);
+    return null;
+  }
+};
 
 const MapComponent = () => {
   const mapRef = useRef(null);
@@ -93,15 +98,8 @@ const MapComponent = () => {
           types: ['address'],
         });
 
-        autocomplete.addListener('place_changed', async () => {
-          const place = autocomplete.getPlace();
-          if (place.geometry) {
-            const location = place.geometry.location;
-            map.setCenter(location);
-            map.setZoom(17);
-            console.log('Place selected:', place); // Log for debugging
-            await handlePlaceSelect(location); // Trigger search directly
-          }
+        autocomplete.addListener('place_changed', () => {
+          // Autocomplete listener remains to populate the input, but no search is triggered here
         });
       }
     };
@@ -164,11 +162,13 @@ const MapComponent = () => {
           createMarker(result, location);
         });
       } else {
-        alert('Inga förskolor hittades på den angivna adressen.');
+        setErrorMessage('Inga förskolor hittades på den angivna adressen.');
+        setLoading(false);
       }
     } catch (error) {
       console.error('Error fetching nearby places:', error);
-      alert('Ett fel inträffade vid hämtning av närliggande förskolor.');
+      setErrorMessage('Ett fel inträffade vid hämtning av närliggande förskolor.');
+      setLoading(false);
     } finally {
       setLoading(false); // Stop loading indicator
     }
@@ -182,29 +182,6 @@ const MapComponent = () => {
     setServiceType(newServiceType);
   };
 
-  const handlePlaceSelect = useCallback(
-    async (location) => {
-      if (originMarker) {
-        originMarker.setMap(null);
-      }
-
-      const marker = new google.maps.Marker({
-        map: map,
-        position: location,
-        icon: {
-          url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-        },
-      });
-
-      setOriginMarker(marker);
-      await findNearbyPlaces(location);
-      setShowPlaces(true);
-      setShowText(false);
-      setView('map');
-    },
-    [map, originMarker, findNearbyPlaces]
-  );
-
   const extractRelevantAddress = (fullAddress) => {
     const addressParts = fullAddress.split(',');
     return addressParts[0].trim();
@@ -213,7 +190,7 @@ const MapComponent = () => {
   const geocodeAddressHandler = useCallback(async () => {
     const address = document.getElementById('address').value.trim();
     if (!address) {
-      alert('Please enter a valid address.');
+      setErrorMessage('Ange en giltig adress.');
       return;
     }
 
@@ -222,35 +199,43 @@ const MapComponent = () => {
     const relevantAddress = extractRelevantAddress(address);
     console.log('Relevant address extracted:', relevantAddress); // Log for debugging
     const coordinates = await geocodeAddress(relevantAddress);
-    if (coordinates) {
-      const { latitude, longitude } = coordinates;
-      const location = new google.maps.LatLng(latitude, longitude);
+    console.log('Coordinates:', coordinates); // Log coordinates for debugging
 
-      map.setCenter(location);
-      map.setZoom(17);
-
-      if (originMarker) {
-        originMarker.setMap(null);
-      }
-
-      const marker = new google.maps.Marker({
-        map: map,
-        position: location,
-        icon: {
-          url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-        },
-      });
-
-      setOriginMarker(marker);
-
-      await findNearbyPlaces(location);
-      setShowPlaces(true);
-      setShowText(false);
-      setView('map');
-    } else {
+    if (
+      !coordinates ||
+      (coordinates.latitude === SERGELSTORG_COORDINATES.latitude &&
+        coordinates.longitude === SERGELSTORG_COORDINATES.longitude)
+    ) {
+      console.log('Geocoding failed or out of bounds.');
       setErrorMessage('För närvarande stödjer vi bara stockholmsområdet. Prova igen.');
       setLoading(false);
+      return;
     }
+
+    const { latitude, longitude } = coordinates;
+    const location = new google.maps.LatLng(latitude, longitude);
+
+    map.setCenter(location);
+    map.setZoom(17);
+
+    if (originMarker) {
+      originMarker.setMap(null);
+    }
+
+    const marker = new google.maps.Marker({
+      map: map,
+      position: location,
+      icon: {
+        url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+      },
+    });
+
+    setOriginMarker(marker);
+
+    await findNearbyPlaces(location);
+    setShowPlaces(true);
+    setShowText(false);
+    setView('map');
   }, [map, originMarker, findNearbyPlaces]);
 
   const calculateWalkingTime = async (origin, destination) => {

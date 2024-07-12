@@ -11,27 +11,33 @@ const SplashScreen = ({ onProceed }) => {
       width="100%"
       height="100%"
       display="flex"
-      alignItems="flex-start"
+      alignItems="center"
       justifyContent="center"
       bgcolor="rgba(0, 0, 0, 0.5)"
-    
       zIndex={1000}
       p={2}
     >
-      <Container maxWidth="xs" sx={{ mt: '50vh' }}>
+      <Container 
+        maxWidth="xs" 
+        sx={{ 
+          mt: { xs: '30vh', sm: '20vh' }, // Adjust top margin for mobile and larger screens
+          mx: 'auto', // Center horizontally
+          p: 0, // Remove default padding
+        }}
+      >
         <Paper 
           elevation={3} 
           sx={{ 
-            padding: 3, 
+            padding: { xs: 2, sm: 3 }, // Adjust padding for mobile and larger screens
             textAlign: 'center', 
             display: 'flex', 
             flexDirection: 'column', 
             alignItems: 'center', 
             justifyContent: 'center',
-            right: '30px',
+            marginRight: { xs: '25px', sm: '0' }, // Add margin-right for mobile
           }}
         >
-          <Typography variant="h4" gutterBottom>
+          <Typography variant="h5" gutterBottom>
             Välkommen till Förskolekollen.se
           </Typography>
           <Typography variant="body1" paragraph>

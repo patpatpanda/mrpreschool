@@ -474,31 +474,32 @@ p {
 }
 
 /* Style the info-window */
+/* Main container for the info window */
 .gm-style .gm-style-iw-c {
   display: flex;
   position: absolute;
   overflow: hidden;
   transform: translate3d(-50%, -100%, 0);
-  background: rgba(255, 255, 255, 0.7); /* Increased transparency for better readability */
-  border-radius: 8px; /* Reduced radius to save space */
-  backdrop-filter: blur(5px); /* Less blur for clearer text */
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2); /* Reduced shadow */
+  background: rgba(255, 255, 255, 0.9); /* Slightly less transparency for better readability */
+  border-radius: 12px; /* More rounded corners for a modern look */
+  backdrop-filter: blur(3px); /* Subtle blur for a cleaner look */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* Slightly more shadow for better separation from map */
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 140px !important; /* Reduced width */
-  height: 165px !important; /* Reduced height */
+  width: 180px !important; /* Slightly wider */
+  height: auto !important; /* Auto height to fit content */
   text-align: center;
   pointer-events: none; /* Disable interactions */
-  
+  padding: 10px; /* Added padding for better spacing */
 }
 
-/* Ensure content stays within the info-window */
+/* Ensure content stays within the info window */
 .gm-style .gm-style-iw-d {
   overflow: hidden !important;
 }
 
-/* Hide the close button in the info-window */
+/* Hide the close button in the info window */
 .gm-style .gm-style-iw-t::after {
   content: none !important;
 }
@@ -507,25 +508,31 @@ p {
   display: none !important;
 }
 
+/* Title of the info window */
 .info-window-title {
-  font-size: 12px; /* Smaller text size */
+  font-size: 14px; /* Slightly larger text size */
   margin: 0;
-  padding-bottom: 3px; /* Reduced padding */
+  padding-bottom: 5px; /* Slightly more padding for spacing */
+  font-weight: bold; /* Bold text for better readability */
+  color: #333; /* Darker text color for better contrast */
 }
 
+/* Rating and walking time text */
 .info-window-rating,
 .info-window-walking-time {
-  font-size: 12px; /* Smaller text size */
+  font-size: 13px; /* Slightly larger text size */
   margin: 0;
-  padding-bottom: 3px; /* Reduced padding */
+  padding-bottom: 5px; /* Slightly more padding for spacing */
+  font-weight: normal; /* Normal weight for better readability */
+  color: #555; /* Medium dark text color for better contrast */
 }
 
 .info-window-rating {
-  color: #007BFF;
-  font-weight: bold; /* Clearer text */
+  color: #FF5722; /* Different color for rating text */
+  font-weight: bold; /* Bold text for emphasis */
 }
 
 .info-window-walking-time {
-  color: #28a745;
-  font-weight: bold; /* Clearer text */
+  color: #4CAF50; /* Different color for walking time text */
+  font-weight: bold; /* Bold text for emphasis */
 }
