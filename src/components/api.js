@@ -25,10 +25,6 @@ const normalizeName = (name) => {
   return normalizedName;
 };
 
-
-
-
-
 // Funktion för att hämta PdfData baserat på förskolans namn
 const pdfDataCache = new Map();
 const schoolDetailsCache = new Map();
@@ -85,6 +81,7 @@ export const fetchNearbySchools = async (lat, lng, organisationsform, typAvServi
     return [];
   }
 };
+
 export const fetchSchoolById = async (id) => {
   try {
     const response = await axios.get(`${backendUrl}/api/Forskolan/${id}`);
@@ -94,5 +91,3 @@ export const fetchSchoolById = async (id) => {
     return null;
   }
 };
-
-

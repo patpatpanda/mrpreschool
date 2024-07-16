@@ -226,6 +226,9 @@ const MapComponent = () => {
 
     setLoading(true);
 
+    clearMarkersAndInfoWindows(); // Clear previous markers and info windows
+    setNearbyPlaces([]); // Clear previous nearby places
+
     const relevantAddress = extractRelevantAddress(address);
     console.log('Relevant address extracted:', relevantAddress); // Log for debugging
     const coordinates = await geocodeAddress(relevantAddress);
@@ -345,16 +348,14 @@ const MapComponent = () => {
     label.open(map, marker);
 
     marker.addListener('click', () => {
-      label.open(map, marker);
-      selectPlace(place, true);
-      navigate(`/forskolan/${place.id}`); // Update URL with school ID
+      selectPlace(place);
     });
 
     setCurrentMarkers((prevMarkers) => [...prevMarkers, marker]);
     setCurrentInfoWindows((prevWindows) => [...prevWindows, label]);
   };
 
-  const selectPlace = async (place, showDetailedCard = true) => {
+  const selectPlace = async (place) => {
     const cleanName = place.namn
       .replace(/^(Förskola\s+|Förskolan\s+|Dagmamma\s+|Föräldrakooperativet\s+)/i, '')
       .trim();
@@ -368,16 +369,12 @@ const MapComponent = () => {
       schoolDetails: schoolDetails ? schoolDetails : null,
     };
 
-    if (showDetailedCard) {
-      setSelectedPlace(detailedPlace);
-    } else {
-      setSelectedPlace(null);
-    }
+    setSelectedPlace(detailedPlace);
+    navigate(`/forskolan/${place.id}`);
   };
 
   const handleCardSelect = (place) => {
     selectPlace(place);
-    navigate(`/forskolan/${place.id}`); // Update URL with school ID
   };
 
   const clearMarkersAndInfoWindows = () => {
