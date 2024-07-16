@@ -469,7 +469,7 @@ const MapComponent = () => {
       {showSplashScreen && <SplashScreen onProceed={() => setShowSplashScreen(false)} />}
       {showText && (
         <div className="initial-text">
-          <h1>Förskolekollen.se</h1>
+          
         </div>
       )}
       <div className={`search-container ${showPlaces ? 'top' : 'center'}`}>

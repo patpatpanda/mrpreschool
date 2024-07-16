@@ -88,22 +88,45 @@ body.fixed-position {
   transform: translate(-50%, -50%);
   z-index: 1000;
 }
-
 .initial-text {
   position: absolute;
   top: 80px; /* Justera efter behov */
   left: 50%;
   transform: translateX(-50%);
-  z-index: 1000;
-  font-size: 1rem;
+  z-index: 20000;
+  
   color: #fff;
+  background-size: contain; 
   padding: 10px 20px;
-  background: rgba(255, 255, 255, 0.2); /* Semi-transparent bakgrund */
-  border-radius: 10px;
-  backdrop-filter: blur(10px); /* Blur effekten för glaseffekt */
-  border: 1px solid rgba(255, 255, 255, 0.3); /* Ljusare kant för glasutseende */
+  width: 100%; /* Gör elementet fullbredd */
+  max-width: 1000px; /* Maximal bredd för större skärmar */
+  height: 140px; /* Justera höjden */
+  background: url('/src/images/Förskolelogo.png') no-repeat center center; 
+  
+  
+  
   text-align: center; /* Centrera texten */
 }
+
+@media (max-width: 768px) {
+  .initial-text {
+    top: 60px; /* Justera position för mindre skärmar */
+    max-width: 500px; /* Anpassa maximal bredd för mindre skärmar */
+    height: 80px; /* Justera höjden för mindre skärmar */
+    background-size: contain; /* Gör bakgrundsbilden anpassningsbar */
+  }
+}
+
+@media (max-width: 480px) {
+  .initial-text {
+    top: 40px; /* Justera position för ännu mindre skärmar */
+    max-width: 300px; /* Anpassa maximal bredd för små skärmar */
+    height: 60px; /* Justera höjden för små skärmar */
+    background-size: contain; /* Gör bakgrundsbilden anpassningsbar */
+  }
+}
+
+
 .cards-container {
   display: flex;
   flex-wrap: wrap;
@@ -252,21 +275,7 @@ body.fixed-position {
     margin-right: 10px;
     margin-top: 5px;
   }
-  .initial-text {
-    position: absolute;
-    top: 80px; /* Justera efter behov */
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 100;
-    font-size: 1rem;
-    color: #fff;
-    padding: 10px 20px;
-    background: rgba(255, 255, 255, 0.2); /* Semi-transparent bakgrund */
-    border-radius: 10px;
-    backdrop-filter: blur(10px); /* Blur effekten för glaseffekt */
-    border: 1px solid rgba(255, 255, 255, 0.3); /* Ljusare kant för glasutseende */
-    text-align: center; /* Centrera texten */
-  }
+  
   .cards-container {
     display: grid;
     grid-template-columns: 1fr;
@@ -316,21 +325,8 @@ body.fixed-position {
 
 /* For mobile devices */
 @media (max-width: 480px) {
-  .initial-text {
-    position: absolute;
-    top: 80px; /* Justera efter behov */
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 100;
-    font-size: 1rem;
-    color: #fff;
-    padding: 10px 20px;
-    background: rgba(255, 255, 255, 0.2); /* Semi-transparent bakgrund */
-    border-radius: 10px;
-    backdrop-filter: blur(10px); /* Blur effekten för glaseffekt */
-    border: 1px solid rgba(255, 255, 255, 0.3); /* Ljusare kant för glasutseende */
-    text-align: center; /* Centrera texten */
-  }
+
+  
   .custom-snackbar {
     display: flex;
     justify-content: center;
