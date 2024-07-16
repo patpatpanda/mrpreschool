@@ -2,9 +2,9 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { styled } from '@mui/material/styles';
 import PreschoolCard from './PreschoolCard';
 import DetailedCard from './DetailedCard';
-import SplashScreen from './SplashScreen'; // Import the SplashScreen component
+import SplashScreen from './SplashScreen';
 import '../styles/GoogleMap.css';
-import { fetchPdfDataByName, fetchSchoolDetailsByAddress, fetchNearbySchools } from './api';
+import { fetchPdfDataByName, fetchSchoolDetailsByAddress, fetchNearbySchools, fetchSchoolById } from './api';
 import { TextField, Button, Container, Box, CircularProgress, Snackbar, Alert } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ListIcon from '@mui/icons-material/List';
@@ -12,6 +12,7 @@ import MapIcon from '@mui/icons-material/Map';
 import kommunalMarker from '../images/icons8-toy-train-64.png';
 import friskolaMarker from '../images/icons8-children-48.png';
 import axios from 'axios';
+import { useNavigate, useParams } from 'react-router-dom';
 
 /*global google*/
 
@@ -71,6 +72,8 @@ const MapComponent = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [infoWindowsVisible, setInfoWindowsVisible] = useState(true);
   const [showSplashScreen, setShowSplashScreen] = useState(true);
+  const navigate = useNavigate();
+  const { id } = useParams();
 
   useEffect(() => {
     const initMap = () => {
@@ -120,6 +123,33 @@ const MapComponent = () => {
       initMap();
     }
   }, []);
+
+  useEffect(() => {
+    if (id) {
+      fetchSchoolById(id).then((school) => {
+        if (school) {
+          const location = new google.maps.LatLng(school.latitude, school.longitude);
+          selectPlace(school, false);
+          map.setCenter(location);
+          map.setZoom(17);
+
+          const marker = new google.maps.Marker({
+            map: map,
+            position: location,
+            icon: {
+              url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+            },
+          });
+
+          setOriginMarker(marker);
+          createMarker(school, location);
+          setShowPlaces(true);
+          setShowText(false);
+          setView('map');
+        }
+      });
+    }
+  }, [id, map]);
 
   const findNearbyPlaces = useCallback(async (location) => {
     try {
@@ -317,6 +347,7 @@ const MapComponent = () => {
     marker.addListener('click', () => {
       label.open(map, marker);
       selectPlace(place, true);
+      navigate(`/forskolan/${place.id}`); // Update URL with school ID
     });
 
     setCurrentMarkers((prevMarkers) => [...prevMarkers, marker]);
@@ -346,6 +377,7 @@ const MapComponent = () => {
 
   const handleCardSelect = (place) => {
     selectPlace(place);
+    navigate(`/forskolan/${place.id}`); // Update URL with school ID
   };
 
   const clearMarkersAndInfoWindows = () => {

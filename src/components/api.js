@@ -85,5 +85,14 @@ export const fetchNearbySchools = async (lat, lng, organisationsform, typAvServi
     return [];
   }
 };
+export const fetchSchoolById = async (id) => {
+  try {
+    const response = await axios.get(`${backendUrl}/api/Forskolan/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching school by ID:', error);
+    return null;
+  }
+};
 
 
