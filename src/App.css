@@ -486,7 +486,6 @@ p {
   width: 180px !important; /* Slightly wider */
   height: auto !important; /* Auto height to fit content */
   text-align: center;
-  pointer-events: none; /* Disable interactions */
   padding: 10px; /* Added padding for better spacing */
   font-family: Comic Sans MS, Comic Sans;
 }

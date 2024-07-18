@@ -8,22 +8,14 @@ const normalizeName = (name) => {
     .replace(/(\s+Förskola|\s+Förskolan|\s+Föräldrakooperativet|\s+Föräldrakooperativ|\s+Föräldrarkoperativet|\s+Föräldrarkoperativ|\s+Daghemmet|\s+Daghem|\s+Barnstugan|\s+Barnstugan)$/i, '')
     .trim();
   
-  // Remove special characters except Swedish letters and hyphen
   normalizedName = normalizedName.replace(/[^\w\s\-åäöÅÄÖ]/gi, '').toLowerCase();
-
-  // Replace multiple spaces with a single space
   normalizedName = normalizedName.replace(/\s+/g, ' ');
-
-  // Replace hyphens surrounded by spaces with a single hyphen
   normalizedName = normalizedName.replace(/\s*-\s*/g, '-');
-
-  // Extract only the first part of the name, assuming it's the main name before any address or additional description
   normalizedName = normalizedName.split(' ')[0];
-
-  console.log(`Normalized name: ${normalizedName}`); // Log the normalized name
 
   return normalizedName;
 };
+
 
 // Funktion för att hämta PdfData baserat på förskolans namn
 const pdfDataCache = new Map();

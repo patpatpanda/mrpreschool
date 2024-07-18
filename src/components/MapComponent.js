@@ -127,7 +127,7 @@ const MapComponent = () => {
   useEffect(() => {
     if (id) {
       fetchSchoolById(id).then((school) => {
-        if (school) {
+        if (school && map) { // Ensure map is initialized
           const location = new google.maps.LatLng(school.latitude, school.longitude);
           selectPlace(school, false);
           map.setCenter(location);
@@ -149,7 +149,7 @@ const MapComponent = () => {
         }
       });
     }
-  }, [id, map]);
+  }, [id, map]); // Add map to dependencies
 
   const findNearbyPlaces = useCallback(async (location) => {
     try {
@@ -248,27 +248,32 @@ const MapComponent = () => {
     const { latitude, longitude } = coordinates;
     const location = new google.maps.LatLng(latitude, longitude);
 
-    map.setCenter(location);
-    map.setZoom(17);
+    if (map) { // Ensure map is initialized
+      map.setCenter(location);
+      map.setZoom(17);
 
-    if (originMarker) {
-      originMarker.setMap(null);
+      if (originMarker) {
+        originMarker.setMap(null);
+      }
+
+      const marker = new google.maps.Marker({
+        map: map,
+        position: location,
+        icon: {
+          url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+        },
+      });
+
+      setOriginMarker(marker);
+
+      await findNearbyPlaces(location);
+      setShowPlaces(true);
+      setShowText(false);
+      setView('map');
+    } else {
+      setErrorMessage('Map is not initialized.');
+      setLoading(false);
     }
-
-    const marker = new google.maps.Marker({
-      map: map,
-      position: location,
-      icon: {
-        url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-      },
-    });
-
-    setOriginMarker(marker);
-
-    await findNearbyPlaces(location);
-    setShowPlaces(true);
-    setShowText(false);
-    setView('map');
   }, [map, originMarker, findNearbyPlaces]);
 
   const calculateWalkingTime = async (origin, destination) => {
@@ -332,16 +337,23 @@ const MapComponent = () => {
       [place.id]: formattedWalkingTime,
     }));
 
+    const infoWindowContent = document.createElement('div');
+    infoWindowContent.className = 'info-window';
+    infoWindowContent.innerHTML = `
+      <div class="info-window-title">${place.namn}</div>
+      <div class="info-window-rating">Helhetsomdöme: ${
+        place.pdfData ? place.pdfData.helhetsomdome : 'N/A'
+      }%</div>
+      <div class="info-window-walking-time">Gångtid: ${formattedWalkingTime} minuter</div>
+    `;
+
+    infoWindowContent.addEventListener('click', (event) => {
+      event.stopPropagation(); // Prevent event from bubbling up to map
+      selectPlace(place);
+    });
+
     const label = new google.maps.InfoWindow({
-      content: `
-        <div class="info-window" style="pointer-events: none;">
-          <div class="info-window-title">${place.namn}</div>
-          <div class="info-window-rating">Helhetsomdöme: ${
-            place.pdfData ? place.pdfData.helhetsomdome : 'N/A'
-          }%</div>
-          <div class="info-window-walking-time">Gångtid: ${formattedWalkingTime} minuter</div>
-        </div>
-      `,
+      content: infoWindowContent,
       disableAutoPan: true,
     });
 
@@ -354,23 +366,26 @@ const MapComponent = () => {
     setCurrentMarkers((prevMarkers) => [...prevMarkers, marker]);
     setCurrentInfoWindows((prevWindows) => [...prevWindows, label]);
   };
-
   const selectPlace = async (place) => {
-    const cleanName = place.namn
-      .replace(/^(Förskola\s+|Förskolan\s+|Dagmamma\s+|Föräldrakooperativet\s+)/i, '')
-      .trim();
-    const pdfData = await fetchPdfDataByName(cleanName);
-    const relevantAddress = extractRelevantAddress(place.adress);
-    const schoolDetails = await fetchSchoolDetailsByAddress(relevantAddress);
+    try {
+      const cleanName = place.namn
+        .replace(/^(Förskola\s+|Förskolan\s+|Dagmamma\s+|Föräldrakooperativet\s+)/i, '')
+        .trim();
+      const pdfData = await fetchPdfDataByName(cleanName);
+      const relevantAddress = extractRelevantAddress(place.adress);
+      const schoolDetails = await fetchSchoolDetailsByAddress(relevantAddress);
 
-    const detailedPlace = {
-      ...place,
-      pdfData: pdfData ? pdfData : null,
-      schoolDetails: schoolDetails ? schoolDetails : null,
-    };
+      const detailedPlace = {
+        ...place,
+        pdfData: pdfData ? pdfData : null,
+        schoolDetails: schoolDetails ? schoolDetails : null,
+      };
 
-    setSelectedPlace(detailedPlace);
-    navigate(`/forskolan/${place.id}`);
+      setSelectedPlace(detailedPlace);
+      navigate(`/forskolan/${place.id}`);
+    } catch (error) {
+      console.error('Error selecting place:', error);
+    }
   };
 
   const handleCardSelect = (place) => {
@@ -392,7 +407,9 @@ const MapComponent = () => {
     if (infoWindowsVisible) {
       currentInfoWindows.forEach((infoWindow) => infoWindow.close());
     } else {
-      currentInfoWindows.forEach((infoWindow) => infoWindow.open(map, infoWindow.anchor));
+      currentMarkers.forEach((marker, index) => {
+        currentInfoWindows[index].open(map, marker);
+      });
     }
     setInfoWindowsVisible(!infoWindowsVisible);
   };
@@ -470,7 +487,7 @@ const MapComponent = () => {
   };
 
   useEffect(() => {
-    if (originMarker) {
+    if (originMarker && map) { // Ensure map is initialized
       findNearbyPlaces(originMarker.getPosition());
     }
   }, [filter, serviceType]);
@@ -493,6 +510,10 @@ const MapComponent = () => {
     };
   }, [map]);
 
+  const goToBlog = () => {
+    window.location.href = '/blog'; // Länka till din .NET-blogg
+  };
+
   return (
     <div className="app-container">
       {showSplashScreen && <SplashScreen onProceed={() => setShowSplashScreen(false)} />}
@@ -504,6 +525,9 @@ const MapComponent = () => {
       <div className={`search-container ${showPlaces ? 'top' : 'center'}`}>
         <Container maxWidth="sm">
           <Box display="flex" alignItems="center" justifyContent="center" flexWrap="wrap" gap={2}>
+            <Button onClick={goToBlog} variant="contained" color="primary">
+              Blogg
+            </Button>
             {showPlaces && (
               <Box display="flex" justifyContent="center" width="100%" gap={2} mt={2}>
                 <Button onClick={filterClosestPreschools} variant="contained" color="secondary">

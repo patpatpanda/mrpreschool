@@ -29,7 +29,17 @@ const DetailedCard = ({ schoolData, onClose }) => {
   const { namn, adress, pdfData, schoolDetails, description, walkingTime } = schoolData;
 
   return (
-    <Dialog open onClose={onClose} fullWidth maxWidth="md">
+    <Dialog
+      open
+      onClose={onClose}
+      fullWidth
+      maxWidth="md"
+      PaperProps={{
+        style: {
+          borderRadius: '15px', // Add border-radius here
+        },
+      }}
+    >
       <StyledDialogTitle>
         {namn}
         <IconButton onClick={onClose} sx={{ position: 'absolute', right: 10, top: 10, color: '#ffffff' }}>
