@@ -125,9 +125,9 @@ const MapComponent = () => {
   }, []);
 
   useEffect(() => {
-    if (id) {
+    if (id && map) {
       fetchSchoolById(id).then((school) => {
-        if (school && map) { // Ensure map is initialized
+        if (school) { // Ensure map is initialized
           const location = new google.maps.LatLng(school.latitude, school.longitude);
           selectPlace(school, false);
           map.setCenter(location);
@@ -366,6 +366,7 @@ const MapComponent = () => {
     setCurrentMarkers((prevMarkers) => [...prevMarkers, marker]);
     setCurrentInfoWindows((prevWindows) => [...prevWindows, label]);
   };
+
   const selectPlace = async (place) => {
     try {
       const cleanName = place.namn
