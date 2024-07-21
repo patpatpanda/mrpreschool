@@ -134,7 +134,7 @@ body.fixed-position {
   overflow-y: auto;
   overflow-x: hidden; /* Prevent cards-container from scrolling horizontally */
   padding: 15px;
-  background: url('/src/images/yeye.webp') no-repeat center center; /* Add the background image */
+  background: url('/src/images/ste.webp') no-repeat center center; /* Add the background image */
   background-size: cover; /* Ensure the image covers the entire container */
   position: relative;
   z-index: 100;
@@ -469,66 +469,66 @@ p {
   overflow: hidden;
 }
 
-/* Style the info-window */
-/* Main container for the info window */
 .gm-style .gm-style-iw-c {
   display: flex;
   position: absolute;
   overflow: hidden;
-  transform: translate3d(-50%, -100%, 0);
-  background: rgba(255, 255, 255, 0.9); /* Slightly less transparency for better readability */
-  border-radius: 12px; /* More rounded corners for a modern look */
-  backdrop-filter: blur(3px); /* Subtle blur for a cleaner look */
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* Slightly more shadow for better separation from map */
-  flex-direction: column;
+  transform: translate3d(10px, -50%, 0); /* Adjust position to the right of the marker */
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 8px;
+  backdrop-filter: blur(2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+ 
   align-items: center;
-  justify-content: center;
-  width: 180px !important; /* Slightly wider */
-  height: auto !important; /* Auto height to fit content */
-  text-align: center;
-  padding: 10px; /* Added padding for better spacing */
+  justify-content: flex-start;
+  max-width: 1000px !important;
+  height: auto !important;
+  text-align: left;
+  padding: 10px;
   font-family: Comic Sans MS, Comic Sans;
 }
 
-/* Ensure content stays within the info window */
 .gm-style .gm-style-iw-d {
+  display: flex;
   overflow: hidden !important;
 }
 
-/* Hide the close button in the info window */
 .gm-style .gm-style-iw-t::after {
+  display: flex;
   content: none !important;
 }
 
 .gm-style-iw button.gm-ui-hover-effect {
+  display: flex;
   display: none !important;
 }
 
-/* Title of the info window */
 .info-window-title {
-  font-size: 14px; /* Slightly larger text size */
-  margin: 0;
-  padding-bottom: 5px; /* Slightly more padding for spacing */
-  font-weight: bold; /* Bold text for better readability */
-  color: #333; /* Darker text color for better contrast */
+  display: flex;
+  font-size: 15px;
+  margin: 0 15px 0 0;
+  
+  color: #222;
+  white-space: nowrap;
 }
 
-/* Rating and walking time text */
 .info-window-rating,
 .info-window-walking-time {
-  font-size: 13px; /* Slightly larger text size */
-  margin: 0;
-  padding-bottom: 5px; /* Slightly more padding for spacing */
-  font-weight: normal; /* Normal weight for better readability */
-  color: #555; /* Medium dark text color for better contrast */
+  display: flex;
+  font-size: 14px;
+  margin: 0 10px 0 0;
+  font-weight: normal;
+  white-space: nowrap;
 }
 
 .info-window-rating {
-  color: #FF5722; /* Different color for rating text */
-  font-weight: bold; /* Bold text for emphasis */
+  display: flex;
+  color: #ff22e2;
+
 }
 
 .info-window-walking-time {
-  color: #4CAF50; /* Different color for walking time text */
-  font-weight: bold; /* Bold text for emphasis */
+  display: flex;
+  color: #333;
+ 
 }

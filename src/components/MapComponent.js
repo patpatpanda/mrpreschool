@@ -344,8 +344,10 @@ const MapComponent = () => {
       <div class="info-window-rating">Helhetsomdöme: ${
         place.pdfData ? place.pdfData.helhetsomdome : 'N/A'
       }%</div>
-      <div class="info-window-walking-time">Gångtid: ${formattedWalkingTime} minuter</div>
+      <div class="info-window-walking-time">Gångavstånd: ${formattedWalkingTime} minuter</div>
     `;
+    
+    
 
     infoWindowContent.addEventListener('click', (event) => {
       event.stopPropagation(); // Prevent event from bubbling up to map
