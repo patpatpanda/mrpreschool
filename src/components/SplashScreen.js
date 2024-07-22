@@ -20,7 +20,7 @@ const SplashScreen = ({ onProceed }) => {
       <Container 
         maxWidth="xs" 
         sx={{ 
-          mt: { xs: '30vh', sm: '20vh' }, // Adjust top margin for mobile and larger screens
+          mt: { xs: '50vh', sm: '30vh' }, // Adjust top margin for mobile and larger screens
           mx: 'auto', // Center horizontally
           p: 0, // Remove default padding
         }}
@@ -28,7 +28,7 @@ const SplashScreen = ({ onProceed }) => {
         <Paper 
           elevation={3} 
           sx={{ 
-            padding: { xs: 2, sm: 3 }, // Adjust padding for mobile and larger screens
+            padding: { xs: 2, sm: 6 }, // Adjust padding for mobile and larger screens
             textAlign: 'center', 
             display: 'flex', 
             flexDirection: 'column', 

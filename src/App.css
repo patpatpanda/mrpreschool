@@ -93,17 +93,17 @@ body.fixed-position {
   top: 80px; /* Justera efter behov */
   left: 50%;
   transform: translateX(-50%);
-  z-index: 20000;
+  z-index: 1333;
   
   color: #fff;
   background-size: contain; 
-  padding: 10px 20px;
+  padding: 5px 20px;
   width: 100%; /* Gör elementet fullbredd */
   max-width: 1000px; /* Maximal bredd för större skärmar */
   height: 140px; /* Justera höjden */
   background: url('/src/images/Förskolelogo.png') no-repeat center center; 
   
-  
+ 
   
   text-align: center; /* Centrera texten */
 }
@@ -128,22 +128,24 @@ body.fixed-position {
 
 
 .cards-container {
-  display: flex;
+  display: grid;
   flex-wrap: wrap;
   justify-content: center;
+  grid-template-columns: 1fr 1fr 1fr;
   overflow-y: auto;
   overflow-x: hidden; /* Prevent cards-container from scrolling horizontally */
   padding: 15px;
-  background: url('/src/images/ste.webp') no-repeat center center; /* Add the background image */
+  background: url('/src/images/yeye.webp') no-repeat center center; /* Add the background image */
   background-size: cover; /* Ensure the image covers the entire container */
   position: relative;
   z-index: 100;
   height: 100vh;
   padding-top: 400px;
+  
 
   /* Additional styles to make the background more lively */
   box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.5); /* Add a subtle inner shadow */
-  filter: brightness() saturate(1.1); /* Increase brightness and saturation */
+  filter: brightness() saturate(0.7); /* Increase brightness and saturation */
   
 }
 
@@ -233,18 +235,17 @@ body.fixed-position {
 /* Media Queries for Responsiveness */
 
 /* For tablets and below */
-@media (max-width: 768px) {
+@media (max-width: 1400px) {
   .styled-input {
     width: calc(100% - 80px);
     font-size: 16px;
     overflow-y: auto;
     overflow-x: hidden; /* Prevent cards-container from scrolling horizontally */
   }
-  .hidden-mobile {
-    display: none;
-}
+  
 
   .search-container {
+    display: flex;
     user-select: none;
 
     touch-action: none;
@@ -263,7 +264,7 @@ body.fixed-position {
   }
 
   .search-container.top {
-    top:10px;
+    top:1px;
     font-size: 16px;
     
     position: absolute; /* Changed from fixed to absolute */
@@ -278,7 +279,7 @@ body.fixed-position {
   
   .cards-container {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
     padding: 15px;
     background-color: #FFF;
     position: relative;
@@ -374,7 +375,7 @@ body.fixed-position {
   }
 
   .search-container.top {
-    top: 22px;
+    top: 1px;
     
     font-size: 16px;
     margin-right: 15px;
@@ -531,4 +532,25 @@ p {
   display: flex;
   color: #333;
  
+}
+
+.view-options {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 480px) {
+  .view-options {
+    width: 100%;
+    left: 0;
+    top: 0;
+    display: flex;
+    justify-content: space-between;
+  }
 }

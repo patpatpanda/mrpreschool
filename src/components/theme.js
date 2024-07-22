@@ -49,16 +49,13 @@ const theme = createTheme({
         root: {
           borderRadius: '20px',
           textTransform: 'none',
-          fontWeight: 'bold',
+         
           fontSize: '1rem', // Standardstorlek för desktop
-          padding: '8px 16px', // Standard padding för desktop
-          '@media (max-width:800px)': {
-            fontSize: '0.75rem',  // Mindre textstorlek för mobil
-            padding: '4px 8px',  // Mindre padding för mobil
-          },
-          '@media (min-width:1200px)': {
-            fontSize: '0.75rem',  // Större textstorlek för större skärmar
-            padding: '12px 36px',  // Större padding för större skärmar
+          padding: '8px 12px', // Standard padding för desktop
+       
+          '@media (max-width:460px)': {
+            fontSize: '0.6rem',
+            padding:'4px 6px'
           },
         },
       },

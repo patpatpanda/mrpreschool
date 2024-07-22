@@ -1,11 +1,10 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { styled } from '@mui/material/styles';
 import PreschoolCard from './PreschoolCard';
 import DetailedCard from './DetailedCard';
 import SplashScreen from './SplashScreen';
 import '../styles/GoogleMap.css';
 import { fetchPdfDataByName, fetchSchoolDetailsByAddress, fetchNearbySchools, fetchSchoolById } from './api';
-import { TextField, Button, Container, Box, CircularProgress, Snackbar, Alert } from '@mui/material';
+import { TextField, Button, Container, Box, CircularProgress, Snackbar, Alert, FormControl, InputLabel, Select, MenuItem, Checkbox, ListItemText, InputAdornment, IconButton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ListIcon from '@mui/icons-material/List';
 import MapIcon from '@mui/icons-material/Map';
@@ -15,12 +14,6 @@ import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 
 /*global google*/
-
-const ResponsiveButton = styled(Button)(({ theme }) => ({
-  [theme.breakpoints.down('sm')]: {
-    display: 'none',
-  },
-}));
 
 const STOCKHOLM_BOUNDS = {
   north: 59.435,
@@ -63,8 +56,7 @@ const MapComponent = () => {
   const [currentMarkers, setCurrentMarkers] = useState([]);
   const [currentInfoWindows, setCurrentInfoWindows] = useState([]);
   const [originMarker, setOriginMarker] = useState(null);
-  const [filter, setFilter] = useState('alla');
-  const [serviceType, setServiceType] = useState('alla');
+  const [filter, setFilter] = useState(['Kommunal', 'Fristående', 'Föräldrakooperativ']);
   const [view, setView] = useState('list');
   const [walkingTimes, setWalkingTimes] = useState({});
   const [showText, setShowText] = useState(true);
@@ -72,8 +64,11 @@ const MapComponent = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [infoWindowsVisible, setInfoWindowsVisible] = useState(true);
   const [showSplashScreen, setShowSplashScreen] = useState(true);
+  const [searchMade, setSearchMade] = useState(false); // State to track if a search has been made
   const navigate = useNavigate();
   const { id } = useParams();
+
+  const organisationTypes = ['Kommunal', 'Fristående', 'Föräldrakooperativ']; // Define the organization types
 
   useEffect(() => {
     const initMap = () => {
@@ -155,7 +150,7 @@ const MapComponent = () => {
     try {
       setLoading(true); // Start loading indicator
       console.log('Fetching nearby places for location:', location); // Log for debugging
-      const places = await fetchNearbySchools(location.lat(), location.lng(), filter, serviceType);
+      const places = await fetchNearbySchools(location.lat(), location.lng(), filter, 'alla');
 
       if (places.length > 0) {
         const nearestPlace = places[0];
@@ -202,14 +197,10 @@ const MapComponent = () => {
     } finally {
       setLoading(false); // Stop loading indicator
     }
-  }, [map, filter, serviceType]);
+  }, [map, filter]);
 
-  const handleFilterChange = (newFilter) => {
-    setFilter(newFilter);
-  };
-
-  const handleServiceTypeChange = (newServiceType) => {
-    setServiceType(newServiceType);
+  const handleFilterChange = (event) => {
+    setFilter(event.target.value);
   };
 
   const extractRelevantAddress = (fullAddress) => {
@@ -217,7 +208,8 @@ const MapComponent = () => {
     return addressParts[0].trim();
   };
 
-  const geocodeAddressHandler = useCallback(async () => {
+  const geocodeAddressHandler = useCallback(async (event) => {
+    event.preventDefault(); // Prevent default form submission behavior
     const address = document.getElementById('address').value.trim();
     if (!address) {
       setErrorMessage('Ange en giltig adress.');
@@ -270,11 +262,18 @@ const MapComponent = () => {
       setShowPlaces(true);
       setShowText(false);
       setView('map');
+      setSearchMade(true); // Set searchMade to true after a successful search
     } else {
       setErrorMessage('Map is not initialized.');
       setLoading(false);
     }
   }, [map, originMarker, findNearbyPlaces]);
+
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      geocodeAddressHandler(event);
+    }
+  };
 
   const calculateWalkingTime = async (origin, destination) => {
     try {
@@ -309,6 +308,8 @@ const MapComponent = () => {
       iconUrl = kommunalMarker;
     } else if (place.organisationsform === 'Fristående') {
       iconUrl = friskolaMarker;
+    } else if (place.organisationsform === 'Föräldrakooperativ') {
+      iconUrl = 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'; // Use a different icon for Föräldrakooperativ
     } else {
       iconUrl = 'http://maps.google.com/mapfiles/ms/icons/red-dot.png';
     }
@@ -346,9 +347,8 @@ const MapComponent = () => {
       }%</div>
       <div class="info-window-walking-time">Gångavstånd: ${formattedWalkingTime} minuter</div>
     `;
-    
-    
 
+    
     infoWindowContent.addEventListener('click', (event) => {
       event.stopPropagation(); // Prevent event from bubbling up to map
       selectPlace(place);
@@ -493,7 +493,7 @@ const MapComponent = () => {
     if (originMarker && map) { // Ensure map is initialized
       findNearbyPlaces(originMarker.getPosition());
     }
-  }, [filter, serviceType]);
+  }, [filter]);
 
   useEffect(() => {
     const addressInput = document.getElementById('address');
@@ -514,7 +514,7 @@ const MapComponent = () => {
   }, [map]);
 
   const goToBlog = () => {
-    window.location.href = '/blog'; // Länka till din .NET-blogg
+    window.location.href = 'https://masterkinder20240523125154.azurewebsites.net/blog'; // Länka till din .NET-blogg
   };
 
   return (
@@ -528,55 +528,75 @@ const MapComponent = () => {
       <div className={`search-container ${showPlaces ? 'top' : 'center'}`}>
         <Container maxWidth="sm">
           <Box display="flex" alignItems="center" justifyContent="center" flexWrap="wrap" gap={2}>
-            <Button onClick={goToBlog} variant="contained" color="primary">
-              Blogg
-            </Button>
+          <Button
+      onClick={goToBlog}
+      variant="contained"
+      color="primary"
+      sx={{ padding: '16px 32px', fontSize: '1.5rem' }}
+    >
+      Blogg
+    </Button>
             {showPlaces && (
-              <Box display="flex" justifyContent="center" width="100%" gap={2} mt={2}>
+              <Box display="flex" justifyContent="center" width="100%" gap={2} mt={0}>
                 <Button onClick={filterClosestPreschools} variant="contained" color="secondary">
                   Närmsta 5
                 </Button>
                 <Button onClick={handleTopRanked} variant="contained" color="secondary">
                   Högst rank
                 </Button>
-                <Button onClick={() => handleFilterChange('Fristående')} variant="contained" color="secondary">
-                  Fristående
+                <Button onClick={toggleView} variant="contained" color="secondary" startIcon={view === 'map' ? <ListIcon /> : <MapIcon />}>
+                  {view === 'map' ? 'Visa Lista' : 'Visa Karta'}
                 </Button>
-                <Button onClick={() => handleFilterChange('Kommunal')} variant="contained" color="secondary">
-                  Kommunal
+                <Button onClick={toggleInfoWindows} variant="contained" color="secondary">
+                  {infoWindowsVisible ? 'Dölj Info-Fönster' : 'Visa Info-Fönster'}
                 </Button>
-                <ResponsiveButton onClick={() => handleServiceTypeChange('Förskola')} variant="contained" color="secondary">
-                  Förskola
-                </ResponsiveButton>
-                <ResponsiveButton onClick={() => handleServiceTypeChange('Pedagogisk omsorg')} variant="contained" color="secondary">
-                  Dagmamma
-                </ResponsiveButton>
               </Box>
             )}
-            <TextField
-              id="address"
-              variant="outlined"
-              placeholder="Skriv din adress för att hitta förskola"
-              fullWidth
-              sx={{ backgroundColor: 'white', color: 'black' }}
-              inputRef={addressRef}
-              InputProps={{
-                style: { color: 'black' },
-                endAdornment: (
-                  <Button onClick={geocodeAddressHandler} variant="contained" color="primary" startIcon={<SearchIcon />}>
-                    Sök
-                  </Button>
-                ),
-              }}
-            />
-            <Box display="flex" justifyContent="center" width="100%" mt={2} gap={2}>
-              <Button onClick={toggleView} variant="contained" color="secondary" startIcon={view === 'map' ? <ListIcon /> : <MapIcon />}>
-                {view === 'map' ? 'Visa Lista' : 'Visa Karta'}
-              </Button>
-              <Button onClick={toggleInfoWindows} variant="contained" color="secondary">
-                {infoWindowsVisible ? 'Dölj Info-Fönster' : 'Visa Info-Fönster'}
-              </Button>
-            </Box>
+            <form onSubmit={geocodeAddressHandler} style={{ width: '100%' }}>
+              <TextField
+                id="address"
+                variant="outlined"
+                placeholder="Skriv din adress för att hitta förskola"
+                fullWidth
+                sx={{ backgroundColor: 'white', color: 'black' }}
+                inputRef={addressRef}
+                onKeyDown={handleKeyDown}
+                InputProps={{
+                  style: { color: 'black' },
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={geocodeAddressHandler}
+                        edge="end"
+                      >
+                        <SearchIcon style={{ color: 'black' }} />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </form>
+            {searchMade && (
+              <>
+                <FormControl variant="outlined" fullWidth sx={{ mt: 2 }}>
+                  <InputLabel>Organisationsform</InputLabel>
+                  <Select
+                    multiple
+                    value={filter}
+                    onChange={handleFilterChange}
+                    renderValue={(selected) => selected.join(', ')}
+                    label="Organisationsform"
+                  >
+                    {organisationTypes.map((type) => (
+                      <MenuItem key={type} value={type}>
+                        <Checkbox checked={filter.indexOf(type) > -1} />
+                        <ListItemText primary={type} />
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </>
+            )}
           </Box>
         </Container>
       </div>
