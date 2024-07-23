@@ -1,0 +1,149 @@
+/* Grundläggande stil för Sidebar */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 300px;
+  height: 100%;
+  background-color: white;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  z-index: 2000;
+  overflow-y: auto;
+  transition: transform 0.3s ease;
+  cursor: pointer;
+}
+
+/* Sidebar när den är stängd */
+.sidebar.closed {
+  transform: translateX(-100%);
+}
+
+/* Sidebar när den är öppen */
+.sidebar.open {
+  transform: translateX(0);
+}
+
+/* Toggle button för att öppna/stänga Sidebar */
+.toggle-button {
+  background: #FF4081; /* Matcha med temat */
+  color: white;
+  font-size: 1.2em;
+  position: fixed;
+  left: 10px; /* Initial position när sidopanelen är stängd */
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  z-index: 2100; /* Se till att knappen är ovanför andra element */
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  transition: left 0.3s ease, transform 0.3s ease; /* För smidig övergång mellan positioner */
+}
+
+/* Ny position för toggle-button när Sidebar är öppen */
+.toggle-button.open {
+  left: 310px; /* Ny position när sidopanelen är öppen */
+}
+
+/* Sidebar Card */
+.sidebar-card {
+  background-color: #FFFDE7; /* Bakgrundsfärg från temat */
+  border-radius: 8px; /* Rundade hörn */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Lätt skugga */
+  padding: 15px; /* Lite padding inuti kortet */
+  margin: 15px; /* Marginal runt varje kort */
+  font-family: 'Comic Sans MS', 'Comic Sans', sans-serif; /* Matcha med temat */
+  color: #333; /* Textfärg */
+}
+
+/* Rubriker i kortet */
+.sidebar-card h3 {
+  font-size: 1.5rem; /* Storlek för rubriker */
+  margin-top: 0; /* Ingen övre marginal */
+  margin-bottom: 10px; /* Marginal under rubriken */
+  color: #FF4081; /* Primär färg från temat */
+}
+
+/* Paragrafer i kortet */
+.sidebar-card p {
+  margin: 5px 0; /* Marginal ovanför och under varje paragraf */
+  font-size: 0.9em; /* Lite mindre textstorlek */
+  color: #555; /* Textfärg */
+}
+
+/* Fet text för den första paragrafen */
+.sidebar-card p:first-of-type {
+  font-weight: bold;
+}
+
+/* Betyg och gångavstånd */
+.sidebar-card .rating {
+  color: #FF9800; /* Färg för betyg (exempelvis en stjärnklassning) */
+}
+
+.sidebar-card .distance {
+  color: #616161; /* Färg för gångavståndet */
+}
+
+/* Responsiva stilar */
+@media (max-width: 768px) {
+  /* Minska bredden på sidebar för mindre skärmar */
+  .sidebar {
+    width: 240px;
+  }
+
+  /* Minska fontstorleken för toggle-button på mindre skärmar */
+  .toggle-button {
+    font-size: 1em;
+    padding: 8px 12px;
+  }
+
+  .toggle-button.open {
+    left: 250px; /* Ny position när sidopanelen är öppen */
+  }
+
+  /* Minska padding och fontstorlek för sidebar-card på mindre skärmar */
+  .sidebar-card {
+    padding: 12px;
+    margin: 10px;
+  }
+
+  .sidebar-card h3 {
+    font-size: 1.3rem;
+  }
+
+  .sidebar-card p {
+    font-size: 0.85em;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Göra sidebar ännu smalare på mycket små skärmar */
+  .sidebar {
+    width: 200px;
+  }
+
+  /* Justera position och storlek på toggle-button på mycket små skärmar */
+  .toggle-button {
+    font-size: 0.9em;
+    padding: 6px 10px;
+  }
+
+  .toggle-button.open {
+    left: 210px; /* Ny position när sidopanelen är öppen */
+  }
+
+  /* Justera padding och fontstorlek ytterligare för sidebar-card */
+  .sidebar-card {
+    padding: 10px;
+    margin: 8px;
+  }
+
+  .sidebar-card h3 {
+    font-size: 1.1rem;
+  }
+
+  .sidebar-card p {
+    font-size: 0.8em;
+  }
+}

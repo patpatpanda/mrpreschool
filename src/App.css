@@ -325,7 +325,7 @@ body.fixed-position {
 }
 
 /* For mobile devices */
-@media (max-width: 480px) {
+@media (max-width: 768px) {
 
   
   .custom-snackbar {
@@ -396,8 +396,8 @@ body.fixed-position {
   }
 
   .card {
-    width: 300px; /* Full width for smaller screens */
-    height: 500px; /* Set a fixed height */
+    width: 350px; /* Full width for smaller screens */
+    height: 520px; /* Set a fixed height */
     font-size: 16px;
     margin-left: 10px; /* Move cards slightly to the left */
   }
@@ -474,20 +474,21 @@ p {
   display: flex;
   position: absolute;
   overflow: hidden;
-  transform: translate3d(10px, -50%, 0); /* Adjust position to the right of the marker */
+  transform: translate3d(10px, -50%, 0);
   background: rgba(255, 255, 255, 0.95);
   border-radius: 8px;
   backdrop-filter: blur(2px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
- 
   align-items: center;
   justify-content: flex-start;
-  max-width: 1000px !important;
+  max-width: 250px; /* Justerat max bredd */
+  max-height: 150px; /* Justerat max höjd */
   height: auto !important;
   text-align: left;
   padding: 10px;
   font-family: Comic Sans MS, Comic Sans;
 }
+
 
 .gm-style .gm-style-iw-d {
   display: flex;
@@ -516,7 +517,7 @@ p {
 .info-window-rating,
 .info-window-walking-time {
   display: flex;
-  font-size: 14px;
+  font-size: 12px;
   margin: 0 10px 0 0;
   font-weight: normal;
   white-space: nowrap;
@@ -554,3 +555,4 @@ p {
     justify-content: space-between;
   }
 }
+
