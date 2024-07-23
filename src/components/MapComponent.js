@@ -539,7 +539,7 @@ const MapComponent = () => {
             </form>
             {searchMade && (
               <>
-                <FormControl 
+               <FormControl 
   variant="outlined" 
   fullWidth 
   sx={{ 
@@ -592,10 +592,7 @@ const MapComponent = () => {
           '&.Mui-selected': {
             backgroundColor: 'secondary.light',
             color: 'primary.main',
-            '&:hover': {
-              backgroundColor: 'secondary.main',
-              color: 'primary.contrastText',
-            },
+            
           },
           '&:hover': {
             backgroundColor: 'secondary.light',

@@ -11,6 +11,7 @@
   overflow-y: auto;
   transition: transform 0.3s ease;
   cursor: pointer;
+  font-family: 'Comic Sans MS', 'Comic Sans',
 }
 
 /* Sidebar när den är stängd */
@@ -30,7 +31,7 @@
   font-size: 1.2em;
   position: fixed;
   left: 10px; /* Initial position när sidopanelen är stängd */
-  top: 50%;
+  top: 70%;
   transform: translateY(-50%);
   cursor: pointer;
   z-index: 2100; /* Se till att knappen är ovanför andra element */
@@ -52,7 +53,7 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Lätt skugga */
   padding: 15px; /* Lite padding inuti kortet */
   margin: 15px; /* Marginal runt varje kort */
-  font-family: 'Comic Sans MS', 'Comic Sans', sans-serif; /* Matcha med temat */
+  font-family: 'Comic Sans MS', 'Comic Sans';
   color: #333; /* Textfärg */
 }
 
@@ -90,6 +91,7 @@
   /* Minska bredden på sidebar för mindre skärmar */
   .sidebar {
     width: 240px;
+    font-family: 'Comic Sans MS', 'Comic Sans';
   }
 
   /* Minska fontstorleken för toggle-button på mindre skärmar */
@@ -106,21 +108,21 @@
   .sidebar-card {
     padding: 12px;
     margin: 10px;
+    font-family: 'Comic Sans MS', 'Comic Sans'
   }
 
   .sidebar-card h3 {
     font-size: 1.3rem;
-  }
+    font-family: 'Comic Sans MS', 'Comic Sans'
 
-  .sidebar-card p {
-    font-size: 0.85em;
+  
   }
 }
-
 @media (max-width: 480px) {
   /* Göra sidebar ännu smalare på mycket små skärmar */
   .sidebar {
     width: 200px;
+    font-family: 'Comic Sans MS', 'Comic Sans'
   }
 
   /* Justera position och storlek på toggle-button på mycket små skärmar */
@@ -137,13 +139,16 @@
   .sidebar-card {
     padding: 10px;
     margin: 8px;
+    font-family: 'Comic Sans MS', 'Comic Sans'
   }
 
   .sidebar-card h3 {
     font-size: 1.1rem;
+    font-family: 'Comic Sans MS', 'Comic Sans'
   }
 
   .sidebar-card p {
     font-size: 0.8em;
+    font-family: 'Comic Sans MS', 'Comic Sans'
   }
 }

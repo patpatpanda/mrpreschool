@@ -1,5 +1,5 @@
 import { createTheme } from '@mui/material/styles';
-import { pink, purple, yellow, blueGrey, deepOrange } from '@mui/material/colors';
+import { pink, yellow, blueGrey, deepOrange } from '@mui/material/colors';
 
 const theme = createTheme({
   palette: {
@@ -7,7 +7,7 @@ const theme = createTheme({
       main: pink[500],
     },
     secondary: {
-      main: purple[500],
+      main: pink[500],
     },
     background: {
       default: yellow[50],
@@ -53,9 +53,9 @@ const theme = createTheme({
           fontSize: '1rem', // Standardstorlek för desktop
           padding: '8px 12px', // Standard padding för desktop
        
-          '@media (max-width:460px)': {
-            fontSize: '0.6rem',
-            padding:'4px 6px'
+          '@media (max-width:768px)': {
+            fontSize: '1rem',
+            padding:'8px 18px'
           },
         },
       },
