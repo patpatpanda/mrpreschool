@@ -4,6 +4,7 @@ import { Dialog, DialogTitle, DialogContent, IconButton, Typography, Box, Grid }
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes, faMapMarkerAlt, faClock } from '@fortawesome/free-solid-svg-icons';
 import { styled } from '@mui/material/styles';
+import myImage from '../images/seri.webp'; // Import your image
 
 const StyledBox = styled(Box)(({ theme }) => ({
   backgroundColor: '#f0f4f8',
@@ -25,8 +26,26 @@ const StyledDialogContent = styled(DialogContent)(({ theme }) => ({
   maxHeight: '70vh', // Set a maximum height for the content
 }));
 
+const ImageContainer = styled(Box)(({ theme }) => ({
+  width: '100%',
+  borderRadius: '10px',
+  overflow: 'hidden',
+  marginBottom: '20px',
+  img: {
+    width: '100%',
+    height: 'auto',
+    display: 'block',
+  },
+  [theme.breakpoints.down('sm')]: {
+    img: {
+      width: '100%',
+      height: 'auto',
+    },
+  },
+}));
+
 const DetailedCard = ({ schoolData, onClose }) => {
-  const { namn, adress, pdfData, schoolDetails, description, walkingTime, imageUrl } = schoolData;
+  const { namn, adress, pdfData, schoolDetails, description, walkingTime } = schoolData;
 
   return (
     <Dialog
@@ -48,11 +67,9 @@ const DetailedCard = ({ schoolData, onClose }) => {
       </StyledDialogTitle>
       <StyledDialogContent>
         <StyledBox>
-          {imageUrl && (
-            <Box mb={2}>
-              <img src={imageUrl} alt={`${namn}`} style={{ width: '100%', borderRadius: '10px' }} />
-            </Box>
-          )}
+          <ImageContainer>
+            <img src={myImage} alt={`${namn}`} />
+          </ImageContainer>
           {adress && (
             <Typography variant="h6" gutterBottom>
               <FontAwesomeIcon icon={faMapMarkerAlt} /> {adress}
@@ -124,7 +141,6 @@ DetailedCard.propTypes = {
     schoolDetails: PropTypes.object,
     description: PropTypes.string,
     walkingTime: PropTypes.string,
-    imageUrl: PropTypes.string,
   }).isRequired,
   onClose: PropTypes.func.isRequired,
 };

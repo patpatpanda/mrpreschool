@@ -3,7 +3,7 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 300px;
+  width: 600px;
   height: 100%;
   background-color: white;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
@@ -11,7 +11,7 @@
   overflow-y: auto;
   transition: transform 0.3s ease;
   cursor: pointer;
-  font-family: 'Comic Sans MS', 'Comic Sans',
+  font-family: 'Comic Sans MS', 'Comic Sans', 
 }
 
 /* Sidebar när den är stängd */
@@ -31,7 +31,7 @@
   font-size: 1.2em;
   position: fixed;
   left: 10px; /* Initial position när sidopanelen är stängd */
-  top: 70%;
+  top: 60%;
   transform: translateY(-50%);
   cursor: pointer;
   z-index: 2100; /* Se till att knappen är ovanför andra element */
@@ -43,7 +43,7 @@
 
 /* Ny position för toggle-button när Sidebar är öppen */
 .toggle-button.open {
-  left: 310px; /* Ny position när sidopanelen är öppen */
+  left: 300px; /* Ny position när sidopanelen är öppen */
 }
 
 /* Sidebar Card */
@@ -101,7 +101,7 @@
   }
 
   .toggle-button.open {
-    left: 250px; /* Ny position när sidopanelen är öppen */
+    left: 240px; /* Ny position när sidopanelen är öppen */
   }
 
   /* Minska padding och fontstorlek för sidebar-card på mindre skärmar */
@@ -132,7 +132,7 @@
   }
 
   .toggle-button.open {
-    left: 210px; /* Ny position när sidopanelen är öppen */
+    left: 200px; /* Ny position när sidopanelen är öppen */
   }
 
   /* Justera padding och fontstorlek ytterligare för sidebar-card */

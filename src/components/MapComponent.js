@@ -3,10 +3,12 @@ import PreschoolCard from './PreschoolCard';
 import DetailedCard from './DetailedCard';
 import SplashScreen from './SplashScreen';
 import Sidebar from './Sidebar';
+import OrganisationFilter from './OrganisationFilter'; // Lägg till denna rad om den inte redan finns
 import '../styles/GoogleMap.css';
 import { fetchPdfDataByName, fetchSchoolDetailsByAddress, fetchNearbySchools, fetchSchoolById } from './api';
-import { TextField, Button, Container, Box, CircularProgress, Snackbar, Alert, FormControl, InputLabel, Select, MenuItem, Checkbox, ListItemText, InputAdornment, IconButton } from '@mui/material';
+import { TextField, Button, Container, Box, CircularProgress, Snackbar, Alert, InputAdornment, IconButton } from '@mui/material'; // Uppdaterad import
 import SearchIcon from '@mui/icons-material/Search';
+
 
 import kommunalMarker from '../images/icons8-toy-train-64.png';
 import friskolaMarker from '../images/icons8-children-48.png';
@@ -66,6 +68,7 @@ const MapComponent = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false); // Set sidebarOpen to false initially
   const navigate = useNavigate();
   const { id } = useParams();
+ 
 
   const organisationTypes = ['Kommunal', 'Fristående', 'Fristående (föräldrakooperativ)']; // Define the organization types
 
@@ -125,7 +128,7 @@ const MapComponent = () => {
           const location = new google.maps.LatLng(school.latitude, school.longitude);
           selectPlace(school, false);
           map.setCenter(location);
-          map.setZoom(17);
+          map.setZoom(16);
 
           const marker = new google.maps.Marker({
             map: map,
@@ -186,7 +189,8 @@ const MapComponent = () => {
           createMarker(result, location);
         });
 
-        setSidebarOpen(true); // Open the sidebar after search
+        // Ta bort denna rad
+        // setSidebarOpen(true); // Open the sidebar after search
       } else {
         setErrorMessage('Inga förskolor hittades på den angivna adressen.');
         setLoading(false);
@@ -201,7 +205,12 @@ const MapComponent = () => {
   }, [map, filter]);
 
   const handleFilterChange = (event) => {
-    setFilter(event.target.value);
+    const value = event.target.value;
+    setFilter((prevFilter) =>
+      prevFilter.includes(value)
+        ? prevFilter.filter((item) => item !== value)
+        : [...prevFilter, value]
+    );
   };
 
   const extractRelevantAddress = (fullAddress) => {
@@ -243,7 +252,7 @@ const MapComponent = () => {
 
     if (map) { // Ensure map is initialized
       map.setCenter(location);
-      map.setZoom(17);
+      map.setZoom(15);
 
       if (originMarker) {
         originMarker.setMap(null);
@@ -483,36 +492,34 @@ const MapComponent = () => {
     window.location.href = 'https://masterkinder20240523125154.azurewebsites.net/blog'; // Länka till din .NET-blogg
   };
 
-  return (
+   return (
     <div className="app-container">
       {showSplashScreen && <SplashScreen onProceed={() => setShowSplashScreen(false)} />}
-      {showText && (
-        <div className="initial-text">
-          
-        </div>
-      )}
+      {showText && <div className="initial-text"> {/* Initial text content */} </div>}
+      
       <div className={`search-container ${showPlaces ? 'top' : 'center'}`}>
         <Container maxWidth="sm">
           <Box display="flex" alignItems="center" justifyContent="center" flexWrap="wrap" gap={2}>
-          <Button
-      onClick={goToBlog}
-      variant="contained"
-      color="primary"
-      sx={{ padding: '16px 32px', fontSize: '1.5rem' }}
-    >
-      Blogg
-    </Button>
+            <Button
+              onClick={goToBlog}
+              variant="contained"
+              color="primary"
+              sx={{ padding: '16px 32px', fontSize: '1.5rem' }}
+            >
+              Blogg
+            </Button>
+            
             {showPlaces && (
-              <Box display="flex" justifyContent="center" width="100%" gap={2} mt={0}>
+              <Box display="flex" justifyContent="center" width="100%" gap={2}>
                 <Button onClick={filterClosestPreschools} variant="contained" color="secondary">
                   Närmsta 5
                 </Button>
                 <Button onClick={handleTopRanked} variant="contained" color="secondary">
                   Högst rank
                 </Button>
-               
               </Box>
             )}
+            
             <form onSubmit={geocodeAddressHandler} style={{ width: '100%' }}>
               <TextField
                 id="address"
@@ -526,10 +533,7 @@ const MapComponent = () => {
                   style: { color: 'black' },
                   endAdornment: (
                     <InputAdornment position="end">
-                      <IconButton
-                        onClick={geocodeAddressHandler}
-                        edge="end"
-                      >
+                      <IconButton onClick={geocodeAddressHandler} edge="end">
                         <SearchIcon style={{ color: 'black' }} />
                       </IconButton>
                     </InputAdornment>
@@ -537,90 +541,14 @@ const MapComponent = () => {
                 }}
               />
             </form>
-            {searchMade && (
-              <>
-               <FormControl 
-  variant="outlined" 
-  fullWidth 
-  sx={{ 
-    mt: 2, 
-    backgroundColor: 'white', 
-    borderRadius: '8px',
-    '& .MuiOutlinedInput-root': {
-      '& fieldset': {
-        borderColor: 'primary.main',
-      },
-      '&:hover fieldset': {
-        borderColor: 'primary.dark',
-      },
-      '&.Mui-focused fieldset': {
-        borderColor: 'primary.main',
-      },
-    },
-    '& .MuiInputLabel-outlined': {
-      color: 'primary.main',
-    },
-    '& .MuiInputLabel-outlined.Mui-focused': {
-      color: 'primary.main',
-    },
-  }}
->
-  <InputLabel>Organisationsform</InputLabel>
-  <Select
-    multiple
-    value={filter}
-    onChange={handleFilterChange}
-    renderValue={(selected) => selected.join(', ')}
-    label="Organisationsform"
-    sx={{
-      '& .MuiSelect-select': {
-        color: 'text.primary',
-        backgroundColor: 'background.default',
-        padding: '10px',
-        borderRadius: '8px',
-      },
-      '& .MuiSelect-icon': {
-        color: 'primary.main',
-      },
-    }}
-  >
-    {organisationTypes.map((type) => (
-      <MenuItem 
-        key={type} 
-        value={type} 
-        sx={{
-          '&.Mui-selected': {
-            backgroundColor: 'secondary.light',
-            color: 'primary.main',
             
-          },
-          '&:hover': {
-            backgroundColor: 'secondary.light',
-            color: 'primary.main',
-          },
-        }}
-      >
-        <Checkbox 
-          checked={filter.indexOf(type) > -1} 
-          sx={{
-            color: 'secondary.main',
-            '&.Mui-checked': {
-              color: 'secondary.dark',
-            },
-          }}
-        />
-        <ListItemText 
-          primary={type} 
-          sx={{
-            color: 'text.primary',
-          }}
-        />
-      </MenuItem>
-    ))}
-  </Select>
-</FormControl>
-
-              </>
+            {searchMade && (
+              <OrganisationFilter
+                organisationTypes={organisationTypes}
+                filter={filter}
+                handleFilterChange={handleFilterChange}
+                visible={showPlaces} // Styr synligheten av OrganisationFilter
+              />
             )}
           </Box>
         </Container>
@@ -656,13 +584,18 @@ const MapComponent = () => {
         />
       )}
 
+      {searchMade && (
+        <button className={`toggle-button ${sidebarOpen ? 'open' : 'closed'}`} onClick={toggleSidebar}>
+          {sidebarOpen ? 'Dölj' : 'Visa'}
+        </button>
+      )}
       <Sidebar 
         places={nearbyPlaces} 
         selectedPlace={selectedPlace} 
         onSelect={handleCardSelect} 
         sidebarOpen={sidebarOpen} 
         toggleSidebar={toggleSidebar} 
-        walkingTimes={walkingTimes} // Lägg till walkingTimes som props
+        walkingTimes={walkingTimes} 
       />
 
       <Snackbar
