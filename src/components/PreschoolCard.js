@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, Typography, Box, Divider, ButtonBase } f
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMapMarkerAlt, faInfoCircle } from '@fortawesome/free-solid-svg-icons';
 
-const PreschoolCard = ({ preschool, onSelect }) => (
+const PreschoolCard = ({ preschool, onSelect, walkingTime }) => (
   <ButtonBase
     onClick={() => onSelect(preschool)}
     style={{
@@ -52,7 +52,7 @@ const PreschoolCard = ({ preschool, onSelect }) => (
             </Typography>
           </Box>
         )}
-        {preschool.pdfData && (
+        {preschool.pdfData ? (
           <Box mt={2}>
             <Typography variant="body2" sx={{ color: '#333' }}>
               <strong>Antal Svar:</strong> {preschool.pdfData.antalSvar} st
@@ -62,6 +62,25 @@ const PreschoolCard = ({ preschool, onSelect }) => (
             </Typography>
             <Typography variant="body2" sx={{ color: '#333' }}>
               <strong>Svarsfrekvens:</strong> {preschool.pdfData.svarsfrekvens}%
+            </Typography>
+          </Box>
+        ) : (
+          <Box mt={2}>
+            <Typography variant="body2" sx={{ color: '#333' }}>
+              <strong>Antal Svar:</strong> N/A
+            </Typography>
+            <Typography variant="body2" sx={{ color: '#333' }}>
+              <strong>Helhetsomdome:</strong> N/A
+            </Typography>
+            <Typography variant="body2" sx={{ color: '#333' }}>
+              <strong>Svarsfrekvens:</strong> N/A
+            </Typography>
+          </Box>
+        )}
+        {walkingTime && (
+          <Box mt={2}>
+            <Typography variant="body2" sx={{ color: '#333' }}>
+              <strong>Gångavstånd:</strong> {walkingTime} minuter
             </Typography>
           </Box>
         )}
@@ -78,6 +97,7 @@ PreschoolCard.propTypes = {
     pdfData: PropTypes.object,
   }).isRequired,
   onSelect: PropTypes.func.isRequired,
+  walkingTime: PropTypes.string,
 };
 
 export default PreschoolCard;

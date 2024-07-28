@@ -2,6 +2,9 @@ import axios from 'axios';
 
 const backendUrl = 'https://masterkinder20240523125154.azurewebsites.net';
 
+const pdfDataCache = new Map();
+const schoolDetailsCache = new Map();
+const nearbySchoolsCache = new Map();
 const normalizeName = (name) => {
   let normalizedName = name
     .replace(/^(Förskola\s+|Förskolan\s+|Föräldrakooperativet\s+|Föräldrakooperativ\s+|Föräldrarkoperativet\s+|Föräldrarkoperativ\s+|Daghemmet\s+|Daghem\s+|Barnstugan\s+|Barnstugan\s+)/i, '')
@@ -17,10 +20,7 @@ const normalizeName = (name) => {
 };
 
 
-// Funktion för att hämta PdfData baserat på förskolans namn
-const pdfDataCache = new Map();
-const schoolDetailsCache = new Map();
-const nearbySchoolsCache = new Map();
+
 
 export const fetchPdfDataByName = async (name) => {
   try {
@@ -39,6 +39,23 @@ export const fetchPdfDataByName = async (name) => {
     return null;
   }
 };
+export const fetchMalibuByName = async (name) => {
+  try {
+    const encodedName = encodeURIComponent(name.trim());
+    const url = `${backendUrl}/api/Malibu/name/${encodedName}`;
+    console.log(`Fetching Malibu data with URL: ${url}`);
+    const response = await axios.get(url);
+    const data = response.data?.$values[0] || null; // Här extraherar vi den första posten
+    console.log(`Fetched Malibu data for ${name}:`, data);
+    pdfDataCache.set(name.trim(), data);
+    return data;
+  } catch (error) {
+    console.error(`Error fetching Malibu data by name (${name}):`, error.response?.data || error.message);
+    return null;
+  }
+};
+
+
 
 export const fetchSchoolDetailsByAddress = async (address) => {
   try {

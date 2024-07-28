@@ -3,12 +3,11 @@ import PreschoolCard from './PreschoolCard';
 import DetailedCard from './DetailedCard';
 import SplashScreen from './SplashScreen';
 import Sidebar from './Sidebar';
-import OrganisationFilter from './OrganisationFilter'; // Lägg till denna rad om den inte redan finns
+import OrganisationFilter from './OrganisationFilter';
 import '../styles/GoogleMap.css';
-import { fetchPdfDataByName, fetchSchoolDetailsByAddress, fetchNearbySchools, fetchSchoolById } from './api';
-import { TextField, Button, Container, Box, CircularProgress, Snackbar, Alert, InputAdornment, IconButton } from '@mui/material'; // Uppdaterad import
+import { fetchPdfDataByName, fetchMalibuByName, fetchSchoolDetailsByAddress, fetchNearbySchools, fetchSchoolById } from './api';
+import { TextField, Button, Container, Box, CircularProgress, Snackbar, Alert, InputAdornment, IconButton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-
 
 import kommunalMarker from '../images/icons8-toy-train-64.png';
 import friskolaMarker from '../images/icons8-children-48.png';
@@ -64,13 +63,12 @@ const MapComponent = () => {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [showSplashScreen, setShowSplashScreen] = useState(true);
-  const [searchMade, setSearchMade] = useState(false); // State to track if a search has been made
-  const [sidebarOpen, setSidebarOpen] = useState(false); // Set sidebarOpen to false initially
+  const [searchMade, setSearchMade] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const { id } = useParams();
- 
 
-  const organisationTypes = ['Kommunal', 'Fristående', 'Fristående (föräldrakooperativ)']; // Define the organization types
+  const organisationTypes = ['Kommunal', 'Fristående', 'Fristående (föräldrakooperativ)'];
 
   useEffect(() => {
     const initMap = () => {
@@ -146,13 +144,13 @@ const MapComponent = () => {
         }
       });
     }
-  }, [id, map]); // Add map to dependencies
+  }, [id, map]);
 
   const findNearbyPlaces = useCallback(async (location) => {
     try {
-      setLoading(true); // Start loading indicator
-      console.log('Fetching nearby places for location:', location); // Log for debugging
-      const places = await fetchNearbySchools(location.lat(), location.lng(), filter, 'alla');
+      setLoading(true);
+      console.log('Fetching nearby places for location:', location);
+      const places = await fetchNearbySchools(location.lat(), location.lng(), filter.join(','), 'alla');
 
       if (places.length > 0) {
         const nearestPlace = places[0];
@@ -169,14 +167,12 @@ const MapComponent = () => {
 
         const detailedResults = await Promise.all(
           places.map(async (place) => {
-            const cleanName = place.namn
-              .replace(/^(Förskola\s+|Förskolan\s+|Dagmamma\s+|Föräldrakooperativ\s+)/i, '')
-              .trim();
+            const cleanName = place.namn.trim(); // Use the name as it is
             const pdfData = await fetchPdfDataByName(cleanName);
 
             return {
               ...place,
-              pdfData: pdfData ? pdfData : null,
+              pdfData: pdfData || null,
               address: place.adress,
               description: place.beskrivning,
             };
@@ -188,9 +184,6 @@ const MapComponent = () => {
         detailedResults.forEach((result) => {
           createMarker(result, location);
         });
-
-        // Ta bort denna rad
-        // setSidebarOpen(true); // Open the sidebar after search
       } else {
         setErrorMessage('Inga förskolor hittades på den angivna adressen.');
         setLoading(false);
@@ -200,7 +193,7 @@ const MapComponent = () => {
       setErrorMessage('Ett fel inträffade vid hämtning av närliggande förskolor.');
       setLoading(false);
     } finally {
-      setLoading(false); // Stop loading indicator
+      setLoading(false);
     }
   }, [map, filter]);
 
@@ -219,7 +212,7 @@ const MapComponent = () => {
   };
 
   const geocodeAddressHandler = useCallback(async (event) => {
-    event.preventDefault(); // Prevent default form submission behavior
+    event.preventDefault();
     const address = document.getElementById('address').value.trim();
     if (!address) {
       setErrorMessage('Ange en giltig adress.');
@@ -228,13 +221,13 @@ const MapComponent = () => {
 
     setLoading(true);
 
-    clearMarkers(); // Clear previous markers
-    setNearbyPlaces([]); // Clear previous nearby places
+    clearMarkers();
+    setNearbyPlaces([]);
 
     const relevantAddress = extractRelevantAddress(address);
-    console.log('Relevant address extracted:', relevantAddress); // Log for debugging
+    console.log('Relevant address extracted:', relevantAddress);
     const coordinates = await geocodeAddress(relevantAddress);
-    console.log('Coordinates:', coordinates); // Log coordinates for debugging
+    console.log('Coordinates:', coordinates);
 
     if (
       !coordinates ||
@@ -250,7 +243,7 @@ const MapComponent = () => {
     const { latitude, longitude } = coordinates;
     const location = new google.maps.LatLng(latitude, longitude);
 
-    if (map) { // Ensure map is initialized
+    if (map) {
       map.setCenter(location);
       map.setZoom(15);
 
@@ -272,7 +265,7 @@ const MapComponent = () => {
       setShowPlaces(true);
       setShowText(false);
       setView('map');
-      setSearchMade(true); // Set searchMade to true after a successful search
+      setSearchMade(true);
     } else {
       setErrorMessage('Map is not initialized.');
       setLoading(false);
@@ -319,7 +312,7 @@ const MapComponent = () => {
     } else if (place.organisationsform === 'Fristående') {
       iconUrl = friskolaMarker;
     } else if (place.organisationsform === 'Föräldrakooperativ') {
-      iconUrl = 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'; // Use a different icon for Föräldrakooperativ
+      iconUrl = 'http://maps.google.com/mapfiles/ms/icons/green-dot.png';
     } else {
       iconUrl = 'http://maps.google.com/mapfiles/ms/icons/red-dot.png';
     }
@@ -357,16 +350,19 @@ const MapComponent = () => {
 
   const selectPlace = async (place) => {
     try {
-      const cleanName = place.namn
-        .replace(/^(Förskola\s+|Förskolan\s+|Dagmamma\s+|Föräldrakooperativet\s+)/i, '')
-        .trim();
-      const pdfData = await fetchPdfDataByName(cleanName);
+      const cleanName = place.namn.trim(); // Use the name as it is
+      const malibuData = await fetchMalibuByName(cleanName);
+      if (malibuData) {
+        console.log(`Fetched Malibu data for ${cleanName}:`, malibuData);
+      } else {
+        console.log(`No Malibu data found for ${cleanName}`);
+      }
       const relevantAddress = extractRelevantAddress(place.adress);
       const schoolDetails = await fetchSchoolDetailsByAddress(relevantAddress);
 
       const detailedPlace = {
         ...place,
-        pdfData: pdfData ? pdfData : null,
+        malibuData: malibuData || null,
         schoolDetails: schoolDetails ? schoolDetails : null,
       };
 
@@ -385,8 +381,6 @@ const MapComponent = () => {
     currentMarkers.forEach((marker) => marker.setMap(null));
     setCurrentMarkers([]);
   };
-
- 
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -465,7 +459,7 @@ const MapComponent = () => {
   };
 
   useEffect(() => {
-    if (originMarker && map) { // Ensure map is initialized
+    if (originMarker && map) {
       findNearbyPlaces(originMarker.getPosition());
     }
   }, [filter]);
@@ -489,10 +483,10 @@ const MapComponent = () => {
   }, [map]);
 
   const goToBlog = () => {
-    window.location.href = 'https://masterkinder20240523125154.azurewebsites.net/blog'; // Länka till din .NET-blogg
+    window.location.href = 'https://masterkinder20240523125154.azurewebsites.net/blog';
   };
 
-   return (
+  return (
     <div className="app-container">
       {showSplashScreen && <SplashScreen onProceed={() => setShowSplashScreen(false)} />}
       {showText && <div className="initial-text"> {/* Initial text content */} </div>}
@@ -547,7 +541,7 @@ const MapComponent = () => {
                 organisationTypes={organisationTypes}
                 filter={filter}
                 handleFilterChange={handleFilterChange}
-                visible={showPlaces} // Styr synligheten av OrganisationFilter
+                visible={showPlaces}
               />
             )}
           </Box>
