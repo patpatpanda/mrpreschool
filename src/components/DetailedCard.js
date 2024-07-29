@@ -74,6 +74,11 @@ const DetailedCard = ({ schoolData, onClose }) => {
           <ImageContainer>
             <img src={myImage} alt={`${namn}`} />
           </ImageContainer>
+          {walkingTime && (
+            <Box mt={2} mb={2}>
+              <Typography variant="body2"><FontAwesomeIcon icon={faClock} /> Beräknad gångtid: {walkingTime} minuter</Typography>
+            </Box>
+          )}
           {adress && (
             <Typography variant="h6" gutterBottom>
               <FontAwesomeIcon icon={faMapMarkerAlt} /> {adress}
@@ -161,11 +166,6 @@ const DetailedCard = ({ schoolData, onClose }) => {
           {description && (
             <Box mt={2}>
               <Typography variant="body2">{description}</Typography>
-            </Box>
-          )}
-          {walkingTime && (
-            <Box mt={2}>
-              <Typography variant="body2"><FontAwesomeIcon icon={faClock} /> Beräknad gångtid: {walkingTime}</Typography>
             </Box>
           )}
         </StyledBox>

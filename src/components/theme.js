@@ -50,12 +50,12 @@ const theme = createTheme({
           borderRadius: '20px',
           textTransform: 'none',
          
-          fontSize: '1rem', // Standardstorlek för desktop
-          padding: '8px 12px', // Standard padding för desktop
+          fontSize: '0.8rem', // Standardstorlek för desktop
+          padding: '6px 12px', // Standard padding för desktop
        
           '@media (max-width:768px)': {
-            fontSize: '1rem',
-            padding:'8px 18px'
+            fontSize: '0.7rem',
+            padding:'5px 12px'
           },
         },
       },

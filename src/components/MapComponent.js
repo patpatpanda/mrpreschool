@@ -56,6 +56,7 @@ const MapComponent = () => {
   const [showPlaces, setShowPlaces] = useState(false);
   const [currentMarkers, setCurrentMarkers] = useState([]);
   const [originMarker, setOriginMarker] = useState(null);
+  const [originPosition, setOriginPosition] = useState(null); // Spara den ursprungliga startpositionen
   const [filter, setFilter] = useState(['Kommunal', 'Fristående', 'Fristående (föräldrakooperativ)']);
   const [view, setView] = useState('list');
   const [walkingTimes, setWalkingTimes] = useState({});
@@ -65,11 +66,13 @@ const MapComponent = () => {
   const [showSplashScreen, setShowSplashScreen] = useState(true);
   const [searchMade, setSearchMade] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [filterVisible, setFilterVisible] = useState(true); // Ny state-variabel för att hantera synligheten
+  const currentLines = useRef([]); // Ny useRef för att hantera linjer
   const navigate = useNavigate();
   const { id } = useParams();
 
   const organisationTypes = ['Kommunal', 'Fristående', 'Fristående (föräldrakooperativ)'];
-
+  
   useEffect(() => {
     const initMap = () => {
       const stockholm = new google.maps.LatLng(59.3293, 18.0686);
@@ -260,6 +263,7 @@ const MapComponent = () => {
       });
 
       setOriginMarker(marker);
+      setOriginPosition(location); // Spara den ursprungliga startpositionen
 
       await findNearbyPlaces(location);
       setShowPlaces(true);
@@ -304,6 +308,37 @@ const MapComponent = () => {
     }
   };
 
+  const createRoute = (destination) => {
+    if (!originPosition) {
+      console.error('Origin position is not set');
+      return;
+    }
+
+    // Ta bort alla gamla linjer om de finns
+    if (currentLines.current.length > 0) {
+      currentLines.current.forEach(line => {
+        line.setMap(null);
+      });
+      currentLines.current = [];
+    }
+
+    // Skapa en ny linje
+    const line = new google.maps.Polyline({
+      path: [originPosition, destination],
+      geodesic: true,
+      strokeColor: '#FF0000',
+      strokeOpacity: 1.0,
+      strokeWeight: 2,
+    });
+
+    // Visa den nya linjen på kartan
+    line.setMap(map);
+
+    // Lägg till den nya linjen i currentLines
+    currentLines.current.push(line);
+    console.log('New route created', currentLines.current);
+  };
+
   const createMarker = async (place, originLocation) => {
     let iconUrl;
 
@@ -343,6 +378,7 @@ const MapComponent = () => {
 
     marker.addListener('click', () => {
       selectPlace(place);
+      createRoute(new google.maps.LatLng(place.latitude, place.longitude)); // Lägg till denna rad för att rita linjen
     });
 
     setCurrentMarkers((prevMarkers) => [...prevMarkers, marker]);
@@ -359,20 +395,28 @@ const MapComponent = () => {
       }
       const relevantAddress = extractRelevantAddress(place.adress);
       const schoolDetails = await fetchSchoolDetailsByAddress(relevantAddress);
-
+  
+      const walkingTime = walkingTimes[place.id]; // Hämta gångtiden för denna plats
+  
       const detailedPlace = {
         ...place,
         malibuData: malibuData || null,
         schoolDetails: schoolDetails ? schoolDetails : null,
+        walkingTime: walkingTime, // Lägg till gångtiden här
       };
-
+  
       setSelectedPlace(detailedPlace);
       navigate(`/forskolan/${place.id}`);
+  
+      // Lägg till denna rad för att rita linjen
+      if (originMarker) {
+        createRoute(new google.maps.LatLng(place.latitude, place.longitude));
+      }
     } catch (error) {
       console.error('Error selecting place:', error);
     }
   };
-
+  
   const handleCardSelect = (place) => {
     selectPlace(place);
   };
@@ -498,7 +542,7 @@ const MapComponent = () => {
               onClick={goToBlog}
               variant="contained"
               color="primary"
-              sx={{ padding: '16px 32px', fontSize: '1.5rem' }}
+              sx={{ padding: '12px 24px', fontSize: '1rem' }}
             >
               Blogg
             </Button>
@@ -537,12 +581,19 @@ const MapComponent = () => {
             </form>
             
             {searchMade && (
-              <OrganisationFilter
-                organisationTypes={organisationTypes}
-                filter={filter}
-                handleFilterChange={handleFilterChange}
-                visible={showPlaces}
-              />
+              <>
+                <Button onClick={() => setFilterVisible(!filterVisible)} variant="contained" color="primary">
+                  {filterVisible ? 'Dölj filter' : 'Visa filter'}
+                </Button>
+                {filterVisible && (
+                  <OrganisationFilter
+                    organisationTypes={organisationTypes}
+                    filter={filter}
+                    handleFilterChange={handleFilterChange}
+                    visible={showPlaces}
+                  />
+                )}
+              </>
             )}
           </Box>
         </Container>

@@ -96,7 +96,7 @@ body.fixed-position {
   z-index: 1333;
   
   color: #fff;
-  background-size: contain; 
+ 
   padding: 5px 20px;
   width: 100%; /* Gör elementet fullbredd */
   max-width: 1000px; /* Maximal bredd för större skärmar */
@@ -108,11 +108,11 @@ body.fixed-position {
   text-align: center; /* Centrera texten */
 }
 
-@media (max-width: 768px) {
+@media (max-width: 4000px) {
   .initial-text {
     top: 60px; /* Justera position för mindre skärmar */
-    max-width: 500px; /* Anpassa maximal bredd för mindre skärmar */
-    height: 80px; /* Justera höjden för mindre skärmar */
+    max-width: 600px; /* Anpassa maximal bredd för mindre skärmar */
+    height: 90px; /* Justera höjden för mindre skärmar */
     background-size: contain; /* Gör bakgrundsbilden anpassningsbar */
   }
 }
@@ -475,20 +475,20 @@ p {
   position: absolute;
   overflow: hidden;
   transform: translate3d(10px, -50%, 0);
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 8px;
-  backdrop-filter: blur(2px);
+  background: #fff;
+ 
+  
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   align-items: center;
   justify-content: flex-start;
+  font-size: 1rem;
   max-width: 250px; /* Justerat max bredd */
-  max-height: 150px; /* Justerat max höjd */
+  max-height: 250px; /* Justerat max höjd */
   height: auto !important;
   text-align: left;
   padding: 10px;
   font-family: Comic Sans MS, Comic Sans;
 }
-
 
 .gm-style .gm-style-iw-d {
   display: flex;
@@ -509,7 +509,6 @@ p {
   display: flex;
   font-size: 15px;
   margin: 0 15px 0 0;
-  
   color: #222;
   white-space: nowrap;
 }
@@ -526,25 +525,14 @@ p {
 .info-window-rating {
   display: flex;
   color: #ff22e2;
-
 }
 
 .info-window-walking-time {
   display: flex;
   color: #333;
- 
 }
 
-.view-options {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 1000;
-  background: rgba(255, 255, 255, 0.8);
-  padding: 10px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
+
 
 @media (max-width: 480px) {
   .view-options {
