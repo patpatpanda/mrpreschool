@@ -358,7 +358,7 @@ const MapComponent = () => {
       title: place.namn,
       icon: {
         url: iconUrl,
-        scaledSize: new google.maps.Size(42, 42),
+        scaledSize: new google.maps.Size(30, 30),
       },
     });
 
@@ -555,6 +555,9 @@ const MapComponent = () => {
                 <Button onClick={handleTopRanked} variant="contained" color="secondary">
                   Högst rank
                 </Button>
+                <Button onClick={() => setFilterVisible(!filterVisible)} variant="contained" color="primary">
+                  {filterVisible ? 'Dölj filter' : 'Visa filter'}
+                </Button>
               </Box>
             )}
             
@@ -580,20 +583,13 @@ const MapComponent = () => {
               />
             </form>
             
-            {searchMade && (
-              <>
-                <Button onClick={() => setFilterVisible(!filterVisible)} variant="contained" color="primary">
-                  {filterVisible ? 'Dölj filter' : 'Visa filter'}
-                </Button>
-                {filterVisible && (
-                  <OrganisationFilter
-                    organisationTypes={organisationTypes}
-                    filter={filter}
-                    handleFilterChange={handleFilterChange}
-                    visible={showPlaces}
-                  />
-                )}
-              </>
+            {searchMade && filterVisible && (
+              <OrganisationFilter
+                organisationTypes={organisationTypes}
+                filter={filter}
+                handleFilterChange={handleFilterChange}
+                visible={showPlaces}
+              />
             )}
           </Box>
         </Container>
@@ -629,11 +625,6 @@ const MapComponent = () => {
         />
       )}
 
-      {searchMade && (
-        <button className={`toggle-button ${sidebarOpen ? 'open' : 'closed'}`} onClick={toggleSidebar}>
-          {sidebarOpen ? 'Dölj' : 'Visa'}
-        </button>
-      )}
       <Sidebar 
         places={nearbyPlaces} 
         selectedPlace={selectedPlace} 

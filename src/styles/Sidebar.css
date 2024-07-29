@@ -90,7 +90,7 @@
 @media (max-width: 768px) {
   /* Minska bredden på sidebar för mindre skärmar */
   .sidebar {
-    width: 300px;
+    width: 240px;
     font-family: 'Comic Sans MS', 'Comic Sans';
   }
 

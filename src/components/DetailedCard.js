@@ -4,7 +4,7 @@ import { Dialog, DialogTitle, DialogContent, IconButton, Typography, Box, Grid }
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes, faMapMarkerAlt, faClock } from '@fortawesome/free-solid-svg-icons';
 import { styled } from '@mui/material/styles';
-import myImage from '../images/seri.webp'; // Importera din bild
+import myImage from '../images/seri.webp'; // Importera din standardbild
 
 const StyledBox = styled(Box)(({ theme }) => ({
   backgroundColor: '#f0f4f8',
@@ -46,10 +46,14 @@ const ImageContainer = styled(Box)(({ theme }) => ({
 
 const DetailedCard = ({ schoolData, onClose }) => {
   const { namn, adress, malibuData, schoolDetails, description, walkingTime } = schoolData;
+  const bildUrl = schoolData.bildUrl; // Korrekt fält från API-svaret
 
   useEffect(() => {
     console.log('DetailedCard mounted with schoolData:', schoolData);
   }, [schoolData]);
+
+  const isAbsoluteUrl = (url) => /^(?:[a-z]+:)?\/\//i.test(url);
+  const imageUrl = bildUrl && isAbsoluteUrl(bildUrl) ? bildUrl : myImage;
 
   return (
     <Dialog
@@ -72,7 +76,7 @@ const DetailedCard = ({ schoolData, onClose }) => {
       <StyledDialogContent>
         <StyledBox>
           <ImageContainer>
-            <img src={myImage} alt={`${namn}`} />
+            <img src={imageUrl} alt={`${namn}`} />
           </ImageContainer>
           {walkingTime && (
             <Box mt={2} mb={2}>
@@ -182,6 +186,7 @@ DetailedCard.propTypes = {
     schoolDetails: PropTypes.object,
     description: PropTypes.string,
     walkingTime: PropTypes.string,
+    bildUrl: PropTypes.string, // Lägg till BildUrl här
   }).isRequired,
   onClose: PropTypes.func.isRequired,
 };
