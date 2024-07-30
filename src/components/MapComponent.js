@@ -136,6 +136,7 @@ const MapComponent = () => {
             position: location,
             icon: {
               url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+              scaledSize: new google.maps.Size(1, 1), // Mindre storlek för den blå markören
             },
           });
 
@@ -259,6 +260,7 @@ const MapComponent = () => {
         position: location,
         icon: {
           url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+          scaledSize: new google.maps.Size(30, 30), // Stor markör för utgångspunkten
         },
       });
 
@@ -358,7 +360,7 @@ const MapComponent = () => {
       title: place.namn,
       icon: {
         url: iconUrl,
-        scaledSize: new google.maps.Size(30, 30),
+        scaledSize: new google.maps.Size(42, 42),
       },
     });
 
@@ -555,9 +557,6 @@ const MapComponent = () => {
                 <Button onClick={handleTopRanked} variant="contained" color="secondary">
                   Högst rank
                 </Button>
-                <Button onClick={() => setFilterVisible(!filterVisible)} variant="contained" color="primary">
-                  {filterVisible ? 'Dölj filter' : 'Visa filter'}
-                </Button>
               </Box>
             )}
             
@@ -583,13 +582,20 @@ const MapComponent = () => {
               />
             </form>
             
-            {searchMade && filterVisible && (
-              <OrganisationFilter
-                organisationTypes={organisationTypes}
-                filter={filter}
-                handleFilterChange={handleFilterChange}
-                visible={showPlaces}
-              />
+            {searchMade && (
+              <>
+                <Button onClick={() => setFilterVisible(!filterVisible)} variant="contained" color="primary">
+                  {filterVisible ? 'Dölj filter' : 'Visa filter'}
+                </Button>
+                {filterVisible && (
+                  <OrganisationFilter
+                    organisationTypes={organisationTypes}
+                    filter={filter}
+                    handleFilterChange={handleFilterChange}
+                    visible={showPlaces}
+                  />
+                )}
+              </>
             )}
           </Box>
         </Container>
@@ -625,6 +631,11 @@ const MapComponent = () => {
         />
       )}
 
+      {searchMade && (
+        <button className={`toggle-button ${sidebarOpen ? 'open' : 'closed'}`} onClick={toggleSidebar}>
+          {sidebarOpen ? 'Dölj' : 'Visa'}
+        </button>
+      )}
       <Sidebar 
         places={nearbyPlaces} 
         selectedPlace={selectedPlace} 
