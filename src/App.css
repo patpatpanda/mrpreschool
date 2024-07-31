@@ -101,7 +101,7 @@ body.fixed-position {
   width: 100%; /* Gör elementet fullbredd */
   max-width: 1000px; /* Maximal bredd för större skärmar */
   height: 140px; /* Justera höjden */
-  background: url('/src/images/Förskolelogo.png') no-repeat center center; 
+  background: url('/förskolekollen.png') no-repeat center center;
   
  
   
@@ -135,7 +135,7 @@ body.fixed-position {
   overflow-y: auto;
   overflow-x: hidden; /* Prevent cards-container from scrolling horizontally */
   padding: 15px;
-  background: url('/src/images/yeye.webp') no-repeat center center; /* Add the background image */
+  background: url('/yeye.webp') no-repeat center center;
   background-size: cover; /* Ensure the image covers the entire container */
   position: relative;
   z-index: 100;

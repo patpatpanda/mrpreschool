@@ -5,9 +5,9 @@ import SplashScreen from './SplashScreen';
 import Sidebar from './Sidebar';
 import OrganisationFilter from './OrganisationFilter';
 import '../styles/GoogleMap.css';
-import { fetchPdfDataByName, fetchMalibuByName, fetchSchoolDetailsByAddress, fetchNearbySchools, fetchSchoolById } from './api';
 import { TextField, Button, Container, Box, CircularProgress, Snackbar, Alert, InputAdornment, IconButton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
+import { fetchSchoolById, fetchNearbySchools, fetchPdfDataByName, fetchMalibuByName, fetchSchoolDetailsByAddress } from './api'; // Se till att vägen är korrekt
 
 import kommunalMarker from '../images/icons8-toy-train-64.png';
 import friskolaMarker from '../images/icons8-children-48.png';
@@ -29,9 +29,9 @@ const SERGELSTORG_COORDINATES = {
 };
 
 const geocodeAddress = async (address) => {
-  console.log('Geocoding address:', address); // Log for debugging
+  console.log('Geocoding address:', address);
   try {
-    const fullAddress = `${address}, Stockholm, Sweden`; // Specificera Stockholm som en del av adressen
+    const fullAddress = `${address}, Stockholm, Sweden`;
     const response = await axios.get(`https://masterkinder20240523125154.azurewebsites.net/api/Forskolan/geocode/${encodeURIComponent(fullAddress)}`);
     const data = response.data;
 
@@ -49,14 +49,14 @@ const geocodeAddress = async (address) => {
 
 const MapComponent = () => {
   const mapRef = useRef(null);
-  const addressRef = useRef(null); // Create a reference for the address input
+  const addressRef = useRef(null);
   const [map, setMap] = useState(null);
   const [nearbyPlaces, setNearbyPlaces] = useState([]);
   const [selectedPlace, setSelectedPlace] = useState(null);
   const [showPlaces, setShowPlaces] = useState(false);
   const [currentMarkers, setCurrentMarkers] = useState([]);
   const [originMarker, setOriginMarker] = useState(null);
-  const [originPosition, setOriginPosition] = useState(null); // Spara den ursprungliga startpositionen
+  const [originPosition, setOriginPosition] = useState(null);
   const [filter, setFilter] = useState(['Kommunal', 'Fristående', 'Fristående (föräldrakooperativ)']);
   const [view, setView] = useState('list');
   const [walkingTimes, setWalkingTimes] = useState({});
@@ -66,8 +66,8 @@ const MapComponent = () => {
   const [showSplashScreen, setShowSplashScreen] = useState(true);
   const [searchMade, setSearchMade] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [filterVisible, setFilterVisible] = useState(true); // Ny state-variabel för att hantera synligheten
-  const currentLines = useRef([]); // Ny useRef för att hantera linjer
+  const [filterVisible, setFilterVisible] = useState(true);
+  const currentLines = useRef([]);
   const navigate = useNavigate();
   const { id } = useParams();
 
@@ -84,7 +84,6 @@ const MapComponent = () => {
       });
       setMap(map);
 
-      // Initialize Autocomplete
       if (addressRef.current) {
         const autocomplete = new google.maps.places.Autocomplete(addressRef.current, {
           bounds: {
@@ -100,7 +99,6 @@ const MapComponent = () => {
         });
 
         autocomplete.addListener('place_changed', () => {
-          // Autocomplete listener remains to populate the input, but no search is triggered here
         });
       }
     };
@@ -125,7 +123,7 @@ const MapComponent = () => {
   useEffect(() => {
     if (id && map) {
       fetchSchoolById(id).then((school) => {
-        if (school) { // Ensure map is initialized
+        if (school) {
           const location = new google.maps.LatLng(school.latitude, school.longitude);
           selectPlace(school, false);
           map.setCenter(location);
@@ -136,7 +134,7 @@ const MapComponent = () => {
             position: location,
             icon: {
               url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-              scaledSize: new google.maps.Size(1, 1), // Mindre storlek för den blå markören
+              scaledSize: new google.maps.Size(1, 1),
             },
           });
 
@@ -171,7 +169,7 @@ const MapComponent = () => {
 
         const detailedResults = await Promise.all(
           places.map(async (place) => {
-            const cleanName = place.namn.trim(); // Use the name as it is
+            const cleanName = place.namn.trim();
             const pdfData = await fetchPdfDataByName(cleanName);
 
             return {
@@ -260,12 +258,12 @@ const MapComponent = () => {
         position: location,
         icon: {
           url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-          scaledSize: new google.maps.Size(30, 30), // Stor markör för utgångspunkten
+          scaledSize: new google.maps.Size(30, 30),
         },
       });
 
       setOriginMarker(marker);
-      setOriginPosition(location); // Spara den ursprungliga startpositionen
+      setOriginPosition(location);
 
       await findNearbyPlaces(location);
       setShowPlaces(true);
@@ -316,7 +314,6 @@ const MapComponent = () => {
       return;
     }
 
-    // Ta bort alla gamla linjer om de finns
     if (currentLines.current.length > 0) {
       currentLines.current.forEach(line => {
         line.setMap(null);
@@ -324,7 +321,6 @@ const MapComponent = () => {
       currentLines.current = [];
     }
 
-    // Skapa en ny linje
     const line = new google.maps.Polyline({
       path: [originPosition, destination],
       geodesic: true,
@@ -333,10 +329,8 @@ const MapComponent = () => {
       strokeWeight: 2,
     });
 
-    // Visa den nya linjen på kartan
     line.setMap(map);
 
-    // Lägg till den nya linjen i currentLines
     currentLines.current.push(line);
     console.log('New route created', currentLines.current);
   };
@@ -380,7 +374,7 @@ const MapComponent = () => {
 
     marker.addListener('click', () => {
       selectPlace(place);
-      createRoute(new google.maps.LatLng(place.latitude, place.longitude)); // Lägg till denna rad för att rita linjen
+      createRoute(new google.maps.LatLng(place.latitude, place.longitude));
     });
 
     setCurrentMarkers((prevMarkers) => [...prevMarkers, marker]);
@@ -388,7 +382,7 @@ const MapComponent = () => {
 
   const selectPlace = async (place) => {
     try {
-      const cleanName = place.namn.trim(); // Use the name as it is
+      const cleanName = place.namn.trim();
       const malibuData = await fetchMalibuByName(cleanName);
       if (malibuData) {
         console.log(`Fetched Malibu data for ${cleanName}:`, malibuData);
@@ -398,19 +392,18 @@ const MapComponent = () => {
       const relevantAddress = extractRelevantAddress(place.adress);
       const schoolDetails = await fetchSchoolDetailsByAddress(relevantAddress);
   
-      const walkingTime = walkingTimes[place.id]; // Hämta gångtiden för denna plats
+      const walkingTime = walkingTimes[place.id];
   
       const detailedPlace = {
         ...place,
         malibuData: malibuData || null,
         schoolDetails: schoolDetails ? schoolDetails : null,
-        walkingTime: walkingTime, // Lägg till gångtiden här
+        walkingTime: walkingTime,
       };
   
       setSelectedPlace(detailedPlace);
       navigate(`/forskolan/${place.id}`);
   
-      // Lägg till denna rad för att rita linjen
       if (originMarker) {
         createRoute(new google.maps.LatLng(place.latitude, place.longitude));
       }
@@ -529,8 +522,9 @@ const MapComponent = () => {
   }, [map]);
 
   const goToBlog = () => {
-    window.location.href = 'https://masterkinder20240523125154.azurewebsites.net/blog';
+    navigate('/react-blog'); // Navigate to the new blog route within your React application
   };
+  
 
   return (
     <div className="app-container">
@@ -610,6 +604,7 @@ const MapComponent = () => {
       <div ref={mapRef} className={`map-container ${view === 'list' ? 'hidden' : ''}`}></div>
 
       <div className={`cards-container ${view === 'map' ? 'hidden' : ''}`}>
+
         {showPlaces && nearbyPlaces.length > 0 ? (
           nearbyPlaces.map((place) => (
             <PreschoolCard

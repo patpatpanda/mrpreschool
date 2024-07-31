@@ -2,9 +2,10 @@ import React from 'react';
 import { ThemeProvider } from '@mui/material/styles';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import MapComponent from './components/MapComponent';
+import BlogList from './components/BlogList';  // Importera BlogList-komponenten
+import theme from './components/theme';
 
 import './App.css';
-import theme from './components/theme';
 
 function App() {
   return (
@@ -12,13 +13,14 @@ function App() {
       <Router>
         <div className="App">
           <nav>
-            {/* Add your navigation here */}
+            {/* Lägg till din navigering här */}
           </nav>
           <main>
             <Routes>
               <Route path="/" element={<MapComponent />} />
               <Route path="/forskolan/:id" element={<MapComponent />} />
-              {/* Add other routes as needed */}
+              <Route path="/react-blog" element={<BlogList />} />
+
             </Routes>
           </main>
         </div>

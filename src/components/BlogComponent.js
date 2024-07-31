@@ -1,34 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React from 'react';
 
-const BlogComponent = () => {
-  const [posts, setPosts] = useState([]);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const response = await axios.get('https://masterkinder20240523125154.azurewebsites.net/api/blog/posts');
-        setPosts(response.data);
-      } catch (err) {
-        setError('Failed to fetch posts: ' + err.message);
-      }
-    };
-
-    fetchPosts();
-  }, []);
-
+function BlogComponent() {
   return (
     <div>
-      <h2>Blog Posts</h2>
-      {error && <p>{error}</p>}
-      <ul>
-        {posts.map(post => (
-          <li key={post.id}>{post.title}</li>
-        ))}
-      </ul>
+      <h1>Blog Page</h1>
+      <p>This is the blog page.</p>
     </div>
   );
-};
+}
 
 export default BlogComponent;
