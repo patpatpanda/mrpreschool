@@ -7,7 +7,10 @@ import OrganisationFilter from './OrganisationFilter';
 import '../styles/GoogleMap.css';
 import { TextField, Button, Container, Box, CircularProgress, Snackbar, Alert, InputAdornment, IconButton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import { fetchSchoolById, fetchNearbySchools, fetchPdfDataByName, fetchMalibuByName, fetchSchoolDetailsByAddress } from './api';
+import { fetchSchoolById, fetchNearbySchools, fetchPdfDataByName, fetchMalibuByName, fetchSchoolDetailsByAddress } from './api'; // Se till att vägen är korrekt
+
+import kommunalMarker from '../images/icons8-toy-train-64.png';
+import friskolaMarker from '../images/icons8-children-48.png';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -49,7 +52,6 @@ const MapComponent = () => {
   const addressRef = useRef(null);
   const [map, setMap] = useState(null);
   const [nearbyPlaces, setNearbyPlaces] = useState([]);
-  const [allPlaces, setAllPlaces] = useState([]); 
   const [selectedPlace, setSelectedPlace] = useState(null);
   const [showPlaces, setShowPlaces] = useState(false);
   const [currentMarkers, setCurrentMarkers] = useState([]);
@@ -63,149 +65,14 @@ const MapComponent = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [showSplashScreen, setShowSplashScreen] = useState(true);
   const [searchMade, setSearchMade] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);  // Behåll detta om du behöver använda sidebar
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [filterVisible, setFilterVisible] = useState(true);
   const currentLines = useRef([]);
   const navigate = useNavigate();
   const { id } = useParams();
 
   const organisationTypes = ['Kommunal', 'Fristående', 'Fristående (föräldrakooperativ)'];
-
-  const calculateWalkingTime = useCallback(async (origin, destination) => {
-    try {
-      const response = await axios.get(
-        `https://masterkinder20240523125154.azurewebsites.net/api/Forskolan/walking-time`,
-        {
-          params: {
-            lat1: origin.lat(),
-            lon1: origin.lng(),
-            lat2: destination.lat,
-            lon2: destination.lng,
-          },
-        }
-      );
-      const timeInHours = response.data;
-      if (typeof timeInHours !== 'number' || isNaN(timeInHours)) {
-        console.error('Invalid response for walking time:', response.data);
-        return null;
-      }
-      const timeInMinutes = timeInHours * 60;
-      return timeInMinutes;
-    } catch (error) {
-      console.error('Error calculating walking time:', error);
-      return null;
-    }
-  }, []);
-
-  const createRoute = useCallback((destination) => {
-    if (!originPosition) {
-      console.error('Origin position is not set');
-      return;
-    }
-
-    if (currentLines.current.length > 0) {
-      currentLines.current.forEach(line => {
-        line.setMap(null);
-      });
-      currentLines.current = [];
-    }
-
-    const line = new google.maps.Polyline({
-      path: [originPosition, destination],
-      geodesic: true,
-      strokeColor: '#FF0000',
-      strokeOpacity: 1.0,
-      strokeWeight: 2,
-    });
-
-    line.setMap(map);
-
-    currentLines.current.push(line);
-    console.log('New route created', currentLines.current);
-  }, [originPosition, map]);
-
-  const selectPlace = useCallback(async (place) => {
-    try {
-      const cleanName = place.namn.trim();
-      const malibuData = await fetchMalibuByName(cleanName);
-      if (malibuData) {
-        console.log(`Fetched Malibu data for ${cleanName}:`, malibuData);
-      } else {
-        console.log(`No Malibu data found for ${cleanName}`);
-      }
-      const relevantAddress = extractRelevantAddress(place.adress);
-      const schoolDetails = await fetchSchoolDetailsByAddress(relevantAddress);
-
-      const walkingTime = walkingTimes[place.id];
-
-      const detailedPlace = {
-        ...place,
-        malibuData: malibuData || null,
-        schoolDetails: schoolDetails ? schoolDetails : null,
-        walkingTime: walkingTime,
-      };
-
-      setSelectedPlace(detailedPlace);
-      navigate(`/forskolan/${place.id}`);
-
-      if (originMarker) {
-        createRoute(new google.maps.LatLng(place.latitude, place.longitude));
-      }
-    } catch (error) {
-      console.error('Error selecting place:', error);
-    }
-  }, [walkingTimes, originMarker, navigate, createRoute]);
-
-  const clearMarkers = useCallback(() => {
-    currentMarkers.forEach((marker) => marker.setMap(null));
-    setCurrentMarkers([]);
-  }, [currentMarkers]);
-
-  const createMarker = useCallback(async (place, originLocation) => {
-    let iconUrl;
-
-    if (place.organisationsform === 'Kommunal') {
-      iconUrl = 'http://maps.google.com/mapfiles/ms/icons/pink-dot.png';
-    } else if (place.organisationsform === 'Fristående') {
-      iconUrl = 'http://maps.google.com/mapfiles/ms/icons/orange-dot.png';
-    } else if (place.organisationsform === 'Föräldrakooperativ') {
-      iconUrl = 'http://maps.google.com/mapfiles/ms/icons/green-dot.png';
-    } else {
-      iconUrl = 'http://maps.google.com/mapfiles/ms/icons/red-dot.png';
-    }
-
-    const marker = new google.maps.Marker({
-      map: map,
-      position: { lat: place.latitude, lng: place.longitude },
-      title: place.namn,
-      icon: {
-        url: iconUrl,
-        scaledSize: new google.maps.Size(30, 30),
-      },
-    });
-
-    const walkingTimeInMinutes = await calculateWalkingTime(originLocation, {
-      lat: place.latitude,
-      lng: place.longitude,
-    });
-    const formattedWalkingTime =
-      walkingTimeInMinutes !== null && !isNaN(walkingTimeInMinutes)
-        ? walkingTimeInMinutes.toFixed(2)
-        : 'N/A';
-
-    setWalkingTimes((prevTimes) => ({
-      ...prevTimes,
-      [place.id]: formattedWalkingTime,
-    }));
-
-    marker.addListener('click', () => {
-      selectPlace(place);
-      createRoute(new google.maps.LatLng(place.latitude, place.longitude));
-    });
-
-    setCurrentMarkers((prevMarkers) => [...prevMarkers, marker]);
-  }, [map, calculateWalkingTime, createRoute, selectPlace]);
-
+  
   useEffect(() => {
     const initMap = () => {
       const stockholm = new google.maps.LatLng(59.3293, 18.0686);
@@ -231,13 +98,15 @@ const MapComponent = () => {
           types: ['address'],
         });
 
-        autocomplete.addListener('place_changed', () => {});
+        autocomplete.addListener('place_changed', () => {
+        });
       }
     };
 
     const loadScript = () => {
       const script = document.createElement('script');
-      script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyCbJmqNnZHTZ99pPQ2uHfkDXwpMxOpfYLw&libraries=places';
+      script.src =
+        'https://maps.googleapis.com/maps/api/js?key=AIzaSyCbJmqNnZHTZ99pPQ2uHfkDXwpMxOpfYLw&libraries=places';
       script.async = true;
       script.defer = true;
       script.onload = () => initMap();
@@ -256,7 +125,7 @@ const MapComponent = () => {
       fetchSchoolById(id).then((school) => {
         if (school) {
           const location = new google.maps.LatLng(school.latitude, school.longitude);
-          selectPlace(school);
+          selectPlace(school, false);
           map.setCenter(location);
           map.setZoom(16);
 
@@ -277,33 +146,32 @@ const MapComponent = () => {
         }
       });
     }
-  }, [id, map, createMarker, selectPlace]);
+  }, [id, map]);
 
-/* eslint-enable react-hooks/exhaustive-deps */
   const findNearbyPlaces = useCallback(async (location) => {
     try {
       setLoading(true);
       console.log('Fetching nearby places for location:', location);
       const places = await fetchNearbySchools(location.lat(), location.lng(), filter.join(','), 'alla');
-  
+
       if (places.length > 0) {
         const nearestPlace = places[0];
         const distanceToNearestPlace = calculateDistance(
           location,
           new google.maps.LatLng(nearestPlace.latitude, nearestPlace.longitude)
         );
-  
+
         if (distanceToNearestPlace > 3) {
           setErrorMessage('För närvarande stödjer vi bara stockholmsområdet. Prova igen.');
           setLoading(false);
           return;
         }
-  
+
         const detailedResults = await Promise.all(
           places.map(async (place) => {
             const cleanName = place.namn.trim();
             const pdfData = await fetchPdfDataByName(cleanName);
-  
+
             return {
               ...place,
               pdfData: pdfData || null,
@@ -312,10 +180,9 @@ const MapComponent = () => {
             };
           })
         );
-  
+
         setNearbyPlaces(detailedResults);
-        setAllPlaces(detailedResults);
-        clearMarkers(); 
+        clearMarkers();
         detailedResults.forEach((result) => {
           createMarker(result, location);
         });
@@ -330,9 +197,7 @@ const MapComponent = () => {
     } finally {
       setLoading(false);
     }
-  }, [filter, clearMarkers, createMarker]);
-  /* eslint-enable react-hooks/exhaustive-deps */
-  
+  }, [map, filter]);
 
   const handleFilterChange = (event) => {
     const value = event.target.value;
@@ -347,7 +212,7 @@ const MapComponent = () => {
     const addressParts = fullAddress.split(',');
     return addressParts[0].trim();
   };
-/* eslint-disable react-hooks/exhaustive-deps */
+
   const geocodeAddressHandler = useCallback(async (event) => {
     event.preventDefault();
     const address = document.getElementById('address').value.trim();
@@ -410,12 +275,154 @@ const MapComponent = () => {
       setLoading(false);
     }
   }, [map, originMarker, findNearbyPlaces]);
-  /* eslint-enable react-hooks/exhaustive-deps */
 
   const handleKeyDown = (event) => {
     if (event.key === 'Enter') {
       geocodeAddressHandler(event);
     }
+  };
+
+  const calculateWalkingTime = async (origin, destination) => {
+    try {
+      const response = await axios.get(
+        `https://masterkinder20240523125154.azurewebsites.net/api/Forskolan/walking-time`,
+        {
+          params: {
+            lat1: origin.lat(),
+            lon1: origin.lng(),
+            lat2: destination.lat,
+            lon2: destination.lng,
+          },
+        }
+      );
+      const timeInHours = response.data;
+      if (typeof timeInHours !== 'number' || isNaN(timeInHours)) {
+        console.error('Invalid response for walking time:', response.data);
+        return null;
+      }
+      const timeInMinutes = timeInHours * 60;
+      return timeInMinutes;
+    } catch (error) {
+      console.error('Error calculating walking time:', error);
+      return null;
+    }
+  };
+
+  const createRoute = (destination) => {
+    if (!originPosition) {
+      console.error('Origin position is not set');
+      return;
+    }
+
+    if (currentLines.current.length > 0) {
+      currentLines.current.forEach(line => {
+        line.setMap(null);
+      });
+      currentLines.current = [];
+    }
+
+    const line = new google.maps.Polyline({
+      path: [originPosition, destination],
+      geodesic: true,
+      strokeColor: '#FF0000',
+      strokeOpacity: 1.0,
+      strokeWeight: 2,
+    });
+
+    line.setMap(map);
+
+    currentLines.current.push(line);
+    console.log('New route created', currentLines.current);
+  };
+
+  const createMarker = async (place, originLocation) => {
+    let iconUrl;
+
+    if (place.organisationsform === 'Kommunal') {
+      iconUrl = kommunalMarker;
+    } else if (place.organisationsform === 'Fristående') {
+      iconUrl = friskolaMarker;
+    } else if (place.organisationsform === 'Föräldrakooperativ') {
+      iconUrl = 'http://maps.google.com/mapfiles/ms/icons/green-dot.png';
+    } else {
+      iconUrl = 'http://maps.google.com/mapfiles/ms/icons/red-dot.png';
+    }
+
+    const marker = new google.maps.Marker({
+      map: map,
+      position: { lat: place.latitude, lng: place.longitude },
+      title: place.namn,
+      icon: {
+        url: iconUrl,
+        scaledSize: new google.maps.Size(42, 42),
+      },
+    });
+
+    const walkingTimeInMinutes = await calculateWalkingTime(originLocation, {
+      lat: place.latitude,
+      lng: place.longitude,
+    });
+    const formattedWalkingTime =
+      walkingTimeInMinutes !== null && !isNaN(walkingTimeInMinutes)
+        ? walkingTimeInMinutes.toFixed(2)
+        : 'N/A';
+
+    setWalkingTimes((prevTimes) => ({
+      ...prevTimes,
+      [place.id]: formattedWalkingTime,
+    }));
+
+    marker.addListener('click', () => {
+      selectPlace(place);
+      createRoute(new google.maps.LatLng(place.latitude, place.longitude));
+    });
+
+    setCurrentMarkers((prevMarkers) => [...prevMarkers, marker]);
+  };
+
+  const selectPlace = async (place) => {
+    try {
+      const cleanName = place.namn.trim();
+      const malibuData = await fetchMalibuByName(cleanName);
+      if (malibuData) {
+        console.log(`Fetched Malibu data for ${cleanName}:`, malibuData);
+      } else {
+        console.log(`No Malibu data found for ${cleanName}`);
+      }
+      const relevantAddress = extractRelevantAddress(place.adress);
+      const schoolDetails = await fetchSchoolDetailsByAddress(relevantAddress);
+  
+      const walkingTime = walkingTimes[place.id];
+  
+      const detailedPlace = {
+        ...place,
+        malibuData: malibuData || null,
+        schoolDetails: schoolDetails ? schoolDetails : null,
+        walkingTime: walkingTime,
+      };
+  
+      setSelectedPlace(detailedPlace);
+      navigate(`/forskolan/${place.id}`);
+  
+      if (originMarker) {
+        createRoute(new google.maps.LatLng(place.latitude, place.longitude));
+      }
+    } catch (error) {
+      console.error('Error selecting place:', error);
+    }
+  };
+  
+  const handleCardSelect = (place) => {
+    selectPlace(place);
+  };
+
+  const clearMarkers = () => {
+    currentMarkers.forEach((marker) => marker.setMap(null));
+    setCurrentMarkers([]);
+  };
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
   };
 
   const filterAndSortPreschools = (places, origin) => {
@@ -438,7 +445,7 @@ const MapComponent = () => {
       return;
     }
 
-    const topPlaces = filterAndSortPreschools(allPlaces, originMarker.getPosition());
+    const topPlaces = filterAndSortPreschools(nearbyPlaces, originMarker.getPosition());
 
     setNearbyPlaces(topPlaces);
     clearMarkers();
@@ -453,7 +460,7 @@ const MapComponent = () => {
       return;
     }
 
-    const sortedPlaces = allPlaces.sort((a, b) => {
+    const sortedPlaces = nearbyPlaces.sort((a, b) => {
       const distanceA = calculateDistance(
         originMarker.getPosition(),
         new google.maps.LatLng(a.latitude, a.longitude)
@@ -494,7 +501,7 @@ const MapComponent = () => {
     if (originMarker && map) {
       findNearbyPlaces(originMarker.getPosition());
     }
-  }, [filter, findNearbyPlaces, map, originMarker]);
+  }, [filter]);
 
   useEffect(() => {
     const addressInput = document.getElementById('address');
@@ -515,17 +522,9 @@ const MapComponent = () => {
   }, [map]);
 
   const goToBlog = () => {
-    navigate('/react-blog');
+    navigate('/react-blog'); // Navigate to the new blog route within your React application
   };
-
-  // Funktionerna `handleCardSelect` och `toggleSidebar` som saknades
-  const handleCardSelect = (place) => {
-    selectPlace(place);
-  };
-
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
+  
 
   return (
     <div className="app-container">

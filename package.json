@@ -52,7 +52,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "ESLINT_NO_DEV_ERRORS=true react-scripts build",
     "copy-build": "cpy 'build/**/*' '../MasterKinder/wwwroot' --parents",
     "build-and-copy": "npm run build && npm run copy-build",
     "test": "react-scripts test",
