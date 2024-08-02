@@ -9,8 +9,7 @@ import { TextField, Button, Container, Box, CircularProgress, Snackbar, Alert, I
 import SearchIcon from '@mui/icons-material/Search';
 import { fetchSchoolById, fetchNearbySchools, fetchPdfDataByName, fetchMalibuByName, fetchSchoolDetailsByAddress } from './api'; // Se till att vägen är korrekt
 
-import kommunalMarker from '../images/icons8-toy-train-64.png';
-import friskolaMarker from '../images/icons8-children-48.png';
+
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -52,6 +51,7 @@ const MapComponent = () => {
   const addressRef = useRef(null);
   const [map, setMap] = useState(null);
   const [nearbyPlaces, setNearbyPlaces] = useState([]);
+  const [allPlaces, setAllPlaces] = useState([]); // Ny state-variabel för att lagra alla förskolor
   const [selectedPlace, setSelectedPlace] = useState(null);
   const [showPlaces, setShowPlaces] = useState(false);
   const [currentMarkers, setCurrentMarkers] = useState([]);
@@ -70,6 +70,7 @@ const MapComponent = () => {
   const currentLines = useRef([]);
   const navigate = useNavigate();
   const { id } = useParams();
+
 
   const organisationTypes = ['Kommunal', 'Fristående', 'Fristående (föräldrakooperativ)'];
   
@@ -182,6 +183,7 @@ const MapComponent = () => {
         );
 
         setNearbyPlaces(detailedResults);
+        setAllPlaces(detailedResults); // Spara alla förskolor i state
         clearMarkers();
         detailedResults.forEach((result) => {
           createMarker(result, location);
@@ -339,9 +341,9 @@ const MapComponent = () => {
     let iconUrl;
 
     if (place.organisationsform === 'Kommunal') {
-      iconUrl = kommunalMarker;
+      iconUrl = 'http://maps.google.com/mapfiles/ms/icons/pink-dot.png';
     } else if (place.organisationsform === 'Fristående') {
-      iconUrl = friskolaMarker;
+      iconUrl = 'http://maps.google.com/mapfiles/ms/icons/orange-dot.png';
     } else if (place.organisationsform === 'Föräldrakooperativ') {
       iconUrl = 'http://maps.google.com/mapfiles/ms/icons/green-dot.png';
     } else {
@@ -354,7 +356,7 @@ const MapComponent = () => {
       title: place.namn,
       icon: {
         url: iconUrl,
-        scaledSize: new google.maps.Size(42, 42),
+        scaledSize: new google.maps.Size(30, 30),
       },
     });
 
@@ -445,7 +447,7 @@ const MapComponent = () => {
       return;
     }
 
-    const topPlaces = filterAndSortPreschools(nearbyPlaces, originMarker.getPosition());
+    const topPlaces = filterAndSortPreschools(allPlaces, originMarker.getPosition()); // Använd allPlaces för filtrering
 
     setNearbyPlaces(topPlaces);
     clearMarkers();
@@ -460,7 +462,7 @@ const MapComponent = () => {
       return;
     }
 
-    const sortedPlaces = nearbyPlaces.sort((a, b) => {
+    const sortedPlaces = allPlaces.sort((a, b) => { // Använd allPlaces för att sortera
       const distanceA = calculateDistance(
         originMarker.getPosition(),
         new google.maps.LatLng(a.latitude, a.longitude)
@@ -481,7 +483,6 @@ const MapComponent = () => {
       createMarker(result, originMarker.getPosition());
     });
   };
-
   const calculateDistance = (origin, destination) => {
     const R = 6371;
     const dLat = (destination.lat() - origin.lat()) * Math.PI / 180;

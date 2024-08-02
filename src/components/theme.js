@@ -4,10 +4,10 @@ import { pink, yellow, blueGrey, deepOrange } from '@mui/material/colors';
 const theme = createTheme({
   palette: {
     primary: {
-      main: pink[500],
+      main: pink[400],
     },
     secondary: {
-      main: pink[500],
+      main: pink[400],
     },
     background: {
       default: yellow[50],

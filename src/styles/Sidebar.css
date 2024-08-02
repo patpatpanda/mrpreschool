@@ -30,7 +30,7 @@
   color: white;
   font-size: 1.2em;
   position: fixed;
-  left: 10px; /* Initial position när sidopanelen är stängd */
+  left: 0; /* Initial position när sidopanelen är stängd */
   top: 60%;
   transform: translateY(-50%);
   cursor: pointer;
@@ -43,7 +43,7 @@
 
 /* Ny position för toggle-button när Sidebar är öppen */
 .toggle-button.open {
-  left: 300px; /* Ny position när sidopanelen är öppen */
+  left: 500px; /* Ny position när sidopanelen är öppen */
 }
 
 /* Sidebar Card */
