@@ -279,6 +279,7 @@ const MapComponent = () => {
     }
   }, [id, map, createMarker, selectPlace]);
 
+/* eslint-enable react-hooks/exhaustive-deps */
   const findNearbyPlaces = useCallback(async (location) => {
     try {
       setLoading(true);
@@ -314,7 +315,7 @@ const MapComponent = () => {
   
         setNearbyPlaces(detailedResults);
         setAllPlaces(detailedResults);
-        clearMarkers(); // Anropa clearMarkers
+        clearMarkers(); 
         detailedResults.forEach((result) => {
           createMarker(result, location);
         });
@@ -329,7 +330,8 @@ const MapComponent = () => {
     } finally {
       setLoading(false);
     }
-  }, [filter, clearMarkers, createMarker]); // Lägg till clearMarkers som beroende
+  }, [filter, clearMarkers, createMarker]);
+  /* eslint-enable react-hooks/exhaustive-deps */
   
 
   const handleFilterChange = (event) => {
@@ -345,7 +347,7 @@ const MapComponent = () => {
     const addressParts = fullAddress.split(',');
     return addressParts[0].trim();
   };
-
+/* eslint-disable react-hooks/exhaustive-deps */
   const geocodeAddressHandler = useCallback(async (event) => {
     event.preventDefault();
     const address = document.getElementById('address').value.trim();
@@ -408,6 +410,7 @@ const MapComponent = () => {
       setLoading(false);
     }
   }, [map, originMarker, findNearbyPlaces]);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   const handleKeyDown = (event) => {
     if (event.key === 'Enter') {
