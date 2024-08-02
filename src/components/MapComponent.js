@@ -7,9 +7,7 @@ import OrganisationFilter from './OrganisationFilter';
 import '../styles/GoogleMap.css';
 import { TextField, Button, Container, Box, CircularProgress, Snackbar, Alert, InputAdornment, IconButton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import { fetchSchoolById, fetchNearbySchools, fetchPdfDataByName, fetchMalibuByName, fetchSchoolDetailsByAddress } from './api'; // Se till att vägen är korrekt
-
-
+import { fetchSchoolById, fetchNearbySchools, fetchPdfDataByName, fetchMalibuByName, fetchSchoolDetailsByAddress } from './api';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -51,6 +49,7 @@ const MapComponent = () => {
   const addressRef = useRef(null);
   const [map, setMap] = useState(null);
   const [nearbyPlaces, setNearbyPlaces] = useState([]);
+  const [allPlaces, setAllPlaces] = useState([]);  // State to store all places fetched from search
   const [selectedPlace, setSelectedPlace] = useState(null);
   const [showPlaces, setShowPlaces] = useState(false);
   const [currentMarkers, setCurrentMarkers] = useState([]);
@@ -71,7 +70,7 @@ const MapComponent = () => {
   const { id } = useParams();
 
   const organisationTypes = ['Kommunal', 'Fristående', 'Fristående (föräldrakooperativ)'];
-  
+
   useEffect(() => {
     const initMap = () => {
       const stockholm = new google.maps.LatLng(59.3293, 18.0686);
@@ -97,15 +96,13 @@ const MapComponent = () => {
           types: ['address'],
         });
 
-        autocomplete.addListener('place_changed', () => {
-        });
+        autocomplete.addListener('place_changed', () => {});
       }
     };
 
     const loadScript = () => {
       const script = document.createElement('script');
-      script.src =
-        'https://maps.googleapis.com/maps/api/js?key=AIzaSyCbJmqNnZHTZ99pPQ2uHfkDXwpMxOpfYLw&libraries=places';
+      script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyCbJmqNnZHTZ99pPQ2uHfkDXwpMxOpfYLw&libraries=places';
       script.async = true;
       script.defer = true;
       script.onload = () => initMap();
@@ -124,7 +121,7 @@ const MapComponent = () => {
       fetchSchoolById(id).then((school) => {
         if (school) {
           const location = new google.maps.LatLng(school.latitude, school.longitude);
-          selectPlace(school, false);
+          selectPlace(school);
           map.setCenter(location);
           map.setZoom(16);
 
@@ -181,6 +178,7 @@ const MapComponent = () => {
         );
 
         setNearbyPlaces(detailedResults);
+        setAllPlaces(detailedResults);  // Store all fetched places
         clearMarkers();
         detailedResults.forEach((result) => {
           createMarker(result, location);
@@ -390,19 +388,19 @@ const MapComponent = () => {
       }
       const relevantAddress = extractRelevantAddress(place.adress);
       const schoolDetails = await fetchSchoolDetailsByAddress(relevantAddress);
-  
+
       const walkingTime = walkingTimes[place.id];
-  
+
       const detailedPlace = {
         ...place,
         malibuData: malibuData || null,
         schoolDetails: schoolDetails ? schoolDetails : null,
         walkingTime: walkingTime,
       };
-  
+
       setSelectedPlace(detailedPlace);
       navigate(`/forskolan/${place.id}`);
-  
+
       if (originMarker) {
         createRoute(new google.maps.LatLng(place.latitude, place.longitude));
       }
@@ -410,7 +408,7 @@ const MapComponent = () => {
       console.error('Error selecting place:', error);
     }
   };
-  
+
   const handleCardSelect = (place) => {
     selectPlace(place);
   };
@@ -444,7 +442,7 @@ const MapComponent = () => {
       return;
     }
 
-    const topPlaces = filterAndSortPreschools(nearbyPlaces, originMarker.getPosition());
+    const topPlaces = filterAndSortPreschools(allPlaces, originMarker.getPosition());
 
     setNearbyPlaces(topPlaces);
     clearMarkers();
@@ -459,7 +457,7 @@ const MapComponent = () => {
       return;
     }
 
-    const sortedPlaces = nearbyPlaces.sort((a, b) => {
+    const sortedPlaces = allPlaces.sort((a, b) => {
       const distanceA = calculateDistance(
         originMarker.getPosition(),
         new google.maps.LatLng(a.latitude, a.longitude)
@@ -520,28 +518,14 @@ const MapComponent = () => {
     };
   }, [map]);
 
-  // // const goToBlog = () => {
-  // //   navigate('/react-blog'); // Navigate to the new blog route within your React application
-  // // };
-  
-
   return (
     <div className="app-container">
       {showSplashScreen && <SplashScreen onProceed={() => setShowSplashScreen(false)} />}
       {showText && <div className="initial-text"> {/* Initial text content */} </div>}
-      
+
       <div className={`search-container ${showPlaces ? 'top' : 'center'}`}>
         <Container maxWidth="sm">
           <Box display="flex" alignItems="center" justifyContent="center" flexWrap="wrap" gap={2}>
-            {/* <Button
-              onClick={goToBlog}
-              variant="contained"
-              color="primary"
-              sx={{ padding: '12px 24px', fontSize: '1rem' }}
-            >
-              Blogg
-            </Button> */}
-            
             {showPlaces && (
               <Box display="flex" justifyContent="center" width="100%" gap={2}>
                 <Button onClick={filterClosestPreschools} variant="contained" color="secondary">
@@ -552,7 +536,7 @@ const MapComponent = () => {
                 </Button>
               </Box>
             )}
-            
+
             <form onSubmit={geocodeAddressHandler} style={{ width: '100%' }}>
               <TextField
                 id="address"
@@ -574,7 +558,7 @@ const MapComponent = () => {
                 }}
               />
             </form>
-            
+
             {searchMade && (
               <>
                 <Button onClick={() => setFilterVisible(!filterVisible)} variant="contained" color="primary">
@@ -603,7 +587,6 @@ const MapComponent = () => {
       <div ref={mapRef} className={`map-container ${view === 'list' ? 'hidden' : ''}`}></div>
 
       <div className={`cards-container ${view === 'map' ? 'hidden' : ''}`}>
-
         {showPlaces && nearbyPlaces.length > 0 ? (
           nearbyPlaces.map((place) => (
             <PreschoolCard
@@ -630,13 +613,13 @@ const MapComponent = () => {
           {sidebarOpen ? 'Dölj' : 'Visa'}
         </button>
       )}
-      <Sidebar 
-        places={nearbyPlaces} 
-        selectedPlace={selectedPlace} 
-        onSelect={handleCardSelect} 
-        sidebarOpen={sidebarOpen} 
-        toggleSidebar={toggleSidebar} 
-        walkingTimes={walkingTimes} 
+      <Sidebar
+        places={nearbyPlaces}
+        selectedPlace={selectedPlace}
+        onSelect={handleCardSelect}
+        sidebarOpen={sidebarOpen}
+        toggleSidebar={toggleSidebar}
+        walkingTimes={walkingTimes}
       />
 
       <Snackbar
