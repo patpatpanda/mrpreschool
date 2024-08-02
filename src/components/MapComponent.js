@@ -129,7 +129,7 @@ const MapComponent = () => {
           selectPlace(school, false);
           map.setCenter(location);
           map.setZoom(16);
-
+  
           const marker = new google.maps.Marker({
             map: map,
             position: location,
@@ -138,7 +138,7 @@ const MapComponent = () => {
               scaledSize: new google.maps.Size(1, 1),
             },
           });
-
+  
           setOriginMarker(marker);
           createMarker(school, location);
           setShowPlaces(true);
@@ -147,32 +147,33 @@ const MapComponent = () => {
         }
       });
     }
-  }, [id, map]);
+  }, [id, map, selectPlace, createMarker]); // Lägg till selectPlace och createMarker som beroenden
+  
 
   const findNearbyPlaces = useCallback(async (location) => {
     try {
       setLoading(true);
       console.log('Fetching nearby places for location:', location);
       const places = await fetchNearbySchools(location.lat(), location.lng(), filter.join(','), 'alla');
-
+  
       if (places.length > 0) {
         const nearestPlace = places[0];
         const distanceToNearestPlace = calculateDistance(
           location,
           new google.maps.LatLng(nearestPlace.latitude, nearestPlace.longitude)
         );
-
+  
         if (distanceToNearestPlace > 3) {
           setErrorMessage('För närvarande stödjer vi bara stockholmsområdet. Prova igen.');
           setLoading(false);
           return;
         }
-
+  
         const detailedResults = await Promise.all(
           places.map(async (place) => {
             const cleanName = place.namn.trim();
             const pdfData = await fetchPdfDataByName(cleanName);
-
+  
             return {
               ...place,
               pdfData: pdfData || null,
@@ -181,7 +182,7 @@ const MapComponent = () => {
             };
           })
         );
-
+  
         setNearbyPlaces(detailedResults);
         setAllPlaces(detailedResults); // Spara alla förskolor i state
         clearMarkers();
@@ -199,7 +200,8 @@ const MapComponent = () => {
     } finally {
       setLoading(false);
     }
-  }, [map, filter]);
+  }, [map, filter, clearMarkers, createMarker]); // Lägg till clearMarkers och createMarker som beroenden
+  
 
   const handleFilterChange = (event) => {
     const value = event.target.value;
@@ -222,17 +224,17 @@ const MapComponent = () => {
       setErrorMessage('Ange en giltig adress.');
       return;
     }
-
+  
     setLoading(true);
-
+  
     clearMarkers();
     setNearbyPlaces([]);
-
+  
     const relevantAddress = extractRelevantAddress(address);
     console.log('Relevant address extracted:', relevantAddress);
     const coordinates = await geocodeAddress(relevantAddress);
     console.log('Coordinates:', coordinates);
-
+  
     if (
       !coordinates ||
       (coordinates.latitude === SERGELSTORG_COORDINATES.latitude &&
@@ -243,18 +245,18 @@ const MapComponent = () => {
       setLoading(false);
       return;
     }
-
+  
     const { latitude, longitude } = coordinates;
     const location = new google.maps.LatLng(latitude, longitude);
-
+  
     if (map) {
       map.setCenter(location);
       map.setZoom(15);
-
+  
       if (originMarker) {
         originMarker.setMap(null);
       }
-
+  
       const marker = new google.maps.Marker({
         map: map,
         position: location,
@@ -263,10 +265,10 @@ const MapComponent = () => {
           scaledSize: new google.maps.Size(30, 30),
         },
       });
-
+  
       setOriginMarker(marker);
       setOriginPosition(location);
-
+  
       await findNearbyPlaces(location);
       setShowPlaces(true);
       setShowText(false);
@@ -276,7 +278,8 @@ const MapComponent = () => {
       setErrorMessage('Map is not initialized.');
       setLoading(false);
     }
-  }, [map, originMarker, findNearbyPlaces]);
+  }, [map, originMarker, clearMarkers, extractRelevantAddress, geocodeAddress, findNearbyPlaces]); // Lägg till clearMarkers som beroende
+  
 
   const handleKeyDown = (event) => {
     if (event.key === 'Enter') {
@@ -502,7 +505,8 @@ const MapComponent = () => {
     if (originMarker && map) {
       findNearbyPlaces(originMarker.getPosition());
     }
-  }, [filter]);
+  }, [filter, findNearbyPlaces, map, originMarker]); // Lägg till findNearbyPlaces, map, och originMarker som beroenden
+  
 
   useEffect(() => {
     const addressInput = document.getElementById('address');
