@@ -7,9 +7,7 @@ import OrganisationFilter from './OrganisationFilter';
 import '../styles/GoogleMap.css';
 import { TextField, Button, Container, Box, CircularProgress, Snackbar, Alert, InputAdornment, IconButton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import { fetchSchoolById, fetchNearbySchools, fetchPdfDataByName, fetchMalibuByName, fetchSchoolDetailsByAddress } from './api'; // Se till att vägen är korrekt
-
-
+import { fetchSchoolById, fetchNearbySchools, fetchPdfDataByName, fetchMalibuByName, fetchSchoolDetailsByAddress } from './api';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -51,7 +49,7 @@ const MapComponent = () => {
   const addressRef = useRef(null);
   const [map, setMap] = useState(null);
   const [nearbyPlaces, setNearbyPlaces] = useState([]);
-  const [allPlaces, setAllPlaces] = useState([]); // Ny state-variabel för att lagra alla förskolor
+  const [allPlaces, setAllPlaces] = useState([]); 
   const [selectedPlace, setSelectedPlace] = useState(null);
   const [showPlaces, setShowPlaces] = useState(false);
   const [currentMarkers, setCurrentMarkers] = useState([]);
@@ -71,9 +69,8 @@ const MapComponent = () => {
   const navigate = useNavigate();
   const { id } = useParams();
 
-
   const organisationTypes = ['Kommunal', 'Fristående', 'Fristående (föräldrakooperativ)'];
-  
+
   useEffect(() => {
     const initMap = () => {
       const stockholm = new google.maps.LatLng(59.3293, 18.0686);
@@ -99,15 +96,13 @@ const MapComponent = () => {
           types: ['address'],
         });
 
-        autocomplete.addListener('place_changed', () => {
-        });
+        autocomplete.addListener('place_changed', () => {});
       }
     };
 
     const loadScript = () => {
       const script = document.createElement('script');
-      script.src =
-        'https://maps.googleapis.com/maps/api/js?key=AIzaSyCbJmqNnZHTZ99pPQ2uHfkDXwpMxOpfYLw&libraries=places';
+      script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyCbJmqNnZHTZ99pPQ2uHfkDXwpMxOpfYLw&libraries=places';
       script.async = true;
       script.defer = true;
       script.onload = () => initMap();
@@ -126,10 +121,10 @@ const MapComponent = () => {
       fetchSchoolById(id).then((school) => {
         if (school) {
           const location = new google.maps.LatLng(school.latitude, school.longitude);
-          selectPlace(school, false);
+          selectPlace(school);
           map.setCenter(location);
           map.setZoom(16);
-  
+
           const marker = new google.maps.Marker({
             map: map,
             position: location,
@@ -138,7 +133,7 @@ const MapComponent = () => {
               scaledSize: new google.maps.Size(1, 1),
             },
           });
-  
+
           setOriginMarker(marker);
           createMarker(school, location);
           setShowPlaces(true);
@@ -147,33 +142,32 @@ const MapComponent = () => {
         }
       });
     }
-  }, [id, map, selectPlace, createMarker]); // Lägg till selectPlace och createMarker som beroenden
-  
+  }, [id, map]);
 
   const findNearbyPlaces = useCallback(async (location) => {
     try {
       setLoading(true);
       console.log('Fetching nearby places for location:', location);
       const places = await fetchNearbySchools(location.lat(), location.lng(), filter.join(','), 'alla');
-  
+
       if (places.length > 0) {
         const nearestPlace = places[0];
         const distanceToNearestPlace = calculateDistance(
           location,
           new google.maps.LatLng(nearestPlace.latitude, nearestPlace.longitude)
         );
-  
+
         if (distanceToNearestPlace > 3) {
           setErrorMessage('För närvarande stödjer vi bara stockholmsområdet. Prova igen.');
           setLoading(false);
           return;
         }
-  
+
         const detailedResults = await Promise.all(
           places.map(async (place) => {
             const cleanName = place.namn.trim();
             const pdfData = await fetchPdfDataByName(cleanName);
-  
+
             return {
               ...place,
               pdfData: pdfData || null,
@@ -182,9 +176,9 @@ const MapComponent = () => {
             };
           })
         );
-  
+
         setNearbyPlaces(detailedResults);
-        setAllPlaces(detailedResults); // Spara alla förskolor i state
+        setAllPlaces(detailedResults);
         clearMarkers();
         detailedResults.forEach((result) => {
           createMarker(result, location);
@@ -200,8 +194,7 @@ const MapComponent = () => {
     } finally {
       setLoading(false);
     }
-  }, [map, filter, clearMarkers, createMarker]); // Lägg till clearMarkers och createMarker som beroenden
-  
+  }, [filter]);
 
   const handleFilterChange = (event) => {
     const value = event.target.value;
@@ -224,17 +217,17 @@ const MapComponent = () => {
       setErrorMessage('Ange en giltig adress.');
       return;
     }
-  
+
     setLoading(true);
-  
+
     clearMarkers();
     setNearbyPlaces([]);
-  
+
     const relevantAddress = extractRelevantAddress(address);
     console.log('Relevant address extracted:', relevantAddress);
     const coordinates = await geocodeAddress(relevantAddress);
     console.log('Coordinates:', coordinates);
-  
+
     if (
       !coordinates ||
       (coordinates.latitude === SERGELSTORG_COORDINATES.latitude &&
@@ -245,18 +238,18 @@ const MapComponent = () => {
       setLoading(false);
       return;
     }
-  
+
     const { latitude, longitude } = coordinates;
     const location = new google.maps.LatLng(latitude, longitude);
-  
+
     if (map) {
       map.setCenter(location);
       map.setZoom(15);
-  
+
       if (originMarker) {
         originMarker.setMap(null);
       }
-  
+
       const marker = new google.maps.Marker({
         map: map,
         position: location,
@@ -265,10 +258,10 @@ const MapComponent = () => {
           scaledSize: new google.maps.Size(30, 30),
         },
       });
-  
+
       setOriginMarker(marker);
       setOriginPosition(location);
-  
+
       await findNearbyPlaces(location);
       setShowPlaces(true);
       setShowText(false);
@@ -278,8 +271,7 @@ const MapComponent = () => {
       setErrorMessage('Map is not initialized.');
       setLoading(false);
     }
-  }, [map, originMarker, clearMarkers, extractRelevantAddress, geocodeAddress, findNearbyPlaces]); // Lägg till clearMarkers som beroende
-  
+  }, [map, originMarker, findNearbyPlaces]);
 
   const handleKeyDown = (event) => {
     if (event.key === 'Enter') {
@@ -385,7 +377,7 @@ const MapComponent = () => {
     setCurrentMarkers((prevMarkers) => [...prevMarkers, marker]);
   };
 
-  const selectPlace = async (place) => {
+  const selectPlace = useCallback(async (place) => {
     try {
       const cleanName = place.namn.trim();
       const malibuData = await fetchMalibuByName(cleanName);
@@ -396,27 +388,27 @@ const MapComponent = () => {
       }
       const relevantAddress = extractRelevantAddress(place.adress);
       const schoolDetails = await fetchSchoolDetailsByAddress(relevantAddress);
-  
+
       const walkingTime = walkingTimes[place.id];
-  
+
       const detailedPlace = {
         ...place,
         malibuData: malibuData || null,
         schoolDetails: schoolDetails ? schoolDetails : null,
         walkingTime: walkingTime,
       };
-  
+
       setSelectedPlace(detailedPlace);
       navigate(`/forskolan/${place.id}`);
-  
+
       if (originMarker) {
         createRoute(new google.maps.LatLng(place.latitude, place.longitude));
       }
     } catch (error) {
       console.error('Error selecting place:', error);
     }
-  };
-  
+  }, [walkingTimes, originMarker, navigate]);
+
   const handleCardSelect = (place) => {
     selectPlace(place);
   };
@@ -450,7 +442,7 @@ const MapComponent = () => {
       return;
     }
 
-    const topPlaces = filterAndSortPreschools(allPlaces, originMarker.getPosition()); // Använd allPlaces för filtrering
+    const topPlaces = filterAndSortPreschools(allPlaces, originMarker.getPosition());
 
     setNearbyPlaces(topPlaces);
     clearMarkers();
@@ -465,7 +457,7 @@ const MapComponent = () => {
       return;
     }
 
-    const sortedPlaces = allPlaces.sort((a, b) => { // Använd allPlaces för att sortera
+    const sortedPlaces = allPlaces.sort((a, b) => {
       const distanceA = calculateDistance(
         originMarker.getPosition(),
         new google.maps.LatLng(a.latitude, a.longitude)
@@ -486,6 +478,7 @@ const MapComponent = () => {
       createMarker(result, originMarker.getPosition());
     });
   };
+
   const calculateDistance = (origin, destination) => {
     const R = 6371;
     const dLat = (destination.lat() - origin.lat()) * Math.PI / 180;
@@ -505,8 +498,7 @@ const MapComponent = () => {
     if (originMarker && map) {
       findNearbyPlaces(originMarker.getPosition());
     }
-  }, [filter, findNearbyPlaces, map, originMarker]); // Lägg till findNearbyPlaces, map, och originMarker som beroenden
-  
+  }, [filter, findNearbyPlaces, map, originMarker]);
 
   useEffect(() => {
     const addressInput = document.getElementById('address');
@@ -527,9 +519,8 @@ const MapComponent = () => {
   }, [map]);
 
   const goToBlog = () => {
-    navigate('/react-blog'); // Navigate to the new blog route within your React application
+    navigate('/react-blog');
   };
-  
 
   return (
     <div className="app-container">
