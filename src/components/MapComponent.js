@@ -102,7 +102,7 @@ const MapComponent = () => {
 
     const loadScript = () => {
       const script = document.createElement('script');
-      script.src = 'https://maps.googleapis.com/maps/api/js?key=KEY&libraries=places';
+      script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyCbJmqNnZHTZ99pPQ2uHfkDXwpMxOpfYLw&libraries=places';
       script.async = true;
       script.defer = true;
       script.onload = () => initMap();
