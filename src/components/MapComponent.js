@@ -617,7 +617,7 @@ const MapComponent = () => {
 
       {searchMade && (
         <button className={`toggle-button ${sidebarOpen ? 'open' : 'closed'}`} onClick={toggleSidebar}>
-          {sidebarOpen ? 'Dölj lista' : 'Visa lista'}
+          {sidebarOpen ? 'Dölj' : 'Visa'}
         </button>
       )}
       <Sidebar
