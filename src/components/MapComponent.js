@@ -70,7 +70,9 @@ const MapComponent = () => {
   const { id } = useParams();
 
   const organisationTypes = ['Kommunal', 'Fristående', 'Fristående (föräldrakooperativ)'];
-
+  const handleBlogRedirect = () => {
+    window.location.href = 'https://blog.förskolekollen.se';
+  };
   useEffect(() => {
     const initMap = () => {
       const stockholm = new google.maps.LatLng(59.3293, 18.0686);
@@ -559,6 +561,10 @@ const MapComponent = () => {
                 }}
               />
             </form>
+
+            <Button onClick={handleBlogRedirect} variant="contained" color="primary" >
+              Gå till Bloggen
+            </Button>
 
             {searchMade && (
               <>
